@@ -58,37 +58,37 @@ int main(int argc, char *argv[]) {
 
   circuit.remove_ids();
   if (full_character) {
-    character c;
-    if (disp_log) cerr << "Parsing circuit...\n" << flush;
-    c.parse_circuit(circuit);
-    if (anc == -1) c.add_ancillae(c.n + c.m);
-    else if (anc > 0) c.add_ancillae(anc);
-    if (disp_log) cerr << "Resynthesizing circuit...\n" << flush;
-    clock_gettime(CLOCK_MONOTONIC, &start);
-    if (anc == -2) synth = c.synthesize_unbounded();
-    else           synth = c.synthesize();
-    clock_gettime(CLOCK_MONOTONIC, &end);
+      character c;
+      if (disp_log) cerr << "Parsing circuit...\n" << flush;
+      c.parse_circuit(circuit);
+      if (anc == -1) c.add_ancillae(c.n + c.m);
+      else if (anc > 0) c.add_ancillae(anc);
+      if (disp_log) cerr << "Resynthesizing circuit...\n" << flush;
+      clock_gettime(CLOCK_MONOTONIC, &start);
+      if (anc == -2) synth = c.synthesize_unbounded();
+      else           synth = c.synthesize();
+      clock_gettime(CLOCK_MONOTONIC, &end);
   } else {
-    metacircuit meta;
-    if (disp_log) cerr << "Parsing circuit...\n" << flush;
-    meta.partition_dotqc(circuit);
-    if (disp_log) cerr << "Resynthesizing circuit...\n" << flush;
-    clock_gettime(CLOCK_MONOTONIC, &start);
-    meta.optimize();
-    clock_gettime(CLOCK_MONOTONIC, &end);
-    synth = meta.to_dotqc();
+      metacircuit meta;
+      if (disp_log) cerr << "Parsing circuit...\n" << flush;
+      meta.partition_dotqc(circuit);
+      if (disp_log) cerr << "Resynthesizing circuit...\n" << flush;
+      clock_gettime(CLOCK_MONOTONIC, &start);
+      meta.optimize();
+      clock_gettime(CLOCK_MONOTONIC, &end);
+      synth = meta.to_dotqc();
   }
 
   if (post_process) {
-    if (disp_log) cerr << "Applying post-processing...\n" << flush;
-    synth.remove_swaps();
-    synth.remove_ids();
+      if (disp_log) cerr << "Applying post-processing...\n" << flush;
+      synth.remove_swaps();
+      synth.remove_ids();
   }
   cout << "# Optimized circuit\n";
   synth.print_stats();
   cout << fixed << setprecision(3);
-  cout << "#   Time: " << (end.tv_sec + (double)end.tv_nsec/1000000000) 
-    - (start.tv_sec + (double)start.tv_nsec/1000000000) << " s\n";
+  cout << "#   Time: " << (end.tv_sec + (double)end.tv_nsec/1000000000)
+      - (start.tv_sec + (double)start.tv_nsec/1000000000) << " s\n";
   synth.print();
 
   return 0;

@@ -184,7 +184,7 @@ gatelist to_lower_echelon(int m, int n, xor_func * bits, xor_func * mat, const s
   return acc;
 }
 
-// Expects two matrices in echelon form, the second being a subset of the 
+// Expects two matrices in echelon form, the second being a subset of the
 //   rowspace of the first. It then morphs the second matrix into the first
 gatelist fix_basis(int m, int n, int k, const xor_func * fst, xor_func * snd, xor_func * mat, const string * names) {
   gatelist acc;
@@ -351,7 +351,7 @@ gatelist Lwr_CNOT_synth(int n, int m, xor_func * bits, const string * names, boo
               acc.splice(acc.begin(), xor_com(col, row, names));
               acc.splice(acc.begin(), xor_com(row, col, names));
               acc.splice(acc.begin(), xor_com(col, row, names));
-            } else { 
+            } else {
               acc.splice(acc.end(), xor_com(row, col, names));
               acc.splice(acc.end(), xor_com(col, row, names));
               acc.splice(acc.end(), xor_com(row, col, names));
@@ -366,10 +366,10 @@ gatelist Lwr_CNOT_synth(int n, int m, xor_func * bits, const string * names, boo
     }
   }
 
-  return acc; 
+  return acc;
 }
 
-gatelist CNOT_synth(int n, xor_func * bits, const string * names) { 
+gatelist CNOT_synth(int n, xor_func * bits, const string * names) {
   gatelist acc, tmp;
   int i, j, m = (int)(log((double)n) / (log(2) * 2));
 
@@ -390,13 +390,13 @@ gatelist CNOT_synth(int n, xor_func * bits, const string * names) {
   acc.splice(acc.end(), Lwr_CNOT_synth(n, m, bits, names, true));
   acc.reverse();
 
-  return acc; 
+  return acc;
 }
 
 // Construct a circuit for a given partition
-gatelist construct_circuit(const vector<exponent> & phase, 
-    const partitioning & part, 
-    xor_func * in, 
+gatelist construct_circuit(const vector<exponent> & phase,
+    const partitioning & part,
+    xor_func * in,
     const xor_func * out,
     int num,
     int dim,

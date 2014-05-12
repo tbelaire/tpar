@@ -91,7 +91,7 @@ void dotqc::input(istream& in) {
 void dotqc::output(ostream& out) {
   int i;
   list<string>::iterator name_it;
-  gatelist::iterator it; 
+  gatelist::iterator it;
   list<string>::iterator ti;
 
   // Inputs
@@ -498,8 +498,8 @@ void character::parse_circuit(dotqc & input) {
     } else if (it->first == "Y" && it->second.size() == 1) {
       insert_phase(gate_lookup[it->first], wires[a], phase_expts);
       wires[name_map[*(it->second.begin())]].flip(n + h);
-    } else if (it->first == "T" || it->first == "T*" || 
-        it->first == "P" || it->first == "P*" || 
+    } else if (it->first == "T" || it->first == "T*" ||
+        it->first == "P" || it->first == "P*" ||
         (it->first == "Z" && it->second.size() == 1)) {
       a = name_map[*(it->second.begin())];
       insert_phase(gate_lookup[it->first], wires[a], phase_expts);
@@ -605,11 +605,11 @@ void character::add_ancillae(int num) {
   outputs = new_out;
   m = new_m;
 }
-  
+
 //---------------------------- Synthesis
 
 dotqc character::synthesize() {
-  partitioning floats[2], frozen[2]; 
+  partitioning floats[2], frozen[2];
   dotqc ret;
   xor_func mask(n + h + 1, 0);      // Tells us what values we have prepared
   xor_func wires[n + m];        // Current state of the wires
@@ -650,7 +650,7 @@ dotqc character::synthesize() {
       } else it++;
     }
   }
-  if (disp_log) cerr << "  " << phase_expts.size() - (remaining[0].size() + remaining[1].size())  
+  if (disp_log) cerr << "  " << phase_expts.size() - (remaining[0].size() + remaining[1].size())
     << "/" << phase_expts.size() << " phase rotations partitioned\n" << flush;
 
   for (it = hadamards.begin(); it != hadamards.end(); it++, h_count++) {
@@ -667,9 +667,9 @@ dotqc character::synthesize() {
     }
 
     // Construct {CNOT, T} subcircuit for the frozen partitions
-    ret.circ.splice(ret.circ.end(), 
+    ret.circ.splice(ret.circ.end(),
         construct_circuit(phase_expts, frozen[0], wires, wires, n + m, n + h, names));
-    ret.circ.splice(ret.circ.end(), 
+    ret.circ.splice(ret.circ.end(),
         construct_circuit(phase_expts, frozen[1], wires, it->wires, n + m, n + h, names));
     for (int i = 0; i < n + m; i++) {
       wires[i] = it->wires[i];
@@ -708,9 +708,9 @@ dotqc character::synthesize() {
 
   applied += num_elts(floats[0]) + num_elts(floats[1]);
   // Construct the final {CNOT, T} subcircuit
-  ret.circ.splice(ret.circ.end(), 
+  ret.circ.splice(ret.circ.end(),
       construct_circuit(phase_expts, floats[0], wires, wires, n + m, n + h, names));
-  ret.circ.splice(ret.circ.end(), 
+  ret.circ.splice(ret.circ.end(),
       construct_circuit(phase_expts, floats[1], wires, outputs, n + m, n + h, names));
   if (disp_log) cerr << "  " << applied << "/" << phase_expts.size() << " phase rotations applied\n" << flush;
 
@@ -718,7 +718,7 @@ dotqc character::synthesize() {
 }
 
 dotqc character::synthesize_unbounded() {
-  partitioning floats[2], frozen[2]; 
+  partitioning floats[2], frozen[2];
   dotqc ret;
   xor_func mask(n + h + 1, 0);      // Tells us what values we have prepared
   xor_func * wires =  new xor_func[n + m]; // Current state of the wires
@@ -756,7 +756,7 @@ dotqc character::synthesize_unbounded() {
       } else it++;
     }
   }
-  if (disp_log) cerr << "  " << phase_expts.size() - (remaining[0].size() + remaining[1].size())  
+  if (disp_log) cerr << "  " << phase_expts.size() - (remaining[0].size() + remaining[1].size())
     << "/" << phase_expts.size() << " phase rotations partitioned\n" << flush;
 
   for (it = hadamards.begin(); it != hadamards.end(); it++, h_count++) {
@@ -790,9 +790,9 @@ dotqc character::synthesize_unbounded() {
 
     if (disp_log) cerr << "    Synthesizing T-layer\n" << flush;
     // Construct {CNOT, T} subcircuit for the frozen partitions
-    ret.circ.splice(ret.circ.end(), 
+    ret.circ.splice(ret.circ.end(),
         construct_circuit(phase_expts, frozen[0], wires, wires, n + m, n + h, names));
-    ret.circ.splice(ret.circ.end(), 
+    ret.circ.splice(ret.circ.end(),
         construct_circuit(phase_expts, frozen[1], wires, it->wires, n + m, n + h, names));
     for (int i = 0; i < n + m; i++) {
       wires[i] = it->wires[i];
@@ -845,9 +845,9 @@ dotqc character::synthesize_unbounded() {
     }
   }
 
-  ret.circ.splice(ret.circ.end(), 
+  ret.circ.splice(ret.circ.end(),
       construct_circuit(phase_expts, floats[0], wires, wires, n + m, n + h, names));
-  ret.circ.splice(ret.circ.end(), 
+  ret.circ.splice(ret.circ.end(),
       construct_circuit(phase_expts, floats[1], wires, outputs, n + m, n + h, names));
   if (disp_log) cerr << "  " << applied << "/" << phase_expts.size() << " phase rotations applied\n" << flush;
 

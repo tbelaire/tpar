@@ -33,7 +33,7 @@ extern bool disp_log;
 extern synth_type synth_method;
 
 class ind_oracle {
-  private: 
+  private:
     int num;
     int dim;
     int length;
@@ -51,9 +51,9 @@ void print_wires(const xor_func * wires, int num, int dim);
 int compute_rank(int m, int n, const xor_func * bits);
 int compute_rank(int n, const vector<exponent> & expnts, const set<int> & lst);
 
-gatelist construct_circuit(const vector<exponent> & phase, 
-    const partitioning & part, 
-    xor_func * in, 
+gatelist construct_circuit(const vector<exponent> & phase,
+    const partitioning & part,
+    xor_func * in,
     const xor_func * out,
     int num,
     int dim,
