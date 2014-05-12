@@ -21,6 +21,7 @@ Author: Matthew Amy
 
 #include "util.h"
 #include <map>
+#include <cmath>
 
 bool disp_log = false;
 synth_type synth_method = PMH;
