@@ -1,21 +1,37 @@
-FLAGS = -O3 -std=c++0x
+BUILD = build
+####################
+# Sources
+vpath %.cpp src
+vpath %.o   $(BUILD)
 OBJS = partition.o util.o circuit.o main.o
-CXX = g++
 
-all: $(OBJS)
-	$(CXX) $(FLAGS) -o tpar $(OBJS) -lrt
+#####################
+# Compiler Clang
+CXX = /usr/bin/clang++
+LDFLAGS =  -L/usr/local/opt/llvm/lib
+CPPFLAGS = -I/usr/local/opt/llvm/include -O3 -std=c++11 -g
 
-partition.o: src/partition.cpp
-	$(CXX) -c $(FLAGS) src/partition.cpp
+.PHONY: all clean
 
-util.o: src/util.cpp
-	$(CXX) -c $(FLAGS) src/util.cpp
+all: tpar
+	echo "Made all"
 
-circuit.o: src/circuit.cpp
-	$(CXX) -c $(FLAGS) src/circuit.cpp
 
-main.o: src/main.cpp
-	$(CXX) -c $(FLAGS) src/main.cpp
 
-clean: 
+tpar: $(OBJS)
+	$(CXX) $(LDFLAGS) $(CPPFLAGS) -o tpar $(OBJS)
+
+# partition.o: src/partition.cpp
+# 	$(CXX) -c $(FLAGS) src/partition.cpp
+
+# util.o: src/util.cpp
+# 	$(CXX) -c $(FLAGS) src/util.cpp
+
+# circuit.o: src/circuit.cpp
+# 	$(CXX) -c $(FLAGS) src/circuit.cpp
+
+# main.o: src/main.cpp
+# 	$(CXX) -c $(FLAGS) src/main.cpp
+
+clean:
 	rm *.o
