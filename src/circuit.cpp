@@ -452,10 +452,10 @@ void insert_phase (unsigned char c, xor_func f, vector<exponent> & phases) {
 // Parse a {CNOT, T} circuit
 // NOTE: a qubit's number is NOT the same as the bit it's value represents
 void character::parse_circuit(dotqc & input) {
-  int i, j, a, b, c, name_max = 0, val_max = 0;
-  n = input.n;
-  m = input.m;
-  h = count_h(input);
+  int name_max = 0, val_max = 0;
+  this->n = input.n;
+  this->m = input.m;
+  this->h = count_h(input);
 
   hadamards.clear();
   map<string, int> name_map, gate_lookup;
@@ -488,26 +488,34 @@ void character::parse_circuit(dotqc & input) {
 
   bool flg;
 
+  // map<string, int> name_map
+  // type gatelist = [(Str, [Str]]
   gatelist::iterator it;
   for (it = input.circ.begin(); it != input.circ.end(); it++) {
     flg = false;
     if (it->first == "tof" && it->second.size() == 2) {
-      wires[name_map[*(++(it->second.begin()))]] ^= wires[name_map[*(it->second.begin())]];
+      auto gate_inputs_it = it->second.begin();
+      int first_input = name_map[*gate_inputs_it];
+      gate_inputs_it++;
+      int second_input = name_map[*gate_inputs_it];
+      wires[second_input] ^= wires[first_input];
     } else if ((it->first == "tof" || it->first == "X") && it->second.size() == 1) {
       wires[name_map[*(it->second.begin())]].flip(n + h);
     } else if (it->first == "Y" && it->second.size() == 1) {
-      insert_phase(gate_lookup[it->first], wires[a], phase_expts);
+      int first_input = name_map[*(it->second.begin())];
+      insert_phase(gate_lookup[it->first], wires[first_input], phase_expts);
       wires[name_map[*(it->second.begin())]].flip(n + h);
     } else if (it->first == "T" || it->first == "T*" ||
         it->first == "P" || it->first == "P*" ||
         (it->first == "Z" && it->second.size() == 1)) {
-      a = name_map[*(it->second.begin())];
-      insert_phase(gate_lookup[it->first], wires[a], phase_expts);
+      int first_input = name_map[*(it->second.begin())];
+      insert_phase(gate_lookup[it->first], wires[first_input], phase_expts);
     } else if (it->first == "Z" && it->second.size() == 3) {
       list<string>::iterator tmp_it = it->second.begin();
-      a = name_map[*(tmp_it++)];
-      b = name_map[*(tmp_it++)];
-      c = name_map[*tmp_it];
+      // The three inputs
+      int a = name_map[*(tmp_it++)];
+      int b = name_map[*(tmp_it++)];
+      int c = name_map[*tmp_it];
       insert_phase(1, wires[a], phase_expts);
       insert_phase(1, wires[b], phase_expts);
       insert_phase(1, wires[c], phase_expts);
@@ -527,14 +535,14 @@ void character::parse_circuit(dotqc & input) {
       new_h.qubit = name_map[*(it->second.begin())];
       new_h.prep  = val_max++;
       new_h.wires = new xor_func[n + m];
-      for (i = 0; i < n + m; i++) {
+      for (int i = 0; i < n + m; i++) {
         new_h.wires[i] = wires[i];
       }
 
       // Check previous exponents to see if they're inconsistent
       wires[new_h.qubit].reset();
       int rank = compute_rank(n + m, n + h, wires);
-      for (i = 0; i < phase_expts.size(); i++) {
+      for (int i = 0; i < phase_expts.size(); i++) {
         if (phase_expts[i].first != 0) {
           wires[new_h.qubit] = phase_expts[i].second;
           if (compute_rank(n + m, n + h, wires) > rank) new_h.in.insert(i);
