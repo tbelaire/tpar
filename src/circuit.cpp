@@ -619,7 +619,7 @@ dotqc character::synthesize() {
   partitioning floats[2], frozen[2];
   dotqc ret;
   xor_func mask(n + h + 1, 0);      // Tells us what values we have prepared
-  xor_func* wires = new xor_func[n + m];        // Current state of the wires
+  vector<xor_func> wires(n + m);        // Current state of the wires
   list<int> remaining[2];          // Which terms we still have to partition
   int dim = n;
   int tdepth = 0, h_count = 1, applied = 0;
@@ -676,9 +676,9 @@ dotqc character::synthesize() {
 
     // Construct {CNOT, T} subcircuit for the frozen partitions
     {
-        auto tmp = construct_circuit(phase_expts, frozen[0], wires, wires, n + m, n + h, names);
+        auto tmp = construct_circuit(phase_expts, frozen[0], &wires[0], &wires[0], n + m, n + h, names);
         ret.circ.splice(ret.circ.end(), tmp);
-        tmp = construct_circuit(phase_expts, frozen[1], wires, it->wires, n + m, n + h, names);
+        tmp = construct_circuit(phase_expts, frozen[1], &wires[0], it->wires, n + m, n + h, names);
         ret.circ.splice(ret.circ.end(), tmp);
     }
     for (int i = 0; i < n + m; i++) {
@@ -693,7 +693,7 @@ dotqc character::synthesize() {
     mask.set(it->prep);
 
     // Check for increases in dimension
-    int rank = compute_rank(n + m, n + h, wires);
+    int rank = compute_rank(n + m, n + h, &wires[0]);
     if (rank > dim) {
       if (disp_log) cerr << "    Dimension increased to " << rank << ", fixing partitions...\n" << flush;
       dim = rank;
@@ -719,14 +719,13 @@ dotqc character::synthesize() {
   applied += num_elts(floats[0]) + num_elts(floats[1]);
   // Construct the final {CNOT, T} subcircuit
   {
-      auto tmp = construct_circuit(phase_expts, floats[0], wires, wires, n + m, n + h, names);
+      auto tmp = construct_circuit(phase_expts, floats[0], &wires[0], &wires[0], n + m, n + h, names);
       ret.circ.splice(ret.circ.end(), tmp);
-      tmp = construct_circuit(phase_expts, floats[1], wires, outputs, n + m, n + h, names);
+      tmp = construct_circuit(phase_expts, floats[1], &wires[0], outputs, n + m, n + h, names);
       ret.circ.splice(ret.circ.end(), tmp);
   }
   if (disp_log) cerr << "  " << applied << "/" << phase_expts.size() << " phase rotations applied\n" << flush;
 
-  delete[] wires;
   return ret;
 }
 

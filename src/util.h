@@ -25,7 +25,7 @@ Author: Matthew Amy
 
 typedef boost::dynamic_bitset<>            xor_func;
 typedef pair<char, xor_func >              exponent;
-typedef list<pair<string, list<string> > > gatelist;
+typedef list<pair<string, list<string> > > gatelist; // [(Str, [Str])]
 
 enum synth_type { AD_HOC, GAUSS, PMH };
 
