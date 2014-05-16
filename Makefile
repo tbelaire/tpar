@@ -8,8 +8,10 @@ OBJS = partition.o util.o circuit.o main.o
 #####################
 # Compiler Clang
 CXX = /usr/bin/clang++
-LDFLAGS =  -L/usr/local/opt/llvm/lib
-CPPFLAGS = -I/usr/local/opt/llvm/include -O3 -std=c++11 -g
+# CXX = g++-4.8
+LDFLAGS =
+CPPFLAGS = -O3 -std=c++11 -g
+
 
 .PHONY: all clean
 
