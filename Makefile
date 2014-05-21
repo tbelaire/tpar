@@ -7,10 +7,13 @@ OBJS = partition.o util.o circuit.o main.o
 
 #####################
 # Compiler Clang
-CXX = /usr/bin/clang++
+CXX = /usr/local/Cellar/llvm-all/3.4.1/bin/clang++
+# CXX = /usr/bin/clang++
 # CXX = g++-4.8
-LDFLAGS =
-CPPFLAGS = -O3 -std=c++11 -g
+DEBUGFLAGS = -O0 -g
+LDFLAGS = -lc++abi
+CPPFLAGS = -std=c++11 -stdlib=libc++ -I /usr/local/Cellar/llvm-all/3.4.1/include/c++/v1 $(DEBUGFLAGS)
+
 
 
 .PHONY: all clean
@@ -36,4 +39,4 @@ tpar: $(OBJS)
 # 	$(CXX) -c $(FLAGS) src/main.cpp
 
 clean:
-	rm *.o
+	rm -f *.o
