@@ -407,12 +407,14 @@ gatelist construct_circuit(const vector<exponent> & phase,
   xor_func * pre = new xor_func[num];
   xor_func * post = new xor_func[num];
   set<int>::iterator ti;
-  int i;
   bool flg = true;
 
-  for (i = 0; i < num; i++) flg &= (in[i] == out[i]);
-  for (i = 0; i < num; i++) {
+  // flg = forall i. in[i] == out[i]
+  for (int i = 0; i < num; i++) {
     flg &= (in[i] == out[i]);
+  }
+  for (int i = 0; i < num; i++) {
+    /* flg &= (in[i] == out[i]); */
     if (synth_method != AD_HOC) {
       pre[i] = xor_func(num + 1, 0);
       post[i] = xor_func(num + 1, 0);
@@ -428,9 +430,16 @@ gatelist construct_circuit(const vector<exponent> & phase,
 
   // For each partition... Compute *it, apply T gates, uncompute
   for (partitioning::const_iterator it = part.begin(); it != part.end(); it++) {
-    for (ti = it->begin(), i = 0; i < num; ti++, i++) {
-      if (i < it->size()) bits[i] = phase[*ti].second;
-      else                bits[i] = xor_func(dim + 1, 0);
+    cerr << "List is of length: " << it->size() << endl;
+    ti = it->begin();
+    for (int i = 0; i < num;  i++) {
+      if (ti != it->end()){
+          it++;
+          /* cerr << "Ran out of list" << endl; */
+          /* exit(4); */
+      }
+      if (i < it->size()) { bits[i] = phase[*ti].second; }
+      else                { bits[i] = xor_func(dim + 1, 0); }
     }
 
     // prepare the bits
@@ -450,7 +459,8 @@ gatelist construct_circuit(const vector<exponent> & phase,
 
     // apply the T gates
     list<string> tmp_lst;
-    for (ti = it->begin(), i = 0; ti != it->end(); ti++, i++) {
+    ti = it-> begin();
+    for (int i = 0; ti != it->end(); ti++, i++) {
       tmp_lst.clear();
       tmp_lst.push_back(names[i]);
       if (phase[*ti].first <= 4) {
@@ -470,7 +480,7 @@ gatelist construct_circuit(const vector<exponent> & phase,
       pre = post;
       post = new xor_func[num];
       // re-initialize
-      for (i = 0; i < num; i++) {
+      for (int i = 0; i < num; i++) {
         post[i] = xor_func(num + 1, 0);
         post[i].set(i);
       }
@@ -478,7 +488,7 @@ gatelist construct_circuit(const vector<exponent> & phase,
   }
 
   // Reduce out to the basis of in
-  for (i = 0; i < num; i++) {
+  for (int i = 0; i < num; i++) {
     bits[i] = out[i];
   }
   if (synth_method == AD_HOC) {
