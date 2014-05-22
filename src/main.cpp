@@ -32,7 +32,7 @@ clock_gettime(int foo, struct timespec *ts)
 {
     struct timeval tv;
 
-    gettimeofday(&tv, NULL);
+    gettimeofday(&tv, nullptr);
     ts->tv_sec = tv.tv_sec;
     ts->tv_nsec = tv.tv_usec * 1000;
     return (0);
