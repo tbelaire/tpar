@@ -75,42 +75,43 @@ gatelist x_com(int a, const string * names) {
 }
 
 // Make triangular to determine the rank
-int compute_rank_dest(int m, int n, xor_func * tmp) {
-  int k, i, j;
-  int ret = 0;
-  bool flg;
+int compute_rank_dest(int m, int n, vector<xor_func> tmp) {
+  int rank = 0;
 
   // Make triangular
-  for (i = 0; i < n; i++) {
-    flg = false;
-    for (j = ret; j < m; j++) {
+  for (int i = 0; i < n; i++) {
+    bool flg = false;
+    for (int j = rank; j < m; j++) {
       if (tmp[j].test(i)) {
         // If we haven't yet seen a vector with bit i set...
         if (!flg) {
           // If it wasn't the first vector we tried, swap to the front
-          if (j != ret) swap(tmp[ret], tmp[j]);
+          if (j != rank) swap(tmp[rank], tmp[j]);
           flg = true;
         } else {
-          tmp[j] ^= tmp[ret];
+          tmp[j] ^= tmp[rank];
         }
       }
     }
-    if (flg) ret++;
+    if (flg) rank++;
   }
 
-  return ret;
+  return rank;
+}
+
+int compute_rank(int m, int n, const vector<xor_func> bits) {
+    return compute_rank_dest(m, n, bits);
 }
 
 int compute_rank(int m, int n, const xor_func * bits) {
   int ret;
 
   // Make a copy of the bitset
-  xor_func * tmp = new xor_func[m];
+  vector<xor_func> tmp(m);
   for(int i = 0; i < m; i++) {
     tmp[i] = bits[i];
   }
   ret = compute_rank_dest(m, n, tmp);
-  delete [] tmp;
   return ret;
 }
 
@@ -118,12 +119,11 @@ int compute_rank(int n, const vector<exponent> & expnts, const set<int> & lst) {
   int ret;
   int m = lst.size();
 
-  xor_func * tmp = new xor_func[m];
+  vector<xor_func> tmp(m);
   for (int i = 0; i < m; i++) {
     tmp[i] = expnts[i].second;
   }
   ret = compute_rank_dest(m, n, tmp);
-  delete [] tmp;
   return ret;
 }
 

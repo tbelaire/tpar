@@ -19,3 +19,26 @@ TEST(utilTest, init_maxtrix) {
     EXPECT_EQ(false, bits.at(0).test(1));
     EXPECT_EQ(false, bits.at(1).test(0));
 }
+
+TEST(utilTest, compute_rank) {
+
+    EXPECT_EQ(1, compute_rank(2, 4, init_matrix_transpose({
+                {1,0,1,0},
+                {1,0,1,0},
+            })));
+    EXPECT_EQ(2, compute_rank(3, 4, init_matrix_transpose({
+                {1,0,1,0},
+                {1,1,1,0},
+                {1,0,1,0},
+            })));
+    EXPECT_EQ(0, compute_rank(3, 4, init_matrix_transpose({
+                {0,0,0,0},
+                {0,0,0,0},
+                {0,0,0,0},
+            })));
+    EXPECT_EQ(3, compute_rank(3, 4, init_matrix_transpose({
+                {1,1,1,1},
+                {1,0,0,0},
+                {1,0,1,1},
+            })));
+}
