@@ -58,3 +58,7 @@ gatelist construct_circuit(const vector<exponent> & phase,
     int num,
     int dim,
     const string * names);
+
+xor_func init_xor_func(initializer_list<int> lst);
+vector<xor_func> init_matrix_transpose(
+        initializer_list<initializer_list<int>>);

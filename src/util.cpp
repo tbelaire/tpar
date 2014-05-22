@@ -590,3 +590,22 @@ int ind_oracle::retrieve_lin_dep(const vector<exponent> & expnts, const set<int>
   assert((num - lst.size()) >= (dim - rank));
   return -1;
 }
+
+xor_func init_xor_func(initializer_list<int> lst){
+    xor_func f(lst.size());
+    int index = 0;
+    for (const int i : lst) {
+        f.set(index++, i);
+    }
+    return f;
+}
+
+vector<xor_func> init_matrix_transpose(
+        initializer_list<initializer_list<int>> lst){
+    vector<xor_func> cols{};
+    for (const auto& l : lst)
+     {
+         cols.push_back(init_xor_func(l));
+     }
+    return cols;
+}
