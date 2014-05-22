@@ -54,11 +54,11 @@ int compute_rank(int n, const vector<exponent> & expnts, const set<int> & lst);
 
 gatelist construct_circuit(const vector<exponent> & phase,
     const partitioning & part,
-    xor_func * in,
-    const xor_func * out,
+    vector<xor_func> in,
+    const vector<xor_func> out,
     int num,
     int dim,
-    const string * names);
+    const vector<string> names);
 
 xor_func init_xor_func(initializer_list<int> lst);
 vector<xor_func> init_matrix_transpose(

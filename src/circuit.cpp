@@ -467,9 +467,10 @@ void character::parse_circuit(dotqc & input) {
   gate_lookup["Y"] = 4;
 
   // Initialize names and wires
-  names = new string [n + m + h];
-  zero  = new bool   [n + m];
-  xor_func * wires = outputs = new xor_func [n + m];
+  this->names.resize( n + m + h );
+  this->zero.resize( n + m );
+  vector<xor_func> wires( n + m );
+  vector<xor_func> &output = wires;
   for (list<string>::iterator it = input.names.begin(); it != input.names.end(); it++) {
     // name_map maps a name to a wire
     name_map[*it] = name_max;
@@ -534,10 +535,7 @@ void character::parse_circuit(dotqc & input) {
       Hadamard new_h;
       new_h.qubit = name_map[*(it->second.begin())];
       new_h.prep  = val_max++;
-      new_h.wires = new xor_func[n + m];
-      for (int i = 0; i < n + m; i++) {
-        new_h.wires[i] = wires[i];
-      }
+      new_h.wires = wires;
 
       // Check previous exponents to see if they're inconsistent
       wires[new_h.qubit].reset();
@@ -564,7 +562,6 @@ void character::parse_circuit(dotqc & input) {
     } else {
       cout << "ERROR: not a {H, CNOT, X, Y, Z, P, T} circuit\n";
       phase_expts.clear();
-      delete[] outputs;
     }
   }
 }
@@ -574,19 +571,14 @@ void character::add_ancillae(int num) {
   stringstream ss;
 
   int new_m = this->m + num;
-  string * new_names = new string[num_qubits];
-  bool * new_zero    = new bool[num_qubits];
-  xor_func * new_out = new xor_func[num_qubits];
-  xor_func * new_wires;
+  vector<string> new_names(num_qubits);
+  vector<bool> new_zero(num_qubits);
+  vector<xor_func> new_out(num_qubits);
 
   for (list<Hadamard>::iterator it = hadamards.begin(); it != hadamards.end(); it++) {
-    new_wires = new xor_func[num_qubits];
-    for (int i = 0; i < num_qubits; i++) {
-      if (i < (n + m)) new_wires[i] = it->wires[i];
-      else new_wires[i] = xor_func(n + h + 1, 0);
+    for (int i = n + m; i < num_qubits; i++) {
+      it->wires.push_back(xor_func(n + h + 1, 0));
     }
-    delete[] it->wires;
-    it->wires = new_wires;
   }
 
   for (int i = 0; i < num_qubits; i++) {
@@ -603,14 +595,10 @@ void character::add_ancillae(int num) {
     }
   }
 
-  delete[] names;
-  delete[] zero;
-  delete[] outputs;
-
-  names = new_names;
-  zero = new_zero;
-  outputs = new_out;
-  m = new_m;
+  this->names = new_names;
+  this->zero = new_zero;
+  this->outputs = new_out;
+  this->m = new_m;
 }
 
 //---------------------------- Synthesis
@@ -676,9 +664,9 @@ dotqc character::synthesize() {
 
     // Construct {CNOT, T} subcircuit for the frozen partitions
     {
-        auto tmp = construct_circuit(phase_expts, frozen[0], &wires[0], &wires[0], n + m, n + h, names);
+        auto tmp = construct_circuit(phase_expts, frozen[0], wires, wires, n + m, n + h, names);
         ret.circ.splice(ret.circ.end(), tmp);
-        tmp = construct_circuit(phase_expts, frozen[1], &wires[0], it->wires, n + m, n + h, names);
+        tmp = construct_circuit(phase_expts, frozen[1], wires, it->wires, n + m, n + h, names);
         ret.circ.splice(ret.circ.end(), tmp);
     }
     for (int i = 0; i < n + m; i++) {
@@ -719,9 +707,9 @@ dotqc character::synthesize() {
   applied += num_elts(floats[0]) + num_elts(floats[1]);
   // Construct the final {CNOT, T} subcircuit
   {
-      auto tmp = construct_circuit(phase_expts, floats[0], &wires[0], &wires[0], n + m, n + h, names);
+      auto tmp = construct_circuit(phase_expts, floats[0], wires, wires, n + m, n + h, names);
       ret.circ.splice(ret.circ.end(), tmp);
-      tmp = construct_circuit(phase_expts, floats[1], &wires[0], outputs, n + m, n + h, names);
+      tmp = construct_circuit(phase_expts, floats[1], wires, outputs, n + m, n + h, names);
       ret.circ.splice(ret.circ.end(), tmp);
   }
   if (disp_log) cerr << "  " << applied << "/" << phase_expts.size() << " phase rotations applied\n" << flush;
@@ -733,7 +721,7 @@ dotqc character::synthesize_unbounded() {
   partitioning floats[2], frozen[2];
   dotqc ret;
   xor_func mask(n + h + 1, 0);      // Tells us what values we have prepared
-  xor_func * wires =  new xor_func[n + m]; // Current state of the wires
+  vector<xor_func> wires( n + m ); // Current state of the wires
   list<int> remaining[2];          // Which terms we still have to partition
   int dim = n, tmp1, tmp2, tdepth = 0, h_count = 1, applied = 0, j;
   ind_oracle oracle(n + m, dim, n + h);
@@ -788,14 +776,10 @@ dotqc character::synthesize_unbounded() {
         tmp2 = compute_rank(n + h, phase_expts, *(frozen[j].begin()));
         int etc = ((tmp1 - tmp2 < 0)?tmp1:tmp1 - tmp2) + num_elts(frozen[j]) - n - m;
         if (etc > 0) {
-          xor_func * tmp = new xor_func[n + m + etc];
-          for (int i = 0; i < n + m + etc; i++) {
-            if (i < n + m) tmp[i] = wires[i];
-            else tmp[i] = xor_func(n + h + 1, 0);
+          for (int i = n + m; i < n + m + etc; i++) {
+            wires.push_back(xor_func(n + h + 1, 0));
           }
-          delete[] wires;
-          wires = tmp;
-          add_ancillae(etc);
+          this->add_ancillae(etc);
         }
       }
     }
@@ -844,14 +828,10 @@ dotqc character::synthesize_unbounded() {
         int etc = tmp1 - tmp2 + num_elts(floats[j]) - n - m;
         if (etc > 0) {
           if (disp_log) cerr << "    " << "Adding " << etc << " ancilla(e)\n" << flush;
-          xor_func * tmp = new xor_func[n + m + etc];
-          for (int i = 0; i < n + m + etc; i++) {
-            if (i < n + m) tmp[i] = wires[i];
-            else tmp[i] = xor_func(n + h + 1, 0);
+          for (int i = n + m; i < n + m + etc; i++) {
+            wires.push_back(xor_func(n + h + 1, 0));
           }
-          delete[] wires;
-          wires = tmp;
-          add_ancillae(etc);
+          this->add_ancillae(etc);
         }
       }
     }
