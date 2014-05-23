@@ -22,6 +22,7 @@ Author: Matthew Amy
 #include "util.h"
 #include <map>
 #include <cmath>
+#include <cassert>
 
 bool disp_log = false;
 synth_type synth_method = PMH;
@@ -75,13 +76,13 @@ gatelist x_com(int a, const vector<string> names) {
 }
 
 // Make triangular to determine the rank
-int compute_rank_dest(int m, int n, vector<xor_func> tmp) {
+int compute_rank_dest(vector<xor_func> tmp) {
   int rank = 0;
 
   // Make triangular
-  for (int i = 0; i < n; i++) {
+  for (int i = 0; i < tmp.size(); i++) {
     bool flg = false;
-    for (int j = rank; j < m; j++) {
+    for (int j = rank; j < tmp[i].size(); j++) {
       if (tmp[j].test(i)) {
         // If we haven't yet seen a vector with bit i set...
         if (!flg) {
@@ -99,8 +100,18 @@ int compute_rank_dest(int m, int n, vector<xor_func> tmp) {
   return rank;
 }
 
+
+// If they're giving the info to me, might as well check it.
 int compute_rank(int m, int n, const vector<xor_func> bits) {
-    return compute_rank_dest(m, n, bits);
+    assert(n == bits.size());
+    if( n > 0 ){
+        assert(m == bits[0].size());
+    }
+    return compute_rank_dest(bits);
+}
+
+int compute_rank(const vector<xor_func> bits) {
+    return compute_rank_dest(bits);
 }
 
 int compute_rank(int m, int n, const xor_func * bits) {
@@ -111,7 +122,7 @@ int compute_rank(int m, int n, const xor_func * bits) {
   for(int i = 0; i < m; i++) {
     tmp[i] = bits[i];
   }
-  ret = compute_rank_dest(m, n, tmp);
+  ret = compute_rank_dest(tmp);
   return ret;
 }
 
@@ -123,7 +134,7 @@ int compute_rank(int n, const vector<exponent> & expnts, const set<int> & lst) {
   for (int i = 0; i < m; i++) {
     tmp[i] = expnts[i].second;
   }
-  ret = compute_rank_dest(m, n, tmp);
+  ret = compute_rank_dest(tmp);
   return ret;
 }
 
