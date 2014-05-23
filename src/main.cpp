@@ -86,6 +86,7 @@ int main(int argc, char *argv[]) {
 
   circuit.remove_ids();
   if (full_character) {
+      if (disp_log) cerr << "With full character" << endl;
       character c;
       if (disp_log) cerr << "Parsing circuit...\n" << flush;
       c.parse_circuit(circuit);
@@ -97,6 +98,7 @@ int main(int argc, char *argv[]) {
       else           synth = c.synthesize();
       clock_gettime(CLOCK_MONOTONIC, &end);
   } else {
+      if (disp_log) cerr << "With metacircuit" << endl;
       metacircuit meta;
       if (disp_log) cerr << "Parsing circuit...\n" << flush;
       meta.partition_dotqc(circuit);

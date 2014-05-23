@@ -700,16 +700,22 @@ dotqc character::synthesize() {
         } else it++;
       }
     }
-    if (disp_log) cerr << "    " << phase_expts.size() - (remaining[0].size() + remaining[1].size())
-      << "/" << phase_expts.size() << " phase rotations partitioned\n" << flush;
+    if (disp_log) {
+        cerr << "    "
+            << phase_expts.size() - (remaining[0].size() + remaining[1].size())
+            << "/" << phase_expts.size() << " phase rotations partitioned\n"
+            << flush;
+    }
   }
 
   applied += num_elts(floats[0]) + num_elts(floats[1]);
   // Construct the final {CNOT, T} subcircuit
   {
-      auto tmp = construct_circuit(phase_expts, floats[0], wires, wires, n + m, n + h, names);
+      auto tmp = construct_circuit(this->phase_expts, floats[0],
+              wires, wires, n + m, n + h, this->names);
       ret.circ.splice(ret.circ.end(), tmp);
-      tmp = construct_circuit(phase_expts, floats[1], wires, outputs, n + m, n + h, names);
+      tmp = construct_circuit(this->phase_expts, floats[1],
+              wires, this->outputs, n + m, n + h, this->names);
       ret.circ.splice(ret.circ.end(), tmp);
   }
   if (disp_log) cerr << "  " << applied << "/" << phase_expts.size() << " phase rotations applied\n" << flush;

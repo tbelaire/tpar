@@ -23,16 +23,18 @@ Author: Matthew Amy
 #include <map>
 #include <cmath>
 #include <cassert>
+#include <stdexcept>
 
-bool disp_log = false;
+#include <boost/lexical_cast.hpp>
+
+bool disp_log = true;
 synth_type synth_method = PMH;
 
-void print_wires(const xor_func * wires, int num, int dim) {
-  int i, j;
-  for (i = 0; i < num; i++) {
-    for (j = 0; j < dim; j++) {
-      if (wires[i].test(j)) cout << "1";
-      else                  cout << "0";
+void print_wires(const vector<xor_func> wires) {
+  for (auto f : wires) {
+    for (int j = 0; j < f.size(); j++) {
+      if (f.test(j)) cout << "1";
+      else           cout << "0";
     }
     cout << "\n";
   }
@@ -79,10 +81,12 @@ gatelist x_com(int a, const vector<string> names) {
 int compute_rank_dest(vector<xor_func> tmp) {
   int rank = 0;
 
+  if(tmp.size() == 0) { return 0; } // Empty vector has 0 rank
+  int func_size = tmp.at(0).size();
   // Make triangular
-  for (int i = 0; i < tmp.size(); i++) {
+  for (int i = 0; i < func_size; i++) {
     bool flg = false;
-    for (int j = rank; j < tmp[i].size(); j++) {
+    for (int j = rank; j < tmp.size(); j++) {
       if (tmp[j].test(i)) {
         // If we haven't yet seen a vector with bit i set...
         if (!flg) {
@@ -103,9 +107,17 @@ int compute_rank_dest(vector<xor_func> tmp) {
 
 // If they're giving the info to me, might as well check it.
 int compute_rank(int m, int n, const vector<xor_func> bits) {
-    assert(n == bits.size());
-    if( n > 0 ){
-        assert(m == bits[0].size());
+    if( m != bits.size() ) {
+        print_wires(bits);
+        throw std::logic_error("Bad sizes in compute_rank: m="
+                + boost::lexical_cast<string>(m) + ", bits.size()="
+                + boost::lexical_cast<string>(bits.size()));
+    }
+    if( m > 0 && n != bits[0].size() ){
+        print_wires(bits);
+        throw std::logic_error("Bad sizes in compute_rank: n="
+                + boost::lexical_cast<string>(n) + ", bits[0].size()="
+                + boost::lexical_cast<string>(bits.size()));
     }
     return compute_rank_dest(bits);
 }
