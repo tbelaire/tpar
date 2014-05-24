@@ -385,6 +385,11 @@ bool dotqc::operator==(const dotqc& other) const {
             && other.circ == circ);
 }
 
+ostream& operator<<(ostream& out, const dotqc& circuit) {
+    circuit.output(out);
+    return out;
+}
+
 //-------------------------------------- End of DOTQC stuff
 
 void character::output(ostream& out) const {
@@ -411,25 +416,38 @@ void character::output(ostream& out) const {
   out << ")|";
 
   // Print the output functions
-  for (i = 0; i < (n + m); i++) {
-    flag = false;
-    out << "(";
-    if (outputs[i].test(n + h)) out << "~";
-    for (j = 0; j < (n + h); j++) {
-      if (outputs[i].test(j)) {
-        if (flag) out << " ";
-        out << names[val_map[j]];
-        flag = true;
+  if (this->outputs.size() > 0) {
+      for (int i = 0; i < (n + m); i++) {
+          flag = false;
+          out << "(";
+          if (outputs[i].test(n + h)) out << "~";
+          for (int j = 0; j < (n + h); j++) {
+              if (outputs[i].test(j)) {
+                  if (flag) out << " ";
+                  out << names.at(val_map.at(j));
+                  flag = true;
+              }
+          }
+          out << ")";
       }
-    }
-    out << ")";
-  }
+  } else { out << "{}"; }
   out << ">\n";
 
   // Print the Hadamards:
   for (const auto& hadamard : hadamards) {
     out << "H:" << names[hadamard.qubit] << "-->" << hadamard.prep << "\n";
   }
+}
+
+void character::print_outputs() const {
+    for(size_t i = 0; i < this->outputs.size(); i++) {
+        cout << "[" << i << "] : size(" << this->outputs.size() << ")";
+        cout << "{";
+        for (size_t j = 0; j < this->outputs[i].size(); j++) {
+            cout << this->outputs[i].test(j);
+        }
+        cout << "}" << endl;
+    }
 }
 
 void insert_phase (unsigned char c, xor_func f, vector<exponent> & phases) {
@@ -718,6 +736,9 @@ dotqc character::synthesize() {
       auto tmp = construct_circuit(this->phase_expts, floats[0],
               wires, wires, n + m, n + h, this->names);
       ret.circ.splice(ret.circ.end(), tmp);
+      cout << "Printing outputs" << endl;
+      this->print_outputs();
+      cout << "Printed outputs" << endl;
       tmp = construct_circuit(this->phase_expts, floats[1],
               wires, this->outputs, n + m, n + h, this->names);
       ret.circ.splice(ret.circ.end(), tmp);

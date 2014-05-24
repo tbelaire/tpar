@@ -50,6 +50,7 @@ struct dotqc {
   void remove_ids();
   bool operator==(const dotqc& other) const;
 };
+ostream& operator<<(ostream& out, const dotqc& circuit);
 
 // ------------------------- Hadamard version
 struct Hadamard {
@@ -75,6 +76,7 @@ struct character {
 
   void output(ostream& out) const;
   void print() {output(cout);}
+  void print_outputs() const;
   void parse_circuit(dotqc & input);
   void add_ancillae(int num);
   dotqc synthesize();
