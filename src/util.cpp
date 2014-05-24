@@ -474,10 +474,10 @@ gatelist CNOT_synth(int n, vector<xor_func> bits, const vector<string> names) {
 // Construct a circuit for a given partition
 gatelist construct_circuit(const vector<exponent> & phase,
     const partitioning & part,
-    vector<xor_func> in,
+    const vector<xor_func> in,
     const vector<xor_func> out,
-    int num,
-    int dim,
+    const int num,
+    const int dim,
     const vector<string> names) {
   gatelist ret, tmp, rev;
   vector<xor_func> bits(num), pre(num), post(num);
@@ -582,8 +582,8 @@ gatelist construct_circuit(const vector<exponent> & phase,
 
 // Matroid oracle
 bool ind_oracle::operator()(const vector<exponent> & expnts, const set<int> & lst) const {
-  if (lst.size() > num) return false;
-  if (lst.size() == 1 || (num - lst.size()) >= dim) return true;
+  if (lst.size() > this->num) return false;
+  if (lst.size() == 1 || (this->num - lst.size()) >= this->dim) return true;
 
   set<int>::const_iterator it;
   int i, j, rank = 0;

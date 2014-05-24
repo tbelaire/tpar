@@ -40,14 +40,15 @@ struct dotqc {
   gatelist circ;           // Circuit
 
   void input(istream& in);
-  void output(ostream& out);
-  void print() {output(cout);}
+  void output(ostream& out) const;
+  void print() const {output(cout);}
   void clear() {n = 0; m = 0; names.clear(); zero.clear(); circ.clear();}
   void append(pair<string, list<string> > gate);
   void remove_swaps();
-  int count_t_depth();
-  void print_stats();
+  int count_t_depth() const;
+  void print_stats() const;
   void remove_ids();
+  bool operator==(const dotqc& other) const;
 };
 
 // ------------------------- Hadamard version
@@ -72,7 +73,7 @@ struct character {
   // TODO: make this a dependency graph instead
   list<Hadamard>   hadamards;   // a list of the hadamards in the order we saw them
 
-  void output(ostream& out);
+  void output(ostream& out) const;
   void print() {output(cout);}
   void parse_circuit(dotqc & input);
   void add_ancillae(int num);
