@@ -21,6 +21,8 @@ Author: Matthew Amy
 
 #include "partition.h"
 
+using namespace std;
+
 template<typename T>
 bool is_disjoint(const set<T> & A, const set<T> & B) {
   typename set<T>::iterator itA = A.begin(), itB = B.begin();

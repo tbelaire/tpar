@@ -4,6 +4,8 @@
 
 #include <sstream>
 
+using namespace std;
+
 // Dotqc testing
 TEST(dotqc, superSimpleInput) {
     stringstream input;

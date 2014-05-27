@@ -23,6 +23,8 @@ Author: Matthew Amy
 #include <algorithm>
 #include <sstream>
 
+using namespace std;
+
 //----------------------------------------- DOTQC stuff
 
 void ignore_white(istream& in) {

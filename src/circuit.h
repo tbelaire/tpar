@@ -27,38 +27,36 @@ Author: Matthew Amy
 #include "matroid.h"
 #include "util.h"
 
-using namespace std;
-
 // Recognized gates are T, T*, P, P*, Z, Z*, Z a b c, tof a b, tof a, X, H
 
 // Internal representation of a .qc circuit circuit
 struct dotqc {
   int n;                   // number of unknown inputs
   int m;                   // number of known inputs (initialized to |0>)
-  list<string> names;      // names of qubits
-  map<string, bool> zero;  // mapping from qubits to 0 (non-zero) or 1 (zero)
+  std::list<std::string> names;      // names of qubits
+  std::map<std::string, bool> zero;  // mapping from qubits to 0 (non-zero) or 1 (zero)
   gatelist circ;           // Circuit
 
-  void input(istream& in);
-  void output(ostream& out) const;
-  void print() const {output(cout);}
+  void input(std::istream& in);
+  void output(std::ostream& out) const;
+  void print() const {output(std::cout);}
   void clear() {n = 0; m = 0; names.clear(); zero.clear(); circ.clear();}
-  void append(pair<string, list<string> > gate);
+  void append(std::pair<std::string, std::list<std::string> > gate);
   void remove_swaps();
   int count_t_depth() const;
   void print_stats() const;
   void remove_ids();
   bool operator==(const dotqc& other) const;
 };
-ostream& operator<<(ostream& out, const dotqc& circuit);
+std::ostream& operator<<(std::ostream& out, const dotqc& circuit);
 
 // ------------------------- Hadamard version
 struct Hadamard {
   int qubit;        // Which qubit this hadamard is applied to
   int prep;         // Which "value" this hadamard prepares
 
-  set<int> in;      // exponent terms that must be prepared before the hadamard
-  vector<xor_func> wires; // state of the wires when this hadamard is applied
+  std::set<int> in;      // exponent terms that must be prepared before the hadamard
+  std::vector<xor_func> wires; // state of the wires when this hadamard is applied
 };
 
 // Characteristic of a circuit
@@ -66,16 +64,16 @@ struct character {
   int n;                        // number of unknown inputs
   int m;                        // number of zero-initialized ancilla qubits
   int h;                        // number of hadamards
-  vector<string>   names;       // names of qubits
-  vector<bool>     zero;        // Which qubits start as 0
-  map<int, int>    val_map;     // which value corresponds to which qubit
-  vector<exponent> phase_expts; // a list of exponents of \omega in the mapping
-  vector<xor_func> outputs;     // the xors computed into each qubit
+  std::vector<std::string>   names;       // names of qubits
+  std::vector<bool>     zero;        // Which qubits start as 0
+  std::map<int, int>    val_map;     // which value corresponds to which qubit
+  std::vector<exponent> phase_expts; // a list of exponents of \omega in the mapping
+  std::vector<xor_func> outputs;     // the xors computed into each qubit
   // TODO: make this a dependency graph instead
-  list<Hadamard>   hadamards;   // a list of the hadamards in the order we saw them
+  std::list<Hadamard>   hadamards;   // a list of the hadamards in the order we saw them
 
-  void output(ostream& out) const;
-  void print() {output(cout);}
+  void output(std::ostream& out) const;
+  void print() {output(std::cout);}
   void print_outputs() const;
   void parse_circuit(dotqc & input);
   void add_ancillae(int num);
@@ -90,13 +88,13 @@ enum circuit_type { CNOTT, OTHER, UNKNOWN };
 struct metacircuit {
   int n;                        // number of unknown inputs
   int m;                        // number of known inputs (initialized to |0>)
-  list<string> names;           // names of qubits
-  map<string, bool> zero;       // mapping from qubits to 0 (non-zero) or 1 (zero)
-  list<pair<circuit_type, dotqc> > circuit_list;     // A list of subcircuits
+  std::list<std::string> names;           // names of qubits
+  std::map<std::string, bool> zero;       // mapping from qubits to 0 (non-zero) or 1 (zero)
+  std::list<std::pair<circuit_type, dotqc> > circuit_list;     // A list of subcircuits
 
   void partition_dotqc(dotqc & input);
-  void output(ostream& out);
-  void print() {output(cout);}
+  void output(std::ostream& out);
+  void print() {output(std::cout);}
   void optimize();
   dotqc to_dotqc();
 };

@@ -23,13 +23,11 @@ Author: Matthew Amy
 #include <set>
 #include <iostream>
 
-using namespace std;
+typedef std::list<std::set<int> > partitioning;
+typedef std::list<std::pair <int, partitioning::iterator> >::iterator path_iterator;
 
-typedef list<set<int> > partitioning;
-typedef list<pair <int, partitioning::iterator> >::iterator path_iterator;
-
-ostream& operator<<(ostream& output, const partitioning& part);
-partitioning freeze_partitions(partitioning & part, set<int> & st);
+std::ostream& operator<<(std::ostream& output, const partitioning& part);
+partitioning freeze_partitions(partitioning & part, std::set<int> & st);
 
 int num_elts(partitioning & part);
-partitioning create(set<int> & st);
+partitioning create(std::set<int> & st);

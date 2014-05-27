@@ -24,8 +24,8 @@ Author: Matthew Amy
 #include "partition.h"
 
 typedef boost::dynamic_bitset<>            xor_func;
-typedef pair<char, xor_func >              exponent;
-typedef list<pair<string, list<string> > > gatelist; // [(Str, [Str])]
+typedef std::pair<char, xor_func >              exponent;
+typedef std::list<std::pair<std::string, std::list<std::string> > > gatelist; // [(Str, [Str])]
 
 enum synth_type { AD_HOC, GAUSS, PMH };
 
@@ -42,24 +42,25 @@ class ind_oracle {
     ind_oracle(int numin, int dimin, int lengthin) { num = numin; dim = dimin; length = lengthin; }
 
     void set_dim(int newdim) { dim = newdim; }
-    int retrieve_lin_dep(const vector<exponent> & expnts, const set<int> & lst) const;
+    int retrieve_lin_dep(const std::vector<exponent> & expnts, const std::set<int> & lst) const;
 
-    bool operator()(const vector<exponent> & expnts, const set<int> & lst) const;
+    bool operator()(const std::vector<exponent> & expnts, const std::set<int> & lst) const;
 };
 
 void print_wires(const xor_func * wires, int num, int dim);
 int compute_rank(int m, int n, const std::vector<xor_func> bits);
 int compute_rank(int m, int n, const xor_func * bits);
-int compute_rank(int n, const vector<exponent> & expnts, const set<int> & lst);
+int compute_rank(int n, const std::vector<exponent> & expnts, const std::set<int> & lst);
 
-gatelist construct_circuit(const vector<exponent> & phase,
+gatelist construct_circuit(const std::vector<exponent> & phase,
     const partitioning & part,
-    const vector<xor_func> in,
-    const vector<xor_func> out,
+    const std::vector<xor_func> in,
+    const std::vector<xor_func> out,
     const int num,
     const int dim,
-    const vector<string> names);
+    const std::vector<std::string> names);
 
-xor_func init_xor_func(initializer_list<int> lst);
-vector<xor_func> init_matrix_transpose(
-        initializer_list<initializer_list<int>>);
+xor_func init_xor_func(std::initializer_list<int> lst);
+std::vector<xor_func> init_matrix_transpose(
+        std::initializer_list<std::initializer_list<int>>);
+

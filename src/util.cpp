@@ -27,6 +27,8 @@ Author: Matthew Amy
 
 #include <boost/lexical_cast.hpp>
 
+using namespace std;
+
 bool disp_log = true;
 synth_type synth_method = PMH;
 

@@ -5,6 +5,9 @@
 
 #include "util.h"
 
+using namespace std;
+
+
 TEST(utilTest, init_maxtrix) {
     xor_func f = init_xor_func({1,0,0,1});
     EXPECT_EQ(true, f.any());

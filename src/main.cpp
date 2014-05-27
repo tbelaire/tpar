@@ -27,6 +27,8 @@ Author: Matthew Amy
 #include <sys/time.h>
 #define CLOCK_MONOTONIC 0
 
+using namespace std;
+
 static int
 clock_gettime(int foo, struct timespec *ts)
 {

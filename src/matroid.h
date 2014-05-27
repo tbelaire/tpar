@@ -28,10 +28,8 @@ Author: Matthew Amy
 #ifndef MATROID
 #define MATROID
 
-using namespace std;
-
 struct path {
-  list<pair <int, partitioning::iterator> > lst;
+  std::list<std::pair <int, partitioning::iterator> > lst;
 
   path() { }
   path(int i, partitioning::iterator ref) { lst.push_front(make_pair(i, ref)); }
@@ -41,7 +39,7 @@ struct path {
     lst.push_front(make_pair(i, ref));
   }
 
-  pair<int, partitioning::iterator> head() { return lst.front(); }
+  std::pair<int, partitioning::iterator> head() { return lst.front(); }
   int                               head_elem() { return lst.front().first; }
   partitioning::iterator            head_part() { return lst.front().second; }
 
@@ -55,19 +53,19 @@ struct path {
 
 // Implements a matroid partitioning algorithm
 template <class T, typename oracle_type>
-void add_to_partition(partitioning & ret, int i, const vector<T> & elts, const oracle_type & oracle) {
+void add_to_partition(partitioning & ret, int i, const std::vector<T> & elts, const oracle_type & oracle) {
   partitioning::iterator Si;
-  set<int>::iterator yi, zi;
+  std::set<int>::iterator yi, zi;
 
   // The node q contains a queue of paths and an iterator to each node's location.
   //	Each path's first element is the element we grow more paths from.
   //	If x->y is in the path, then we can replace x with y.
-  deque<path> node_q;
+  std::deque<path> node_q;
   path t;
   path_iterator p;
   bool marked[elts.size()], flag, bg_flg;
   int tmp;
-  set<int> * newset;
+  std::set<int> * newset;
 
   // Reset everything
   node_q.clear();
@@ -130,7 +128,7 @@ void add_to_partition(partitioning & ret, int i, const vector<T> & elts, const o
 
   // We were unsuccessful trying to edit the current partitions
   if (!flag) {
-    newset = new set<int>;
+    newset = new std::set<int>;
     newset->insert(i);
     ret.push_front(*newset);
   }
@@ -139,7 +137,7 @@ void add_to_partition(partitioning & ret, int i, const vector<T> & elts, const o
 
 // Partition the matroid
 template <class T, typename oracle_type>
-partitioning partition_matroid(const vector<T> & elts, const oracle_type & oracle) {
+partitioning partition_matroid(const std::vector<T> & elts, const oracle_type & oracle) {
   partitioning ret;
 
   // For each element of the matroid
@@ -151,12 +149,12 @@ partitioning partition_matroid(const vector<T> & elts, const oracle_type & oracl
 
 // Repartition according to a new oracle
 template <class T, typename oracle_type>
-void repartition(partitioning & part, const vector<T> & elts, const oracle_type & oracle) {
+void repartition(partitioning & part, const std::vector<T> & elts, const oracle_type & oracle) {
   int tmp;
   partitioning::iterator Si;
-  set<int>::iterator yi;
+  std::set<int>::iterator yi;
 
-  list<int> acc;
+  std::list<int> acc;
 
   for (Si = part.begin(); Si != part.end(); Si++) {
     tmp = oracle.retrieve_lin_dep(elts, *Si);
@@ -167,7 +165,7 @@ void repartition(partitioning & part, const vector<T> & elts, const oracle_type 
     //assert(oracle(elts, *Si));
   }
 
-  for (list<int>::iterator it = acc.begin(); it != acc.end(); it++) {
+  for (std::list<int>::iterator it = acc.begin(); it != acc.end(); it++) {
     add_to_partition(part, *it, elts, oracle);
   }
 }
