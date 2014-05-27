@@ -11,8 +11,6 @@
 #######################################################################
 # All tests produced by this Makefile.  Remember to add new tests you
 # created to the list.
-# TODO, pull all into one test with one main function
-# that way, all errors in all files are repeated at the bottom of the output.
 TESTS = util_test circuit_test
 #######################################################################
 
@@ -40,10 +38,10 @@ GTEST_HEADERS = $(GTEST_DIR)/include/gtest/*.h \
 
 # House-keeping build targets.
 
-test : $(TESTS)
-
-check : $(TESTS)
-	for t in $(TESTS); do ./$$t; done;
+test : $(TESTS:=.o) $(OBJS) gtest_main.a
+	$(CXX) $(LDFLAGS) $(CXXFLAGS) $(CXXFLAGS_TEST) -o $@ $^
+check : test
+	./test
 
 # Builds gtest.a and gtest_main.a.
 
@@ -71,6 +69,7 @@ gtest_main.a : gtest-all.o gtest_main.o
 %_test.o : %_test.cpp %.cpp %.h $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(CXXFLAGS_TEST) -c $< -o $@
 
+# Only used if specified.
 %_test : %_test.o $(OBJS) gtest_main.a
 	$(CXX) $(LDFLAGS) $(CXXFLAGS) $(CXXFLAGS_TEST) $^ -o $@
 

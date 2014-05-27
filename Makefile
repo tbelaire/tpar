@@ -1,15 +1,17 @@
 ####################
 # Sources
 vpath %.cpp src
+vpath %.h   src
 
+# Excludes main.o since tests don't want to link with that.
 OBJS := partition.o util.o circuit.o
 ####################
 
 include compiler.mk
 
-.PHONY: all clean test check
+.PHONY: all clean check
 
-all: tpar
+all: tpar test
 
 include test.mk
 test : $(OBJS)
