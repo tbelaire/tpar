@@ -11,6 +11,8 @@
 #######################################################################
 # All tests produced by this Makefile.  Remember to add new tests you
 # created to the list.
+# TODO, pull all into one test with one main function
+# that way, all errors in all files are repeated at the bottom of the output.
 TESTS = util_test circuit_test
 #######################################################################
 
