@@ -169,26 +169,34 @@ void dotqc::print_stats() const {
   bool tlayer = false;
   set<string> qubits;
 
-  for (auto ti = circ.begin(); ti != circ.end(); ti++) {
-    for (auto it = ti->second.begin(); it != ti->second.end(); it++) qubits.insert(*it);
-    if (ti->first == "T" || ti->first == "T*") {
+  for (const auto& gate : this->circ) {
+    // Add each on the inputs to the set of used qubits
+    for (const string& qubit : gate.second) {
+        qubits.insert(qubit);
+    }
+    if (gate.first == "T" || gate.first == "T*") {
       T++;
       if (!tlayer) {
         tlayer = true;
         tdepth++;
       }
-    } else if (ti->first == "P" || ti->first == "P*") P++;
-    else if (ti->first == "Z" && ti->second.size() == 3) {
+    } else if (gate.first == "P" || gate.first == "P*") {
+        P++;
+    } else if (gate.first == "Z" && gate.second.size() == 3) {
       tdepth += 3;
       T += 7;
       cnot += 7;
-    } else if (ti->first == "Z") Z++;
-    else {
-      if (ti->first == "tof" && ti->second.size() == 2) cnot++;
-      else if (ti->first == "tof" || ti->first == "X") X++;
-      else if (ti->first == "H") H++;
-
-      if (tlayer) tlayer = false;
+    } else if (gate.first == "Z") {
+        Z++;
+    } else {
+      tlayer = false;
+      if (gate.first == "tof" && gate.second.size() == 2) {
+          cnot++;
+      } else if (gate.first == "tof" || gate.first == "X") {
+          X++;
+      } else if (gate.first == "H") {
+          H++;
+      }
     }
   }
 
