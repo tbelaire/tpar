@@ -138,8 +138,8 @@ int dotqc::count_t_depth() const {
   map<string, int> current_t_depth;
   int d;
 
-  for (auto ti = names.begin(); ti != names.end(); ti++) {
-    current_t_depth[*ti] = 0;
+  for (const auto& name : names) {
+    current_t_depth[name] = 0;
   }
 
   for (auto it = circ.rbegin(); it != circ.rend(); it++) {
@@ -149,8 +149,8 @@ int dotqc::count_t_depth() const {
     } else if ((it->first == "Z") && (it->second.size() >= 3)) {
       d = d + 3;
     }
-    for (auto ti = it->second.begin(); ti != it->second.end(); ti++) {
-      current_t_depth[*ti] = d;
+    for (const auto wire : it->second) {
+      current_t_depth[wire] = d;
     }
   }
 

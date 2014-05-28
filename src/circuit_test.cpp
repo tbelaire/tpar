@@ -255,3 +255,66 @@ TEST(depth, maxDepth) {
     // Could mitigate by checking with map::count()
     /* EXPECT_EQ(0, max_depth(depths, {"BEAR"})); */
 }
+
+TEST(depth, countT) {
+    dotqc t {.n = 3, .m = 0,
+        .names = {"A", "B", "C"},
+        .zero = {{"A", false}, {"B", false}, {"C", false}},
+        .circ = {
+            {"T", {"A"} },
+            {"Y", {"A", "C", "B"} },
+        }
+    };
+    EXPECT_EQ(1, t.count_t_depth());
+}
+
+TEST(depth, countNone) {
+    dotqc no_t {.n = 3, .m = 0,
+        .names = {"A", "B", "C"},
+        .zero = {{"A", false}, {"B", false}, {"C", false}},
+        .circ = {
+            {"Z", {"A"} },
+            {"Y", {"A", "C", "B"} },
+        }
+    };
+    EXPECT_EQ(0, no_t.count_t_depth());
+}
+
+TEST(depth, countTT) {
+    dotqc tt {.n = 3, .m = 0,
+        .names = {"A", "B", "C"},
+        .zero = {{"A", false}, {"B", false}, {"C", false}},
+        .circ = {
+            {"T", {"A"} },
+            {"T", {"A"} },
+        }
+    };
+    EXPECT_EQ(2, tt.count_t_depth());
+}
+
+TEST(depth, transitive) {
+    dotqc cir {.n = 3, .m = 0,
+        .names = {"A", "B", "C"},
+        .zero = {{"A", false}, {"B", false}, {"C", false}},
+        .circ = {
+            {"T", {"A"} },
+            {"Y", {"A", "C", "B"} },
+            {"T", {"C"} },
+        }
+    };
+    EXPECT_EQ(2, cir.count_t_depth());
+}
+
+TEST(depth, transitive2) {
+    dotqc cir {.n = 3, .m = 0,
+        .names = {"A", "B", "C"},
+        .zero = {{"A", false}, {"B", false}, {"C", false}},
+        .circ = {
+            {"T", {"A"} },
+            {"T", {"C"} },
+            {"Y", {"A", "C", "B"} },
+            {"T", {"C"} },
+        }
+    };
+    EXPECT_EQ(2, cir.count_t_depth());
+}
