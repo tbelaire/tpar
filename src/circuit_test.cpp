@@ -318,3 +318,18 @@ TEST(depth, transitive2) {
     };
     EXPECT_EQ(2, cir.count_t_depth());
 }
+
+int count_h(dotqc & qc);
+TEST(depth, countH) {
+    dotqc cir {.n = 3, .m = 0,
+        .names = {"A", "B", "C"},
+        .zero = {{"A", false}, {"B", false}, {"C", false}},
+        .circ = {
+            {"T", {"A"} },
+            {"H", {"C"} },
+            {"Y", {"A", "C", "B"} },
+            {"H", {"C"} },
+        }
+    };
+    EXPECT_EQ(2, count_h(cir));
+}

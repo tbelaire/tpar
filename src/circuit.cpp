@@ -217,8 +217,8 @@ void dotqc::print_stats() const {
 int count_h(dotqc & qc) {
   int ret = 0;
 
-  for (auto it = qc.circ.begin(); it != qc.circ.end(); it++) {
-    if (it->first == "H") ret++;
+  for (const auto& gate : qc.circ) {
+    if (gate.first == "H") ret++;
   }
 
   return ret;
