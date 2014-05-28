@@ -333,3 +333,21 @@ TEST(depth, countH) {
     };
     EXPECT_EQ(2, count_h(cir));
 }
+
+TEST(dotqc, append) {
+    dotqc cir {.n = 3, .m = 0,
+        .names = {"A", "B", "C"},
+        .zero = {{"A", false}, {"B", false}, {"C", false}},
+        .circ = {
+            {"T", {"A"} },
+            {"H", {"C"} },
+            {"Y", {"A", "C", "B"} },
+            {"H", {"C"} },
+        }
+    };
+    cir.append({{"T"}, {"A", "B"}});
+    EXPECT_EQ(5, cir.circ.size());
+    EXPECT_EQ(3, cir.names.size());
+    EXPECT_EQ(2, cir.count_t_depth());
+}
+

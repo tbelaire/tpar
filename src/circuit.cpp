@@ -224,18 +224,14 @@ int count_h(dotqc & qc) {
   return ret;
 }
 
-bool find_name(const list<string> & names, const string & name) {
-  for (auto it = names.begin(); it != names.end(); it++) {
-    if (*it == name) return true;
-  }
-  return false;
-}
-
 void dotqc::append(pair<string, list<string> > gate) {
   circ.push_back(gate);
 
-  for (auto it = gate.second.begin(); it != gate.second.end(); it++) {
-    if (!find_name(names, *it)) names.push_back(*it);
+  for (const string& wire : gate.second) {
+    // If it's already not in, add it
+    if (find(names.begin(), names.end(), wire) == names.end()) {
+        names.push_back(wire);
+    }
   }
 }
 
@@ -922,7 +918,9 @@ void metacircuit::partition_dotqc(dotqc & input) {
         for (auto ti = acc.zero.begin(); ti != acc.zero.end(); ti++) {
           if (ti->second) {
             acc.m += 1;
-            if (!find_name(acc.names, ti->first)) acc.names.push_back(ti->first);
+            if (find(acc.names.begin(), acc.names.end(), ti->first) == acc.names.end()) {
+                acc.names.push_back(ti->first);
+            }
           }
         }
         acc.n = acc.names.size() - acc.m;
@@ -940,7 +938,9 @@ void metacircuit::partition_dotqc(dotqc & input) {
         for (auto ti = acc.zero.begin(); ti != acc.zero.end(); ti++) {
           if (ti->second) {
             acc.m += 1;
-            if (!find_name(acc.names, ti->first)) acc.names.push_back(ti->first);
+            if (find(acc.names.begin(), acc.names.end(), ti->first) == acc.names.end()) {
+                acc.names.push_back(ti->first);
+            }
           }
         }
         acc.n = acc.names.size() - acc.m;
@@ -961,7 +961,9 @@ void metacircuit::partition_dotqc(dotqc & input) {
   for (auto ti = acc.zero.begin(); ti != acc.zero.end(); ti++) {
     if (ti->second) {
       acc.m += 1;
-      if (!find_name(acc.names, ti->first)) acc.names.push_back(ti->first);
+      if (find(acc.names.begin(), acc.names.end(), ti->first) == acc.names.end()) {
+          acc.names.push_back(ti->first);
+      }
     }
   }
   acc.n = acc.names.size() - acc.m;
