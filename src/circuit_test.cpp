@@ -93,7 +93,158 @@ TEST(parsingFromDotQC, initalized) {
     // No H gates in this example
     EXPECT_EQ(0, c.hadamards.size());
 
-    c.print_outputs();
+    /* c.print_outputs(); */
 
-    c.print();
+    /* c.print(); */
+}
+
+TEST(removeIds, zz) {
+    dotqc zz {.n = 1, .m = 0,
+        .names = {"1"},
+        .zero = {{"1", false}},
+        .circ = {
+            {"Z", {"1"} },
+            {"Z", {"1"} },
+        }
+    };
+    zz.remove_ids();
+    EXPECT_EQ(0, zz.circ.size());
+}
+
+
+TEST(removeIds, czcz) {
+    dotqc czcz {.n = 2, .m = 0,
+        .names = {"A", "B"},
+        .zero = {{"A", false}, {"B", false}},
+        .circ = {
+            {"Z", {"A", "B"} },
+            {"Z", {"A", "B"} },
+        }
+    };
+    czcz.remove_ids();
+    EXPECT_EQ(0, czcz.circ.size());
+}
+
+TEST(removeIds, zazbza) {
+    dotqc zazbza {.n = 2, .m = 0,
+        .names = {"A", "B"},
+        .zero = {{"A", false}, {"B", false}},
+        .circ = {
+            {"Z", {"A"} },
+            {"Z", {"B"} },
+            {"Z", {"A"} },
+        }
+    };
+    zazbza.remove_ids();
+    EXPECT_EQ(1, zazbza.circ.size());
+    auto gate = *zazbza.circ.begin();
+    EXPECT_EQ("Z", gate.first);
+    EXPECT_EQ(1, gate.second.size());
+    EXPECT_EQ("B", *(gate.second.begin()));
+}
+
+TEST(removeIds, ztz) {
+    dotqc ztz {.n = 2, .m = 0,
+        .names = {"A", "B"},
+        .zero = {{"A", false}, {"B", false}},
+        .circ = {
+            {"Z", {"A"} },
+            {"T", {"A"} },
+            {"Z", {"A"} },
+        }
+    };
+    dotqc ztz_copy = ztz;
+    ztz.remove_ids();
+    EXPECT_EQ(3, ztz.circ.size());
+    EXPECT_EQ(ztz, ztz_copy);
+}
+
+TEST(removeIds, ztz2) {
+    dotqc ztz2 {.n = 2, .m = 0,
+        .names = {"A", "B"},
+        .zero = {{"A", false}, {"B", false}},
+        .circ = {
+            {"Z", {"A"} },
+            {"T", {"A", "B"} },
+            {"Z", {"A"} },
+        }
+    };
+    dotqc ztz2_copy = ztz2;
+    ztz2.remove_ids();
+    EXPECT_EQ(3, ztz2.circ.size());
+    EXPECT_EQ(ztz2, ztz2_copy);
+}
+
+TEST(removeIDs, tt) {
+    dotqc tt {.n = 1, .m = 0,
+        .names = {"1"},
+        .zero = {{"1", false}},
+        .circ = {
+            {"T", {"1"} },
+            {"T", {"1"} },
+        }
+    };
+    tt.remove_ids();
+    EXPECT_EQ(2, tt.circ.size());
+}
+
+TEST(removeIDs, tts) {
+    dotqc tt {.n = 1, .m = 0,
+        .names = {"1"},
+        .zero = {{"1", false}},
+        .circ = {
+            {"T", {"1"} },
+            {"T*", {"1"} },
+        }
+    };
+    tt.remove_ids();
+    EXPECT_EQ(0, tt.circ.size());
+}
+
+void no_op() {}
+
+TEST(removeIDs, superset) {
+    dotqc zz {.n = 3, .m = 0,
+        .names = {"A", "B", "C"},
+        .zero = {{"A", false}, {"B", false}, {"C", false}},
+        .circ = {
+            {"Z", {"A", "B"} },
+            {"Z", {"A", "B", "C"} },
+        }
+    };
+    dotqc zz_copy = zz;
+    zz.remove_ids();
+    no_op();
+    EXPECT_EQ(2, zz.circ.size());
+    cout << "Testing equality" << endl;
+    const bool is_equal = zz == zz_copy;
+    EXPECT_EQ(true, is_equal);
+    cout << "tested equality once" << endl;
+    /* EXPECT_EQ(zz, zz_copy); // Throws. TODO much later, understand */
+}
+
+TEST(removeIDs, yny) {
+    dotqc yny {.n = 2, .m = 0,
+        .names = {"A", "B"},
+        .zero = {{"A", false}, {"B", false}},
+        .circ = {
+            {"Y", {"A", "B"} },
+            {"Y", {"B", "A"} },
+        }
+    };
+    yny.remove_ids();
+    EXPECT_EQ(2, yny.circ.size());
+}
+
+TEST(removeIDs, yabc) {
+    dotqc yny {.n = 3, .m = 0,
+        .names = {"A", "B", "C"},
+        .zero = {{"A", false}, {"B", false}, {"C", false}},
+        .circ = {
+            {"Y", {"A", "B", "C"} },
+            {"Y", {"A", "C", "B"} },
+        }
+    };
+    yny.remove_ids();
+    EXPECT_EQ(2, yny.circ.size());
 }

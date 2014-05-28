@@ -680,3 +680,20 @@ vector<xor_func> init_matrix_transpose(
      }
     return cols;
 }
+
+list_compare_result
+list_compare(const list<string> & a, const list<string> & b) {
+    const set<string> set_a{a.begin(), a.end()},
+                      set_b{b.begin(), b.end()};
+    const auto overlap = set_intersection_count(
+            set_a.begin(), set_a.end(),
+            set_b.begin(), set_b.end());
+    if (overlap == 0) {
+        return list_compare_result::DISJOINT;
+    } else if (overlap == set_a.size() && overlap == set_b.size()) {
+        return list_compare_result::EQUAL;
+    } else {
+        return list_compare_result::OVERLAPPED;
+    }
+
+}

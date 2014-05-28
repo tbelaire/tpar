@@ -51,6 +51,26 @@ TEST(utilTest, compute_rank) {
             })));
 }
 
+TEST(listCompare, baseline) {
+    EXPECT_EQ(list_compare_result::EQUAL,
+              list_compare({"A", "B", "C"}, {"A", "B", "C"}));
+    EXPECT_EQ(list_compare_result::OVERLAPPED,
+              list_compare({"A", "D", "B"}, {"A", "B", "C"}));
+    EXPECT_EQ(list_compare_result::DISJOINT,
+              list_compare({"A"}, {"D"}));
+    EXPECT_EQ(list_compare_result::DISJOINT,
+              list_compare({"A", "B", "C"}, {"D", "E", "F"}));
+}
+
+TEST(listCompare, abABC) {
+    EXPECT_EQ(list_compare_result::OVERLAPPED,
+              list_compare({"A", "B"}, {"A", "B", "C"}));
+}
+
+TEST(listCompare, orderingTest) {
+    EXPECT_EQ(list_compare_result::EQUAL, list_compare({"A", "C", "B"}, {"A", "B", "C"}));
+}
+
 /*  Needs to be manually inspected.
 void print_wires(const vector<xor_func> wires);
 TEST(utilTest, printing) {

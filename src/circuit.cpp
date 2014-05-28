@@ -311,36 +311,10 @@ void dotqc::remove_swaps() {
   }
 }
 
-int list_compare(const list<string> & a, const list<string> & b) {
-  bool disjoint = true, equal = true, elt, strongelt;
-  int i = a.size(), j = b.size();
-  // TODO check this
-  auto it = a.begin();
-  for (i = 0; i < a.size(); i++, it++) {
-    elt = false;
-    strongelt = false;
-    auto ti = b.begin();
-    for (j = 0; j < b.size(); j++, ti++) {
-      if (*it == *ti) {
-        elt = true;
-        disjoint = false;
-        if (i == j) {
-          strongelt = true;
-        }
-      }
-    }
-    if (!strongelt) equal = false;
-  }
-
-  if (equal) return 3;
-  else if (!disjoint) return 2;
-  else return 1;
-}
 
 void dotqc::remove_ids() {
-  gatelist::iterator it, ti;
-  bool mod = true, flg = true;
-  int i;
+
+  // Maps each gate to it's identity.
   map<string, string> ids;
 
   ids["tof"] = "tof";
@@ -351,36 +325,58 @@ void dotqc::remove_ids() {
   ids["T"] = "T*";
   ids["T*"] = "T";
 
-  while (mod) {
-    mod = false;
-    for (auto it = circ.begin(); it != circ.end(); it++) {
-      flg = false;
-      ti = it;
+  // Was an operation performed which might open up new chances to optimize.
+  bool modified = true;
+  const bool logging = false;
+
+  while (modified) {
+    modified = false;
+    for (auto it = this->circ.begin(); it != this->circ.end(); it++) {
+      if(logging) cout << "Looking at gate " << it->first << endl;
+      bool flg = false;
+      gatelist::iterator ti = it;
       ti++;
+      // Peek forward, looking for
+      // a gate with the same inputs
+      // giving up when we see one with overlapping inputs.
+      // Note that we don't care about the order of the inputs apart
+      // from the first one.  That's because they are all control lines.
       for (; ti != circ.end() && !flg; ti++) {
-        i = list_compare(it->second, ti->second);
+        if(logging) cout << "Comparing with gate " << ti->first << endl;
+        if(logging) cout << "Which has wires at:";
+        for (const auto& w : it->second) {
+            if(logging) cout << " " << w;
+        }
+        if(logging) cout << endl;
+        const auto i = list_compare(it->second, ti->second);
         switch (i) {
-          case 3:
-            if (ids[it->first] == ti->first) {
-              ti = circ.erase(ti);
-              it = circ.erase(it);
-              mod = true;
-            }
-            flg = true;
-            break;
-          case 2:
-            flg = true;
-            break;
-          default:
-            break;
+            case list_compare_result::EQUAL:
+                if (ids[it->first] == ti->first
+                        && *(it->second.begin()) == *(ti->second.begin()) ) {
+                    if(logging) cout << "Inside if" << endl;
+                    ti = circ.erase(ti);
+                    it = circ.erase(it);
+                    modified = true;
+                }
+                flg = true;
+                break;
+            case list_compare_result::OVERLAPPED:
+                flg = true;
+                break;
+            case list_compare_result::DISJOINT:
+                break;
+            default:
+                cerr << "Unknown result from list_compare" <<endl;
+                break;
         }
       }
     }
   }
+  if(logging) cout << "DONE" << endl;
 }
 
 bool dotqc::operator==(const dotqc& other) const {
-    return (   other.n == n
+    return    (other.n == n
             && other.m == m
             && other.names == names
             && other.zero == zero
