@@ -201,8 +201,6 @@ TEST(removeIDs, tts) {
     EXPECT_EQ(0, tt.circ.size());
 }
 
-void no_op() {}
-
 TEST(removeIDs, superset) {
     dotqc zz {.n = 3, .m = 0,
         .names = {"A", "B", "C"},
@@ -214,13 +212,11 @@ TEST(removeIDs, superset) {
     };
     dotqc zz_copy = zz;
     zz.remove_ids();
-    no_op();
     EXPECT_EQ(2, zz.circ.size());
-    cout << "Testing equality" << endl;
     const bool is_equal = zz == zz_copy;
     EXPECT_EQ(true, is_equal);
-    cout << "tested equality once" << endl;
-    /* EXPECT_EQ(zz, zz_copy); // Throws. TODO much later, understand */
+    EXPECT_EQ(zz, zz_copy);
+    // There was a crash cause .zero wasn't initalized properly.
 }
 
 TEST(removeIDs, yny) {
