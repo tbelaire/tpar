@@ -236,6 +236,7 @@ void dotqc::append(pair<string, list<string> > gate) {
 }
 
 // Optimizations
+// TODO audit this
 void dotqc::remove_swaps() {
   gatelist::iterator it, tt, ttt;
   list<string>::iterator iti;
