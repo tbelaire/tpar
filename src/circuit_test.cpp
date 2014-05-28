@@ -244,3 +244,14 @@ TEST(removeIDs, yabc) {
     yny.remove_ids();
     EXPECT_EQ(2, yny.circ.size());
 }
+
+int max_depth(const map<string, int> & depths, const list<string> & names);
+TEST(depth, maxDepth) {
+    map<string, int> depths { {"Apple", 4}, {"Pear", 5}, {"Pinecone", 3} };
+    EXPECT_EQ(5, max_depth(depths, {"Apple", "Pear"}));
+    EXPECT_EQ(4, max_depth(depths, {"Apple"}));
+    EXPECT_EQ(0, max_depth(depths, {}));
+    // Throws an error, that might be a good thing.
+    // Could mitigate by checking with map::count()
+    /* EXPECT_EQ(0, max_depth(depths, {"BEAR"})); */
+}
