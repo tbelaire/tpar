@@ -40,13 +40,6 @@ clock_gettime(int foo, struct timespec *ts)
     return (0);
 }
 
-static int
-pthread_condattr_setclock(pthread_condattr_t *attr, int foo)
-{
-    (void)attr;
-    (void)foo;
-    return (0);
-}
 #endif /* !CLOCK_MONOTONIC */
 
 int main(int argc, char *argv[]) {
