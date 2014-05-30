@@ -351,3 +351,34 @@ TEST(dotqc, append) {
     EXPECT_EQ(2, cir.count_t_depth());
 }
 
+//using exponent = pair<u8, xor_func>
+void insert_phase (unsigned char c, xor_func f, vector<pair<exponent_val, xor_func>> & phases);
+TEST(character, insertPhase) {
+    const xor_func f0101 = init_xor_func({0,1,0,1});
+    const xor_func f1010 = init_xor_func({1,0,1,0});
+    const xor_func f1111 = init_xor_func({1,1,1,1});
+    const xor_func f1000 = init_xor_func({1,0,0,0});
+    vector<pair<exponent_val, xor_func>> xpt{ {1, f0101}, {3, f1010}, {1, f1111} };
+    insert_phase(1, f0101, xpt);
+    EXPECT_EQ(2, xpt[0].first);
+    EXPECT_EQ(f0101, xpt[0].second);
+    EXPECT_EQ(3, xpt[1].first);
+    EXPECT_EQ(1, xpt[2].first);
+    insert_phase(6, f0101, xpt);
+    EXPECT_EQ(0, xpt[0].first);  // TODO is that expected?
+}
+
+void insert_phase (unsigned char c, xor_func f, exponents_set& phases);
+TEST(character, insertPhaseMap) {
+    const xor_func f0101 = init_xor_func({0,1,0,1});
+    const xor_func f1010 = init_xor_func({1,0,1,0});
+    const xor_func f1111 = init_xor_func({1,1,1,1});
+    const xor_func f1000 = init_xor_func({1,0,0,0});
+    exponents_set xpt{ {f0101, 1}, {f1010, 3}, {f1111, 1} };
+    insert_phase(1, f0101, xpt);
+    EXPECT_EQ(2, xpt[f0101]);
+    EXPECT_EQ(3, xpt[f1010]);
+    EXPECT_EQ(1, xpt[f1111]);
+    insert_phase(6, f0101, xpt);
+    EXPECT_EQ(0, xpt[f0101]);  // TODO is that expected?
+}

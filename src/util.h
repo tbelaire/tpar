@@ -18,14 +18,35 @@
 
 Author: Matthew Amy
 ---------------------------------------------------------------------*/
+#ifndef UTIL_H
+#define UTIL_H
 
 #include <vector>
+#include <list>
+#include <map>
+#include <set>
 #include <boost/dynamic_bitset.hpp>
-#include "partition.h"
+#include <boost/optional.hpp>
 
-typedef boost::dynamic_bitset<>            xor_func;
-typedef std::pair<char, xor_func >              exponent;
-typedef std::list<std::pair<std::string, std::list<std::string> > > gatelist; // [(Str, [Str])]
+/* typedef boost::dynamic_bitset<>            xor_func; */
+using xor_func = boost::dynamic_bitset<>;
+/* typedef unsigned char                      exponent_val; */
+using exponent_val = unsigned char;
+/* typedef std::pair<xor_func, exponent_val>  exponent; */
+using exponent = std::pair<xor_func, exponent_val>;
+/* typedef std::map<xor_func, exponent_val>   exponents_set; */
+using exponents_set = std::map<xor_func, exponent_val>;
+
+/* typedef std::list<std::pair<std::string, std::list<std::string> > > gatelist; */
+// [(Str, [Str])]
+using gatelist = std::list<std::pair<std::string, std::list<std::string>>>;
+
+
+/* typedef std::list<std::set<xor_func> > partitioning; */
+using partitioning = std::list<std::set<xor_func>>;
+
+/* typedef std::list<std::pair <int, partitioning::iterator> >::iterator path_iterator; */
+using path_iterator = std::list<std::pair<xor_func, partitioning::iterator>>::iterator;
 
 enum synth_type { AD_HOC, GAUSS, PMH };
 
@@ -42,17 +63,18 @@ class ind_oracle {
     ind_oracle(int numin, int dimin, int lengthin) { num = numin; dim = dimin; length = lengthin; }
 
     void set_dim(int newdim) { dim = newdim; }
-    int retrieve_lin_dep(const std::vector<exponent> & expnts, const std::set<int> & lst) const;
+    boost::optional<xor_func>
+    retrieve_lin_dep(const exponents_set& expnts, const std::set<xor_func> & lst) const;
 
-    bool operator()(const std::vector<exponent> & expnts, const std::set<int> & lst) const;
+    bool operator()(const exponents_set & expnts, const std::set<xor_func> & lst) const;
 };
 
 void print_wires(const xor_func * wires, int num, int dim);
 int compute_rank(int m, int n, const std::vector<xor_func> bits);
 int compute_rank(int m, int n, const xor_func * bits);
-int compute_rank(int n, const std::vector<exponent> & expnts, const std::set<int> & lst);
+int compute_rank(int n, const exponents_set & expnts, const std::set<int> & lst);
 
-gatelist construct_circuit(const std::vector<exponent> & phase,
+gatelist construct_circuit(exponents_set & phase,
     const partitioning & part,
     const std::vector<xor_func> in,
     const std::vector<xor_func> out,
@@ -64,6 +86,7 @@ xor_func init_xor_func(std::initializer_list<int> lst);
 std::vector<xor_func> init_matrix_transpose(
         std::initializer_list<std::initializer_list<int>>);
 
+// Note, requies the inputs to be sorted.
 template<class InputIt1, class InputIt2>
 size_t set_intersection_count(InputIt1 first1, InputIt1 last1,
                           InputIt2 first2, InputIt2 last2)
@@ -86,3 +109,4 @@ size_t set_intersection_count(InputIt1 first1, InputIt1 last1,
 enum class list_compare_result { EQUAL, DISJOINT, OVERLAPPED };
 list_compare_result
 list_compare(const std::list<std::string> & a, const std::list<std::string> & b);
+#endif // UTIL_H

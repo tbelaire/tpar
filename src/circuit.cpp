@@ -410,10 +410,10 @@ void character::output(ostream& out) const {
   // Print the phase exponents
   for (auto it = phase_expts.begin(); it != phase_expts.end(); it++) {
     if (it != phase_expts.begin()) out << "+";
-    out << (int)(it->first) << "*";
-    if (it->second.test(n + h)) out << "~";
+    out << (int)(it->second) << "*";
+    if (it->first.test(n + h)) out << "~";
     for (int i = 0; i < (n + h); i++) {
-      if (it->second.test(i)) out << names.at(val_map.at(i));
+      if (it->first.test(i)) out << names.at(val_map.at(i));
     }
   }
   out << ")|";
@@ -453,7 +453,7 @@ void character::print_outputs() const {
     }
 }
 
-void insert_phase (unsigned char c, xor_func f, vector<exponent> & phases) {
+void insert_phase (unsigned char c, xor_func f, vector<pair<exponent_val, xor_func>> & phases) {
   bool flg = false;
   for (auto it = phases.begin(); it != phases.end() && !flg; it++) {
     if (it->second == f) {
@@ -464,6 +464,16 @@ void insert_phase (unsigned char c, xor_func f, vector<exponent> & phases) {
   if (!flg) {
     phases.push_back(make_pair(c, xor_func(f)));
   }
+}
+
+void insert_phase (unsigned char c, xor_func f, map<xor_func, unsigned char> & phases) {
+  phases[f] += c;
+  phases[f] %= 8;
+  /*  If we're pressed for space?
+  if(phases[f] == 0) {
+      phases.erase(f);
+  }
+  */
 }
 
 // Parse a {CNOT, T} circuit
@@ -558,10 +568,12 @@ void character::parse_circuit(dotqc & input) {
       // Check previous exponents to see if they're inconsistent
       wires[new_h.qubit].reset();
       int rank = compute_rank(n + m, n + h, wires);
-      for (int i = 0; i < phase_expts.size(); i++) {
-        if (phase_expts[i].first != 0) {
-          wires[new_h.qubit] = phase_expts[i].second;
-          if (compute_rank(n + m, n + h, wires) > rank) new_h.in.insert(i);
+      for (const auto& expt : phase_expts) {
+        if (expt.second != 0) {
+          wires[new_h.qubit] = expt.first;
+          if (compute_rank(n + m, n + h, wires) > rank) {
+              new_h.in.insert(expt.first);
+          }
         }
       }
 
@@ -635,7 +647,7 @@ dotqc character::synthesize() {
   dotqc ret{};
   xor_func mask(n + h + 1, 0);      // Tells us what values we have prepared
   vector<xor_func> wires(n + m);        // Current state of the wires
-  list<int> remaining[2];          // Which terms we still have to partition
+  list<xor_func> remaining[2];          // Which terms we still have to partition
   int dim = n;
   int tdepth = 0, h_count = 1, applied = 0;
   ind_oracle oracle(n + m, dim, n + h);
@@ -655,16 +667,16 @@ dotqc character::synthesize() {
   }
 
   // initialize the remaining list
-  for (int i = 0; i < phase_expts.size(); i++) {
-    if (phase_expts[i].first % 2 == 1) remaining[0].push_back(i);
-    else if (phase_expts[i].first != 0) remaining[1].push_back(i);
+  for (const auto& xpt : phase_expts) {
+    if (xpt.second % 2 == 1) remaining[0].push_back(xpt.first);
+    else if (xpt.second != 0) remaining[1].push_back(xpt.first);
   }
 
   // create an initial partition
   // cerr << "Adding new functions to the partition... " << flush;
   for (int j = 0; j < 2; j++) {
     for (auto it = remaining[j].begin(); it != remaining[j].end();) {
-      xor_func tmp = (~mask) & (phase_expts[*it].second);
+      xor_func tmp = (~mask) & (*it);
       if (tmp.none()) {
         add_to_partition(floats[j], *it, phase_expts, oracle);
         it = remaining[j].erase(it);
@@ -718,7 +730,7 @@ dotqc character::synthesize() {
     // Add new functions to the partition
     for (int j = 0; j < 2; j++) {
       for (auto it = remaining[j].begin(); it != remaining[j].end();) {
-        xor_func tmp = (~mask) & (phase_expts[*it].second);
+        xor_func tmp = (~mask) & (*it);
         if (tmp.none()) {
           add_to_partition(floats[j], *it, phase_expts, oracle);
           it = remaining[j].erase(it);
@@ -751,6 +763,7 @@ dotqc character::synthesize() {
   return ret;
 }
 
+/*
 dotqc character::synthesize_unbounded() {
   partitioning floats[2], frozen[2];
   dotqc ret;
@@ -887,6 +900,7 @@ dotqc character::synthesize_unbounded() {
   }
   return ret;
 }
+*/
 
 //-------------------------------- old {CNOT, T} version code. Still used for the "no hadamards" option
 

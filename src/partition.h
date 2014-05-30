@@ -22,12 +22,10 @@ Author: Matthew Amy
 #include <list>
 #include <set>
 #include <iostream>
-
-typedef std::list<std::set<int> > partitioning;
-typedef std::list<std::pair <int, partitioning::iterator> >::iterator path_iterator;
+#include "util.h"
 
 std::ostream& operator<<(std::ostream& output, const partitioning& part);
-partitioning freeze_partitions(partitioning & part, std::set<int> & st);
+partitioning freeze_partitions(partitioning & part, std::set<xor_func> & st);
 
 int num_elts(partitioning & part);
-partitioning create(std::set<int> & st);
+partitioning create(std::set<xor_func> & st);

@@ -26,6 +26,7 @@ Author: Matthew Amy
 #include <stdexcept>
 
 #include <boost/lexical_cast.hpp>
+#include <boost/optional.hpp>
 
 using namespace std;
 
@@ -140,7 +141,7 @@ int compute_rank(int m, int n, const xor_func * bits) {
   return ret;
 }
 
-int compute_rank(int n, const vector<exponent> & expnts, const set<int> & lst) {
+int compute_rank(int n, const vector<pair<exponent_val, xor_func>> & expnts, const set<int> & lst) {
   int ret;
   int m = lst.size();
 
@@ -474,7 +475,7 @@ gatelist CNOT_synth(int n, vector<xor_func> bits, const vector<string> names) {
 }
 
 // Construct a circuit for a given partition
-gatelist construct_circuit(const vector<exponent> & phase,
+gatelist construct_circuit(exponents_set & phase,
     const partitioning & part,
     const vector<xor_func> in,
     const vector<xor_func> out,
@@ -483,9 +484,10 @@ gatelist construct_circuit(const vector<exponent> & phase,
     const vector<string> names) {
   gatelist ret, tmp, rev;
   vector<xor_func> bits(num), pre(num), post(num);
-  set<int>::iterator ti;
   bool flg = true;
 
+  assert(in.size() == num);
+  assert(out.size() == num);
   // flg = forall i. in[i] == out[i]
   for (int i = 0; i < num; i++) {
     flg &= (in[i] == out[i]);
@@ -508,14 +510,14 @@ gatelist construct_circuit(const vector<exponent> & phase,
   // For each partition... Compute *it, apply T gates, uncompute
   for (partitioning::const_iterator it = part.begin(); it != part.end(); it++) {
     cerr << "List is of length: " << it->size() << endl;
-    ti = it->begin();
+    auto ti = it->begin();
     for (int i = 0; i < num;  i++) {
       if (ti != it->end()){
           it++;
           /* cerr << "Ran out of list" << endl; */
           /* exit(4); */
       }
-      if (i < it->size()) { bits[i] = phase[*ti].second; }
+      if (i < it->size()) { bits[i] = *ti; }
       else                { bits[i] = xor_func(dim + 1, 0); }
     }
 
@@ -540,13 +542,13 @@ gatelist construct_circuit(const vector<exponent> & phase,
     for (int i = 0; ti != it->end(); ti++, i++) {
       tmp_lst.clear();
       tmp_lst.push_back(names[i]);
-      if (phase[*ti].first <= 4) {
-        if (phase[*ti].first / 4 == 1) ret.push_back(make_pair("Z", tmp_lst));
-        if (phase[*ti].first / 2 == 1) ret.push_back(make_pair("P", tmp_lst));
-        if (phase[*ti].first % 2 == 1) ret.push_back(make_pair("T", tmp_lst));
+      if (phase[*ti] <= 4) {
+        if (phase[*ti] / 4 == 1) ret.push_back(make_pair("Z", tmp_lst));
+        if (phase[*ti] / 2 == 1) ret.push_back(make_pair("P", tmp_lst));
+        if (phase[*ti] % 2 == 1) ret.push_back(make_pair("T", tmp_lst));
       } else {
-        if (phase[*ti].first == 5 || phase[*ti].first == 6) ret.push_back(make_pair("P*", tmp_lst));
-        if (phase[*ti].first % 2 == 1) ret.push_back(make_pair("T*", tmp_lst));
+        if (phase[*ti] == 5 || phase[*ti] == 6) ret.push_back(make_pair("P*", tmp_lst));
+        if (phase[*ti] % 2 == 1) ret.push_back(make_pair("T*", tmp_lst));
       }
     }
 
@@ -582,18 +584,19 @@ gatelist construct_circuit(const vector<exponent> & phase,
   return ret;
 }
 
+// TODO audit this, it doesn't use it's argument
 // Matroid oracle
-bool ind_oracle::operator()(const vector<exponent> & expnts, const set<int> & lst) const {
+bool ind_oracle::operator()(const exponents_set & expnts, const set<xor_func> & lst) const {
   if (lst.size() > this->num) return false;
   if (lst.size() == 1 || (this->num - lst.size()) >= this->dim) return true;
 
-  set<int>::const_iterator it;
+  set<xor_func>::const_iterator it;
   int i, j, rank = 0;
   bool flg;
-  xor_func * tmp = new xor_func[lst.size()];
+  vector<xor_func> tmp{lst.size()};
 
   for (i = 0, it = lst.begin(); it != lst.end(); it++, i++) {
-    tmp[i] = expnts[*it].second;
+    tmp[i] = *it;
   }
 
   for (i = 0; i < length; i++) {
@@ -613,20 +616,21 @@ bool ind_oracle::operator()(const vector<exponent> & expnts, const set<int> & ls
     if (flg) rank++;
   }
 
-  delete[] tmp;
   return (num - lst.size()) >= (dim - rank);
 }
 
+//TODO audit this
 // Shortcut to find a linearly dependent element faster
-int ind_oracle::retrieve_lin_dep(const vector<exponent> & expnts, const set<int> & lst) const {
-  set<int>::const_iterator it;
-  int i, j, rank = 0, tmpr;
-  map<int, int> mp;
+boost::optional<xor_func>
+ind_oracle::retrieve_lin_dep(const exponents_set& expnts, const set<xor_func> & lst) const {
+  set<xor_func>::const_iterator it;
+  int i, j, rank = 0;
+  map<int, xor_func> mp;
   bool flg;
-  xor_func * tmp = new xor_func[lst.size()];
+  vector<xor_func> tmp{lst.size()};
 
   for (i = 0, it = lst.begin(); it != lst.end(); it++, i++) {
-    tmp[i] = expnts[*it].second;
+    tmp[i] = *it;
     mp[i] = *it;
   }
 
@@ -643,7 +647,7 @@ int ind_oracle::retrieve_lin_dep(const vector<exponent> & expnts, const set<int>
           // If it wasn't the first vector we tried, swap to the front
           if (j != rank) {
             swap(tmp[rank], tmp[j]);
-            tmpr = mp[rank];
+            auto tmpr = mp[rank];
             mp[rank] = mp[j];
             mp[j] = tmpr;
           }
@@ -657,9 +661,8 @@ int ind_oracle::retrieve_lin_dep(const vector<exponent> & expnts, const set<int>
     if (flg) rank++;
   }
 
-  delete[] tmp;
   assert((num - lst.size()) >= (dim - rank));
-  return -1;
+  return boost::optional<xor_func>();
 }
 
 xor_func init_xor_func(initializer_list<int> lst){
