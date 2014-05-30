@@ -63,7 +63,7 @@ void add_to_partition(partitioning & ret, xor_func i, const cont & elts, const o
   std::deque<path> node_q;
   path t;
   path_iterator p;
-  bool flag, bg_flg;
+  bool flag;
   std::map<xor_func, bool> marked;
 
   // Reset everything

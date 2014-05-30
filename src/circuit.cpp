@@ -730,7 +730,7 @@ dotqc character::synthesize() {
     // Add new functions to the partition
     for (int j = 0; j < 2; j++) {
       for (auto it = remaining[j].begin(); it != remaining[j].end();) {
-        xor_func tmp = (~mask) & (*it);
+        xor_func tmp = (~mask) & *it;
         if (tmp.none()) {
           add_to_partition(floats[j], *it, phase_expts, oracle);
           it = remaining[j].erase(it);
@@ -763,16 +763,15 @@ dotqc character::synthesize() {
   return ret;
 }
 
-/*
 dotqc character::synthesize_unbounded() {
   partitioning floats[2], frozen[2];
   dotqc ret;
   xor_func mask(n + h + 1, 0);      // Tells us what values we have prepared
   vector<xor_func> wires( n + m ); // Current state of the wires
-  list<int> remaining[2];          // Which terms we still have to partition
+  list<xor_func> remaining[2];          // Which terms we still have to partition
   int dim = n, tmp1, tmp2, tdepth = 0, h_count = 1, applied = 0, j;
   ind_oracle oracle(n + m, dim, n + h);
-  list<pair<string, list<string> > > circ;
+  gatelist circ;
   list<Hadamard>::iterator it;
 
   // initialize some stuff
@@ -786,19 +785,18 @@ dotqc character::synthesize_unbounded() {
   }
 
   // initialize the remaining list
-  for (int i = 0; i < phase_expts.size(); i++) {
-    if (phase_expts[i].first % 2 == 1) remaining[0].push_back(i);
-    else if (phase_expts[i].first != 0) remaining[1].push_back(i);
+  for (const auto& xpt : phase_expts) {
+    if (xpt.second % 2 == 1) remaining[0].push_back(xpt.first);
+    else if (xpt.second != 0) remaining[1].push_back(xpt.first);
   }
 
   // create an initial partition
   // cerr << "Adding new functions to the partition... " << flush;
-  for (j = 0; j < 2; j++) {
+  for (int j = 0; j < 2; j++) {
     for (auto it = remaining[j].begin(); it != remaining[j].end();) {
-      xor_func tmp = (~mask) & (phase_expts[*it].second);
+      xor_func tmp = (~mask) & (*it);
       if (tmp.none()) {
-        if (floats[j].size() == 0) floats[j].push_back(set<int>());
-        (floats[j].begin())->insert(*it);
+        add_to_partition(floats[j], *it, phase_expts, oracle);
         it = remaining[j].erase(it);
       } else it++;
     }
@@ -849,11 +847,13 @@ dotqc character::synthesize_unbounded() {
     mask.set(it->prep);
 
     // Add new functions to the partition
-    for (j = 0; j < 2; j++) {
-      for (list<int>::iterator it = remaining[j].begin(); it != remaining[j].end();) {
-        xor_func tmp = (~mask) & (phase_expts[*it].second);
+    for (int j = 0; j < 2; j++) {
+      for (auto it = remaining[j].begin(); it != remaining[j].end();) {
+        xor_func tmp = (~mask) & *it;
         if (tmp.none()) {
-          if (floats[j].size() == 0) floats[j].push_back(set<int>());
+          if (floats[j].size() == 0) {
+              floats[j].push_back(set<xor_func>());
+          }
           (floats[j].begin())->insert(*it);
           it = remaining[j].erase(it);
         } else it++;
@@ -900,7 +900,6 @@ dotqc character::synthesize_unbounded() {
   }
   return ret;
 }
-*/
 
 //-------------------------------- old {CNOT, T} version code. Still used for the "no hadamards" option
 

@@ -141,13 +141,17 @@ int compute_rank(int m, int n, const xor_func * bits) {
   return ret;
 }
 
-int compute_rank(int n, const vector<pair<exponent_val, xor_func>> & expnts, const set<int> & lst) {
+// Why take a set too?
+int compute_rank(int n, const exponents_set & expnts, const set<xor_func> & lst) {
   int ret;
   int m = lst.size();
 
-  vector<xor_func> tmp(m);
-  for (int i = 0; i < m; i++) {
-    tmp[i] = expnts[i].second;
+  vector<xor_func> tmp;
+  for (const auto& xpt: expnts) {
+      // TODO audit.
+      if(xpt.second != 0) { // Nonzero coefficient
+          tmp.push_back(xpt.first);
+      }
   }
   ret = compute_rank_dest(tmp);
   return ret;
