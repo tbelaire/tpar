@@ -342,7 +342,7 @@ gatelist fix_basis(int m, int n, int k, const xor_func * fst, xor_func * snd, xo
 
 // A := B^{-1} A
 void compose(int num, vector<xor_func> A, const vector<xor_func> B) {
-  vector<xor_func> tmp = B; // TODO check that is is copying B.
+  vector<xor_func> tmp = B;
   to_upper_echelon(num, num, tmp, A);
   to_lower_echelon(num, num, tmp, A);
 }
