@@ -88,7 +88,7 @@ void add_to_partition(partitioning & ret, xor_func i, const cont & elts, const o
         // Add the head to Si. If Si is independent, leave it, otherwise we'll have to remove it
         Si->insert(t.head_elem());
 
-        if (oracle(elts, *Si)) {
+        if (oracle(*Si)) {
           // We have the shortest path to a partition, so make the changes:
           //	For each x->y in the path, remove x from its partition and add y
           for (p = t.begin(); p != --(t.end()); ) {
@@ -107,7 +107,7 @@ void add_to_partition(partitioning & ret, xor_func i, const cont & elts, const o
               // Take yi out
               auto tmp = *yi;
               Si->erase(yi);
-              if (oracle(elts, *Si)) {
+              if (oracle(*Si)) {
                 // Put yi back in
                 yi = Si->insert(Si->begin(), tmp);
                 // Add yi to the queue
@@ -176,7 +176,7 @@ void repartition(partitioning & part, const std::vector<T> & elts, const oracle_
       Si->erase(*tmp);
       acc.push_back(*tmp);
     }
-    //assert(oracle(elts, *Si));
+    //assert(oracle(*Si));
   }
 
   for (std::list<xor_func>::iterator it = acc.begin(); it != acc.end(); it++) {

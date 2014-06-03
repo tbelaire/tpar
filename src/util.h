@@ -66,7 +66,7 @@ class ind_oracle {
     boost::optional<xor_func>
     retrieve_lin_dep(const exponents_set& expnts, const std::set<xor_func> & lst) const;
 
-    bool operator()(const exponents_set & expnts, const std::set<xor_func> & lst) const;
+    bool operator()(const std::set<xor_func> & lst) const;
 };
 
 void print_wires(const xor_func * wires, int num, int dim);

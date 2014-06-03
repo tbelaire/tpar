@@ -83,7 +83,7 @@ bool construct_and_test(int dim, int num, initializer_list<initializer_list<int>
     }
     const int length = arr[0].size();
     ind_oracle oracle{num, dim, length};
-    return oracle(map<xor_func,exponent_val>{}, set);
+    return oracle(set);
 }
 
 TEST(oracle, huh) {

@@ -588,9 +588,8 @@ gatelist construct_circuit(exponents_set & phase,
   return ret;
 }
 
-// TODO audit this, it doesn't use it's argument
 // Matroid oracle
-bool ind_oracle::operator()(const exponents_set & expnts, const set<xor_func> & lst) const {
+bool ind_oracle::operator()(const set<xor_func> & lst) const {
   if (lst.size() > this->num) return false;
   if (lst.size() == 1 || (this->num - lst.size()) >= this->dim) return true;
 
