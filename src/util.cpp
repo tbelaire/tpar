@@ -603,24 +603,9 @@ bool ind_oracle::operator()(const exponents_set & expnts, const set<xor_func> & 
     tmp[i] = *it;
   }
 
-  for (i = 0; i < length; i++) {
-    flg = false;
-    for (j = rank; j < lst.size(); j++) {
-      if (tmp[j].test(i)) {
-        // If we haven't yet seen a vector with bit i set...
-        if (!flg) {
-          // If it wasn't the first vector we tried, swap to the front
-          if (j != rank) swap(tmp[rank], tmp[j]);
-          flg = true;
-        } else {
-          tmp[j] ^= tmp[rank];
-        }
-      }
-    }
-    if (flg) rank++;
-  }
+  rank = compute_rank(tmp);
 
-  return (num - lst.size()) >= (dim - rank);
+  return (this->num - lst.size()) >= (this->dim - rank);
 }
 
 //TODO audit this

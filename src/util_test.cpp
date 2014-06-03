@@ -71,6 +71,53 @@ TEST(listCompare, orderingTest) {
     EXPECT_EQ(list_compare_result::EQUAL, list_compare({"A", "C", "B"}, {"A", "B", "C"}));
 }
 
+int compute_rank(const vector<xor_func> bits);
+
+// num = N = |A'|
+bool construct_and_test(int dim, int num, initializer_list<initializer_list<int>> lst) {
+
+    const auto arr = init_matrix_transpose(lst);
+    set<xor_func> set;
+    for(const auto& f_lst : lst){
+        set.insert(init_xor_func(f_lst));
+    }
+    const int length = arr[0].size();
+    ind_oracle oracle{num, dim, length};
+    return oracle(map<xor_func,exponent_val>{}, set);
+}
+
+TEST(oracle, huh) {
+    /* The first param is the target dimension, dim or n.
+     * The second is the maximum number of vectors, num or N.
+     * Next is a set of vectors that must be included in every possible
+     * solution.  If it's possible to solve, then it's true.
+     *
+     * Another way of phrasing it is there are b dependent vectors in set,
+     * then return num - b >= dim.
+     */
+    EXPECT_EQ(true,
+        construct_and_test(3, 4, {
+            {1,0,0,0},
+            {0,1,0,0},
+            {1,1,0,0}
+            }));
+    EXPECT_EQ(false,
+        construct_and_test(5, 7, {
+            {1,0,0,0,0},
+            {0,1,0,0,0},
+            {1,1,0,0,0},
+            {1,1,1,0,0},
+            {0,1,1,0,0},
+            {0,0,1,0,0},
+            }));
+    EXPECT_EQ(false,
+        construct_and_test(5, 5, {
+            {1,0,0,0,0},
+            {0,1,0,0,0},
+            {1,1,0,0,0},
+            }));
+}
+
 /*  Needs to be manually inspected.
 void print_wires(const vector<xor_func> wires);
 TEST(utilTest, printing) {
