@@ -70,13 +70,17 @@ gatelist swap_com(int a, int b, const vector<string> names) {
 gatelist x_com(int a, const vector<string> names) {
   return {{"tof", {names[a]}}};
 }
-
+// TODO, maybe there's errors because the last
+// entry in a xor_func represents it's negated status.
+// It's kinda like a "free" 000001 vec is added, and then
+// compute rank - 1, I think.  Further research required.
+//
 // Make triangular to determine the rank
 int compute_rank_dest(vector<xor_func> tmp) {
   int rank = 0;
 
   if(tmp.size() == 0) { return 0; } // Empty vector has 0 rank
-  int func_size = tmp.at(0).size();
+  int func_size = tmp.at(0).size() ;  // - 1?
   // Make triangular
   for (int i = 0; i < func_size; i++) {
     bool flg = false;
