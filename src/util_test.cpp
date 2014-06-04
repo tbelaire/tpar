@@ -86,7 +86,7 @@ bool construct_and_test(int dim, int num, initializer_list<initializer_list<int>
     return oracle(set);
 }
 
-TEST(oracle, huh) {
+TEST(oracle, simple) {
     /* The first param is the target dimension, dim or n.
      * The second is the maximum number of vectors, num or N.
      * Next is a set of vectors that must be included in every possible
