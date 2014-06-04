@@ -81,15 +81,14 @@ TEST(computeRank, pointers) {
             })[0]));
 }
 int compute_rank(int n, const exponents_set & expnts, const std::set<xor_func> & lst);
-TEST(computeRank, xptSets) {
+//TEST(computeRank, xptSets) {
     // I have no idea what this is going to do.
     // Looking at it's history, it only uses the set passed in for it's size
     // but it'd make more sense to compute the rank of the subset.
     // Which would involve reading the expoents_set and the set
     // in past versions, where the set is a set of indecies into expnts,
     // but now we can just compute directly.
-    EXPECT_EQ(1,1);
-}
+//}
 TEST(computeRank, sets) {
     EXPECT_EQ(3, compute_rank(set<xor_func>{
                 init_xor_func({0,0,0,0,1}),
@@ -147,27 +146,36 @@ TEST(components, x) {
     EXPECT_EQ("C", *(inputs.begin()));
 }
 
+gatelist to_upper_echelon(int m, int n, vector<xor_func> bits, const vector<string> names);
+TEST(echelon, upperGates) {
+    // TODO
+    EXPECT_EQ(1,0);
+}
+void to_upper_echelon(int m, int n, vector<xor_func> bits, vector<xor_func> mat);
+TEST(echelon, upperMat) {
+    // TODO
+    EXPECT_EQ(1,0);
+}
+gatelist to_lower_echelon(int m, int n, vector<xor_func> bits, const vector<string> names);
+TEST(echelon, lower) {
+    // TODO
+    EXPECT_EQ(1,0);
+}
+void to_lower_echelon(int m, int n, vector<xor_func>& bits, vector<xor_func>& mat);
 
-
-TEST(listCompare, baseline) {
-    EXPECT_EQ(list_compare_result::EQUAL,
-              list_compare({"A", "B", "C"}, {"A", "B", "C"}));
-    EXPECT_EQ(list_compare_result::OVERLAPPED,
-              list_compare({"A", "D", "B"}, {"A", "B", "C"}));
-    EXPECT_EQ(list_compare_result::DISJOINT,
-              list_compare({"A"}, {"D"}));
-    EXPECT_EQ(list_compare_result::DISJOINT,
-              list_compare({"A", "B", "C"}, {"D", "E", "F"}));
+// TODO fix_basis
+TEST(fixBasis, basic) {
+    EXPECT_EQ(1,0);
+}
+// TODO compose
+TEST(compose, basic) {
+    EXPECT_EQ(1,0);
 }
 
-TEST(listCompare, abABC) {
-    EXPECT_EQ(list_compare_result::OVERLAPPED,
-              list_compare({"A", "B"}, {"A", "B", "C"}));
-}
+// MAYBE test *_CNOT_synth
 
-TEST(listCompare, orderingTest) {
-    EXPECT_EQ(list_compare_result::EQUAL, list_compare({"A", "C", "B"}, {"A", "B", "C"}));
-}
+// Future TODO construct_curcuit
+
 
 // num = N = |A'|
 bool construct_and_test(int dim, int num, initializer_list<initializer_list<int>> lst) {
@@ -214,6 +222,30 @@ TEST(oracle, simple) {
             }));
 }
 
+// optional<xor_func> ind_oracle::retrieve_lin_dep(const set<xor_func> & lst) const;
+TEST(oracle, retrieveLinDep) {
+    EXPECT_EQ(0, 1);
+}
+
+TEST(listCompare, baseline) {
+    EXPECT_EQ(list_compare_result::EQUAL,
+              list_compare({"A", "B", "C"}, {"A", "B", "C"}));
+    EXPECT_EQ(list_compare_result::OVERLAPPED,
+              list_compare({"A", "D", "B"}, {"A", "B", "C"}));
+    EXPECT_EQ(list_compare_result::DISJOINT,
+              list_compare({"A"}, {"D"}));
+    EXPECT_EQ(list_compare_result::DISJOINT,
+              list_compare({"A", "B", "C"}, {"D", "E", "F"}));
+}
+
+TEST(listCompare, abABC) {
+    EXPECT_EQ(list_compare_result::OVERLAPPED,
+              list_compare({"A", "B"}, {"A", "B", "C"}));
+}
+
+TEST(listCompare, orderingTest) {
+    EXPECT_EQ(list_compare_result::EQUAL, list_compare({"A", "C", "B"}, {"A", "B", "C"}));
+}
 /*  Needs to be manually inspected.
 void print_wires(const vector<xor_func> wires);
 TEST(utilTest, printing) {
