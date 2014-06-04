@@ -147,28 +147,28 @@ TEST(components, x) {
 }
 
 gatelist to_upper_echelon(int m, int n, vector<xor_func> bits, const vector<string> names);
-TEST(echelon, upperGates) {
+TEST(DISABLED_echelon, upperGates) {
     // TODO
     EXPECT_EQ(1,0);
 }
 void to_upper_echelon(int m, int n, vector<xor_func> bits, vector<xor_func> mat);
-TEST(echelon, upperMat) {
+TEST(DISABLED_echelon, upperMat) {
     // TODO
     EXPECT_EQ(1,0);
 }
 gatelist to_lower_echelon(int m, int n, vector<xor_func> bits, const vector<string> names);
-TEST(echelon, lower) {
+TEST(DISABLED_echelon, lower) {
     // TODO
     EXPECT_EQ(1,0);
 }
 void to_lower_echelon(int m, int n, vector<xor_func>& bits, vector<xor_func>& mat);
 
 // TODO fix_basis
-TEST(fixBasis, basic) {
+TEST(DISABLED_fixBasis, basic) {
     EXPECT_EQ(1,0);
 }
 // TODO compose
-TEST(compose, basic) {
+TEST(DISABLED_compose, basic) {
     EXPECT_EQ(1,0);
 }
 
@@ -223,7 +223,7 @@ TEST(oracle, simple) {
 }
 
 // optional<xor_func> ind_oracle::retrieve_lin_dep(const set<xor_func> & lst) const;
-TEST(oracle, retrieveLinDep) {
+TEST(DISABLED_oracle, retrieveLinDep) {
     EXPECT_EQ(0, 1);
 }
 
@@ -261,4 +261,3 @@ TEST(utilTest, printing) {
             }));
 }
 */
-
