@@ -71,8 +71,6 @@ TEST(listCompare, orderingTest) {
     EXPECT_EQ(list_compare_result::EQUAL, list_compare({"A", "C", "B"}, {"A", "B", "C"}));
 }
 
-int compute_rank(const vector<xor_func> bits);
-
 // num = N = |A'|
 bool construct_and_test(int dim, int num, initializer_list<initializer_list<int>> lst) {
 
