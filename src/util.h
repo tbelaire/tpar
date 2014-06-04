@@ -29,6 +29,8 @@ Author: Matthew Amy
 #include <boost/optional.hpp>
 
 /* typedef boost::dynamic_bitset<>            xor_func; */
+// NOTE, the first n+h bits describe the combination of inputs,
+// and the final bit represents if it's negated or not.
 using xor_func = boost::dynamic_bitset<>;
 /* typedef unsigned char                      exponent_val; */
 using exponent_val = unsigned char;
@@ -67,6 +69,9 @@ class ind_oracle {
 
     bool operator()(const std::set<xor_func> & lst) const;
 };
+
+bool is_negated(const xor_func f);
+void flip_negated(xor_func& f);
 
 void print_wires(const xor_func * wires, int num, int dim);
 int compute_rank(int m, int n, const std::vector<xor_func> bits);

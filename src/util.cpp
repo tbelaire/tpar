@@ -33,6 +33,17 @@ using namespace std;
 bool disp_log = true;
 synth_type synth_method = PMH;
 
+// xor_func stuff
+// TODO this displeases me
+// It doesn't feel safe when adding hadamards
+bool is_negated(const xor_func f) {
+    return f.test(f.size() - 1);
+}
+void flip_negated(xor_func& f) {
+    f.flip(f.size() - 1);
+}
+
+
 void print_wires(const vector<xor_func> wires) {
   for (auto f : wires) {
     for (int j = 0; j < f.size(); j++) {
@@ -152,9 +163,13 @@ int compute_rank(int n, const exponents_set & expnts, const set<xor_func> & lst)
   return ret;
 }
 
-gatelist to_upper_echelon(int m, int n, vector<xor_func> bits, const vector<string> names);
-void to_upper_echelon(int m, int n, vector<xor_func> bits, vector<xor_func> mat);
-
+gatelist to_upper_echelon(int m, int n, vector<xor_func> bits,
+        const vector<string> names);
+void to_upper_echelon(int m, int n, vector<xor_func> bits,
+        vector<xor_func> mat);
+int to_upper_echelon(int m, int n, vector<xor_func> arr,
+        std::function<void(int)> do_negate,
+        std::function<void(int, int)> do_swap);
 
 // Make echelon form
 gatelist to_upper_echelon(int m, int n, vector<xor_func> bits, const vector<string> names) {
@@ -192,6 +207,44 @@ gatelist to_upper_echelon(int m, int n, vector<xor_func> bits, const vector<stri
   }
 
   return acc;
+}
+
+int to_upper_echelon(int m, int n,
+        vector<xor_func> bits,
+        std::function<void(int)> do_negate,
+        std::function<void(int, int)> do_swap){
+
+  for (int j = 0; j < m; j++) {
+    if (is_negated(bits[j])) {
+        flip_negated(bits[j]);
+        do_negate(j);
+    }
+  }
+
+  int rank = 0;
+
+  // Make triangular
+  for (int i = 0; i < n; i++) {
+    bool flg = false;
+    for (int j = rank; j < m; j++) {
+      if (bits[j].test(i)) {
+        // If we haven't yet seen a vector with bit i set...
+        if (!flg) {
+          // If it wasn't the first vector we tried, swap to the front
+          if (j != rank) {
+            swap(bits[rank], bits[j]);
+            do_swap(rank, j);
+          }
+          flg = true;
+        } else {
+          bits[j] ^= bits[rank];
+          do_swap(rank, j);
+        }
+      }
+    }
+    if (flg) rank++;
+  }
+  return rank;
 }
 
 // Make echelon form

@@ -146,6 +146,58 @@ TEST(components, x) {
     EXPECT_EQ("C", *(inputs.begin()));
 }
 
+int to_upper_echelon(int m, int n,
+        vector<xor_func> bits,
+        std::function<void(int)> negate,
+        std::function<void(int, int)> doswap);
+TEST(echelon, upperCallCount) {
+    const auto arr = init_matrix_transpose({
+            {0,1,/* negated */0},
+            {1,0,/* negated */1},
+        });
+    int num_swaps = 0;
+    int num_negates = 0;
+    const int rank = to_upper_echelon(2,2, arr,
+            [&num_negates](int j){
+                (void)j;
+                num_negates++;
+            },
+            [&num_swaps](int r1, int r2){
+                (void)r1;
+                (void)r2;
+                num_swaps++;
+            }
+        );
+    EXPECT_EQ(2, rank);
+    EXPECT_EQ(1, num_swaps);
+    EXPECT_EQ(1, num_negates);
+}
+
+TEST(echelon, upperZeroRow) {
+    const auto arr = init_matrix_transpose({
+            {0,1,/* negated */0},
+            {1,0,/* negated */1},
+            {1,1,/* negated */0},
+        });
+    int num_swaps = 0;
+    int num_negates = 0;
+    const int rank = to_upper_echelon(3,2, arr,
+            [&num_negates](int j){
+                (void)j;
+                num_negates++;
+            },
+            [&num_swaps](int r1, int r2){
+                (void)r1;
+                (void)r2;
+                num_swaps++;
+            }
+        );
+    EXPECT_EQ(2, rank);
+    EXPECT_EQ(3, num_swaps);
+    EXPECT_EQ(1, num_negates);
+}
+
+
 gatelist to_upper_echelon(int m, int n, vector<xor_func> bits, const vector<string> names);
 TEST(DISABLED_echelon, upperGates) {
     // TODO
