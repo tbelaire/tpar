@@ -144,6 +144,16 @@ int compute_rank(int m, int n, const xor_func * bits) {
   return ret;
 }
 
+int compute_rank(const set<xor_func> & set) {
+  // Make a copy of the bitset
+  vector<xor_func> tmp;
+  tmp.reserve(set.size());
+  for(const xor_func& f : set) {
+      tmp.push_back(f);
+  }
+  return compute_rank_dest(tmp);
+}
+
 // Why take a set too?
 // TODO AUDIT
 int compute_rank(int n, const exponents_set & expnts, const set<xor_func> & lst) {

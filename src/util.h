@@ -70,8 +70,10 @@ class ind_oracle {
 
 void print_wires(const xor_func * wires, int num, int dim);
 int compute_rank(int m, int n, const std::vector<xor_func> bits);
+int compute_rank(const std::vector<xor_func> bits);
 int compute_rank(int m, int n, const xor_func * bits);
 int compute_rank(int n, const exponents_set & expnts, const std::set<xor_func> & lst);
+int compute_rank(const std::set<xor_func> & lst);
 
 gatelist construct_circuit(exponents_set & phase,
     const partitioning & part,

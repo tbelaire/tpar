@@ -8,7 +8,7 @@
 using namespace std;
 
 
-TEST(utilTest, init_maxtrix) {
+TEST(utilTest, initMaxtrix) {
     xor_func f = init_xor_func({1,0,0,1});
     EXPECT_EQ(true, f.any());
     EXPECT_EQ(false, f.test(1));
@@ -23,7 +23,8 @@ TEST(utilTest, init_maxtrix) {
     EXPECT_EQ(false, bits.at(1).test(0));
 }
 
-TEST(utilTest, compute_rank) {
+int compute_rank(int m, int n, const std::vector<xor_func> bits);
+TEST(computeRank, vectors) {
 
     EXPECT_EQ(1, compute_rank(2, 4, init_matrix_transpose({
                 {1,0,1,0},
@@ -50,6 +51,56 @@ TEST(utilTest, compute_rank) {
                 {0,1,0,1},
             })));
 }
+
+// Same test data, just fed in differently.
+int compute_rank(int m, int n, const xor_func * bits);
+TEST(computeRank, pointers) {
+    EXPECT_EQ(1, compute_rank(2, 4, &init_matrix_transpose({
+                {1,0,1,0},
+                {1,0,1,0},
+            })[0]));
+    EXPECT_EQ(2, compute_rank(3, 4, &init_matrix_transpose({
+                {1,0,1,0},
+                {1,1,1,0},
+                {1,0,1,0},
+            })[0]));
+    EXPECT_EQ(0, compute_rank(3, 4, &init_matrix_transpose({
+                {0,0,0,0},
+                {0,0,0,0},
+                {0,0,0,0},
+            })[0]));
+    EXPECT_EQ(3, compute_rank(3, 4, &init_matrix_transpose({
+                {1,1,1,1},
+                {1,0,0,0},
+                {1,0,1,1},
+            })[0]));
+    EXPECT_EQ(2, compute_rank(3, 4, &init_matrix_transpose({
+                {1,1,1,1},
+                {1,0,1,0},
+                {0,1,0,1},
+            })[0]));
+}
+int compute_rank(int n, const exponents_set & expnts, const std::set<xor_func> & lst);
+TEST(computeRank, xptSets) {
+    // I have no idea what this is going to do.
+    // Looking at it's history, it only uses the set passed in for it's size
+    // but it'd make more sense to compute the rank of the subset.
+    // Which would involve reading the expoents_set and the set
+    // in past versions, where the set is a set of indecies into expnts,
+    // but now we can just compute directly.
+    EXPECT_EQ(1,1);
+}
+TEST(computeRank, sets) {
+    EXPECT_EQ(3, compute_rank(set<xor_func>{
+                init_xor_func({0,0,0,0,1}),
+                init_xor_func({0,0,0,1,0}),
+                init_xor_func({0,0,0,1,1}),
+                init_xor_func({0,0,1,0,1}),
+                init_xor_func({0,0,1,1,1}),
+                }));
+    EXPECT_EQ(0, compute_rank(set<xor_func>{ }));
+}
+
 
 TEST(listCompare, baseline) {
     EXPECT_EQ(list_compare_result::EQUAL,
