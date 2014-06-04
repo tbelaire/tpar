@@ -101,6 +101,53 @@ TEST(computeRank, sets) {
     EXPECT_EQ(0, compute_rank(set<xor_func>{ }));
 }
 
+gatelist xor_com(int a, int b, const vector<string> names);
+TEST(components, xor) {
+    const gatelist x = xor_com(1,2, {"A", "B", "C"});
+    EXPECT_EQ(1, x.size());
+    const pair<string, list<string>> gate = *x.begin();
+    EXPECT_EQ("tof", gate.first);
+    const auto inputs = gate.second;
+    EXPECT_EQ(2, inputs.size());
+    EXPECT_EQ("B", *(inputs.begin()));
+    EXPECT_EQ("C", *(++inputs.begin()));
+}
+
+gatelist swap_com(int a, int b, const vector<string> names);
+TEST(components, swap) {
+    const gatelist swap_cir = swap_com(1,2, {"A", "B", "C"});
+    EXPECT_EQ(3, swap_cir.size());
+    auto it = swap_cir.begin();
+    const auto a = *it; it++;
+    const auto b = *it; it++;
+    const auto c = *it; it++;
+
+    EXPECT_EQ("tof", a.first);
+    EXPECT_EQ("tof", b.first);
+    EXPECT_EQ("tof", c.first);
+    EXPECT_EQ(2, a.second.size());
+    EXPECT_EQ(2, b.second.size());
+    EXPECT_EQ(2, c.second.size());
+
+    list<string> inputs{"B", "C"};
+    list<string> inputs_r{"C", "B"};
+    EXPECT_EQ(inputs, a.second);
+    EXPECT_EQ(inputs_r, b.second);
+    EXPECT_EQ(inputs, c.second);
+}
+
+gatelist x_com(int a, const vector<string> names);
+TEST(components, x) {
+    const gatelist x = x_com(2, {"A", "B", "C"});
+    EXPECT_EQ(1, x.size());
+    const pair<string, list<string>> gate = *x.begin();
+    EXPECT_EQ("tof", gate.first);
+    const auto inputs = gate.second;
+    EXPECT_EQ(1, inputs.size());
+    EXPECT_EQ("C", *(inputs.begin()));
+}
+
+
 
 TEST(listCompare, baseline) {
     EXPECT_EQ(list_compare_result::EQUAL,

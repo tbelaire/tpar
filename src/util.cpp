@@ -45,39 +45,19 @@ void print_wires(const vector<xor_func> wires) {
 
 // Commands for making certain circuits
 gatelist xor_com(int a, int b, const vector<string> names) {
-  list<string> tmp_list;
-  gatelist ret;
-
-  tmp_list.push_back(names[a]);
-  tmp_list.push_back(names[b]);
-  ret.push_back(make_pair("tof", tmp_list));
-
-  return ret;
+  return {{"tof", {names[a], names[b]}}};
 }
 
 gatelist swap_com(int a, int b, const vector<string> names) {
-  list<string> tmp_list1, tmp_list2;
-  gatelist ret;
-
-  tmp_list1.push_back(names[a]);
-  tmp_list1.push_back(names[b]);
-  tmp_list2.push_back(names[b]);
-  tmp_list2.push_back(names[a]);
-  ret.push_back(make_pair("tof", tmp_list1));
-  ret.push_back(make_pair("tof", tmp_list2));
-  ret.push_back(make_pair("tof", tmp_list1));
-
-  return ret;
+  return {
+      {"tof", {names[a], names[b]}},
+      {"tof", {names[b], names[a]}},
+      {"tof", {names[a], names[b]}},
+  };
 }
 
 gatelist x_com(int a, const vector<string> names) {
-  gatelist ret;
-  list<string> tmp_list;
-
-  tmp_list.push_back(names[a]);
-  ret.push_back(make_pair("tof", tmp_list));
-
-  return ret;
+  return {{"tof", {names[a]}}};
 }
 
 // Make triangular to determine the rank
