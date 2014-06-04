@@ -63,8 +63,7 @@ class ind_oracle {
     ind_oracle(int numin, int dimin, int lengthin) { num = numin; dim = dimin; length = lengthin; }
 
     void set_dim(int newdim) { dim = newdim; }
-    boost::optional<xor_func>
-    retrieve_lin_dep(const exponents_set& expnts, const std::set<xor_func> & lst) const;
+    boost::optional<xor_func> retrieve_lin_dep(const std::set<xor_func> & lst) const;
 
     bool operator()(const std::set<xor_func> & lst) const;
 };

@@ -131,6 +131,9 @@ int compute_rank(const vector<xor_func> bits) {
 
 int compute_rank(int m, int n, const xor_func * bits) {
   int ret;
+  // TODO n is the number of bits used in the xor_funcs
+  // perhaps do an assert?
+  (void) n;
 
   // Make a copy of the bitset
   vector<xor_func> tmp(m);
@@ -142,9 +145,11 @@ int compute_rank(int m, int n, const xor_func * bits) {
 }
 
 // Why take a set too?
+// TODO AUDIT
 int compute_rank(int n, const exponents_set & expnts, const set<xor_func> & lst) {
   int ret;
   int m = lst.size();
+  (void) n;
 
   vector<xor_func> tmp;
   for (const auto& xpt: expnts) {
@@ -234,9 +239,11 @@ void to_upper_echelon(int m, int n, vector<xor_func> bits, vector<xor_func> mat)
   }
 }
 
+// TODO audit
 gatelist to_lower_echelon(int m, int n, vector<xor_func> bits, const vector<string> names) {
   gatelist acc;
 
+  (void) m;
   for (int i = n-1; i > 0; i--) {
     for (int j = i - 1; j >= 0; j--) {
       if (bits[j].test(i)) {
@@ -248,8 +255,9 @@ gatelist to_lower_echelon(int m, int n, vector<xor_func> bits, const vector<stri
   return acc;
 }
 
-void to_lower_echelon(int m, int n, vector<xor_func> bits, vector<xor_func> mat) {
-
+// TODO audit
+void to_lower_echelon(int m, int n, vector<xor_func>& bits, vector<xor_func>& mat) {
+  (void) m;
   for (int i = n-1; i > 0; i--) {
     for (int j = i - 1; j >= 0; j--) {
       if (bits[j].test(i)) {
@@ -610,7 +618,7 @@ bool ind_oracle::operator()(const set<xor_func> & lst) const {
 //TODO audit this
 // Shortcut to find a linearly dependent element faster
 boost::optional<xor_func>
-ind_oracle::retrieve_lin_dep(const exponents_set& expnts, const set<xor_func> & lst) const {
+ind_oracle::retrieve_lin_dep(const set<xor_func> & lst) const {
   set<xor_func>::const_iterator it;
   int i, j, rank = 0;
   map<int, xor_func> mp;

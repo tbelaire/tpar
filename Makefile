@@ -10,13 +10,15 @@ OBJS := partition.o util.o circuit.o
 include compiler.mk
 CXXFLAGS += -Wall
 # Fixed
-CXXFLAGS += -Wheader-hygiene
+CXXFLAGS += -Wheader-hygiene -Wunused-function -Wunused-parameter -Wuninitialized
 # Fixing
 CXXFLAGS +=
 # Not fixed yet
 CXXFLAGS += -Wno-sign-conversion -Wno-unused-variable
 # Don't care about these
 CXXFLAGS += -Wno-c99-extensions -Wno-c++98-compat
+# Turn on runtime checks for memory errors
+# CXXFLAGS += -fsanitize=address
 
 .PHONY: all clean check
 

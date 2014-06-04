@@ -27,12 +27,12 @@ Author: Matthew Amy
 #include <sys/time.h>
 #define CLOCK_MONOTONIC 0
 
-using namespace std;
 
 static int
 clock_gettime(int foo, struct timespec *ts)
 {
     struct timeval tv;
+    (void) foo;
 
     gettimeofday(&tv, nullptr);
     ts->tv_sec = tv.tv_sec;
@@ -41,6 +41,9 @@ clock_gettime(int foo, struct timespec *ts)
 }
 
 #endif /* !CLOCK_MONOTONIC */
+
+using namespace std;
+
 
 int main(int argc, char *argv[]) {
   struct timespec start, end;

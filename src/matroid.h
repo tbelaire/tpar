@@ -152,7 +152,7 @@ void repartition(partitioning & partition, exponents_set & elts, const oracle_ty
     std::list<xor_func> acc;
 
     for (std::set<xor_func>& part : partition) {
-        boost::optional<xor_func> dep = oracle.retrieve_lin_dep(elts, part);
+        boost::optional<xor_func> dep = oracle.retrieve_lin_dep(part);
         if(dep) {
             part.erase(*dep);
             acc.push_back(*dep);
@@ -171,7 +171,7 @@ void repartition(partitioning & part, const std::vector<T> & elts, const oracle_
   std::list<xor_func> acc;
 
   for (Si = part.begin(); Si != part.end(); Si++) {
-    boost::optional<xor_func> tmp = oracle.retrieve_lin_dep(elts, *Si);
+    boost::optional<xor_func> tmp = oracle.retrieve_lin_dep(*Si);
     if (tmp) {
       Si->erase(*tmp);
       acc.push_back(*tmp);
