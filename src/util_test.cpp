@@ -148,8 +148,9 @@ TEST(components, x) {
 
 int to_upper_echelon(int m, int n,
         vector<xor_func> bits,
-        std::function<void(int)> negate,
-        std::function<void(int, int)> doswap);
+        std::function<void(int)> do_negate,
+        std::function<void(int, int)> do_swap,
+        std::function<void(int, int)> do_xor);
 TEST(echelon, upperCallCount) {
     const auto arr = init_matrix_transpose({
             {0,1,/* negated */0},
@@ -157,6 +158,7 @@ TEST(echelon, upperCallCount) {
         });
     int num_swaps = 0;
     int num_negates = 0;
+    int num_xors = 0;
     const int rank = to_upper_echelon(2,2, arr,
             [&num_negates](int j){
                 (void)j;
@@ -166,11 +168,17 @@ TEST(echelon, upperCallCount) {
                 (void)r1;
                 (void)r2;
                 num_swaps++;
+            },
+            [&num_xors](int r1, int r2){
+                (void)r1;
+                (void)r2;
+                num_xors++;
             }
         );
     EXPECT_EQ(2, rank);
     EXPECT_EQ(1, num_swaps);
     EXPECT_EQ(1, num_negates);
+    EXPECT_EQ(0, num_xors);
 }
 
 TEST(echelon, upperZeroRow) {
@@ -181,6 +189,7 @@ TEST(echelon, upperZeroRow) {
         });
     int num_swaps = 0;
     int num_negates = 0;
+    int num_xors = 0;
     const int rank = to_upper_echelon(3,2, arr,
             [&num_negates](int j){
                 (void)j;
@@ -190,11 +199,17 @@ TEST(echelon, upperZeroRow) {
                 (void)r1;
                 (void)r2;
                 num_swaps++;
+            },
+            [&num_xors](int r1, int r2){
+                (void)r1;
+                (void)r2;
+                num_xors++;
             }
         );
     EXPECT_EQ(2, rank);
-    EXPECT_EQ(3, num_swaps);
+    EXPECT_EQ(1, num_swaps);
     EXPECT_EQ(1, num_negates);
+    EXPECT_EQ(2, num_xors);
 }
 
 

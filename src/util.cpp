@@ -167,56 +167,19 @@ int compute_rank(int n, const exponents_set & expnts, const set<xor_func> & lst)
   return ret;
 }
 
+int to_upper_echelon(int m, int n, vector<xor_func> arr,
+        std::function<void(int)> do_negate,
+        std::function<void(int, int)> do_swap);
 gatelist to_upper_echelon(int m, int n, vector<xor_func> bits,
         const vector<string> names);
 void to_upper_echelon(int m, int n, vector<xor_func> bits,
         vector<xor_func> mat);
-int to_upper_echelon(int m, int n, vector<xor_func> arr,
-        std::function<void(int)> do_negate,
-        std::function<void(int, int)> do_swap);
-
-// Make echelon form
-gatelist to_upper_echelon(int m, int n, vector<xor_func> bits, const vector<string> names) {
-  gatelist acc;
-  int rank = 0;
-  bool flg;
-
-  for (int j = 0; j < m; j++) {
-    if (bits[j].test(n)) {
-      bits[j].reset(n);
-      acc.splice(acc.end(), x_com(j, names));
-    }
-  }
-
-  // Make triangular
-  for (int i = 0; i < n; i++) {
-    flg = false;
-    for (int j = rank; j < m; j++) {
-      if (bits[j].test(i)) {
-        // If we haven't yet seen a vector with bit i set...
-        if (!flg) {
-          // If it wasn't the first vector we tried, swap to the front
-          if (j != rank) {
-            swap(bits[rank], bits[j]);
-            acc.splice(acc.end(), swap_com(rank, j, names));
-          }
-          flg = true;
-        } else {
-          bits[j] ^= bits[rank];
-          acc.splice(acc.end(), xor_com(rank, j, names));
-        }
-      }
-    }
-    if (flg) rank++;
-  }
-
-  return acc;
-}
 
 int to_upper_echelon(int m, int n,
         vector<xor_func> bits,
         std::function<void(int)> do_negate,
-        std::function<void(int, int)> do_swap){
+        std::function<void(int, int)> do_swap,
+        std::function<void(int, int)> do_xor){
 
   for (int j = 0; j < m; j++) {
     if (is_negated(bits[j])) {
@@ -237,12 +200,12 @@ int to_upper_echelon(int m, int n,
           // If it wasn't the first vector we tried, swap to the front
           if (j != rank) {
             swap(bits[rank], bits[j]);
-            do_swap(rank, j);
+            do_swap(j, rank);
           }
           flg = true;
         } else {
           bits[j] ^= bits[rank];
-          do_swap(rank, j);
+          do_xor(j, rank);
         }
       }
     }
@@ -252,38 +215,34 @@ int to_upper_echelon(int m, int n,
 }
 
 // Make echelon form
+gatelist to_upper_echelon(int m, int n, vector<xor_func> bits, const vector<string> names) {
+  gatelist acc;
+  to_upper_echelon(m, n, bits,
+          [&acc, &names](int j){
+            acc.splice(acc.end(), x_com(j, names));
+          },
+          [&acc, &names](int r1, int r2){
+            acc.splice(acc.end(), swap_com(r1, r2, names));
+          },
+          [&acc, &names](int target, int i){
+            acc.splice(acc.end(), xor_com(target, i, names));
+          });
+  return acc;
+}
+
+
+// Make echelon form
 void to_upper_echelon(int m, int n, vector<xor_func> bits, vector<xor_func> mat) {
-  int rank = 0;
-  bool flg;
-
-  for (int j = 0; j < m; j++) {
-    if (bits[j].test(n)) {
-      bits[j].reset(n);
-      mat[j].set(m);
-    }
-  }
-
-  // Make triangular
-  for (int i = 0; i < n; i++) {
-    flg = false;
-    for (int j = rank; j < m; j++) {
-      if (bits[j].test(i)) {
-        // If we haven't yet seen a vector with bit i set...
-        if (!flg) {
-          // If it wasn't the first vector we tried, swap to the front
-          if (j != rank) {
-            swap(bits[rank], bits[j]);
-            swap(mat[rank], mat[j]);
-          }
-          flg = true;
-        } else {
-          bits[j] ^= bits[rank];
-          mat[j] ^= mat[rank];
-        }
-      }
-    }
-    if (flg) rank++;
-  }
+  to_upper_echelon(m, n, bits,
+          [&mat, m](int j){
+            mat[j].set(m);
+          },
+          [&mat](int r1, int r2){
+            swap(mat[r1], mat[r2]);
+          },
+          [&mat](int target, int i){
+            mat[target] ^= mat[i];
+          });
 }
 
 // TODO audit
