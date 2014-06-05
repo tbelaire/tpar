@@ -831,7 +831,8 @@ dotqc character::synthesize_unbounded() {
       applied += num_elts(frozen[j]);
       // determine if we need to add ancillae
       if (frozen[j].size() != 0) {
-        tmp2 = compute_rank(n + h, phase_expts, *(frozen[j].begin()));
+          // TODO audit
+        tmp2 = compute_rank(*(frozen[j].begin()));
         int etc = ((tmp1 - tmp2 < 0)?tmp1:tmp1 - tmp2) + num_elts(frozen[j]) - n - m;
         if (etc > 0) {
           for (int i = n + m; i < n + m + etc; i++) {
@@ -883,7 +884,8 @@ dotqc character::synthesize_unbounded() {
   for (j = 0; j < 2; j++) {
     if (floats[j].size() != 0) {
       for (j = 0; j < 2; j++) {
-        tmp2 = compute_rank(n + h, phase_expts, *(floats[j].begin()));
+          // TODO audit
+        tmp2 = compute_rank(*(floats[j].begin()));
         int etc = tmp1 - tmp2 + num_elts(floats[j]) - n - m;
         if (etc > 0) {
           if (disp_log) cerr << "    " << "Adding " << etc << " ancilla(e)\n" << flush;

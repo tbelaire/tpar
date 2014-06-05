@@ -37,7 +37,6 @@ void print_wires(const std::vector<xor_func>& wires);
 int compute_rank(int m, int n, const std::vector<xor_func> bits);
 int compute_rank(const std::vector<xor_func> bits);
 int compute_rank(int m, int n, const xor_func * bits);
-int compute_rank(int n, const exponents_set & expnts, const std::set<xor_func> & lst);
 int compute_rank(const std::set<xor_func> & lst);
 
 int to_upper_echelon(int m, int n, std::vector<xor_func> arr,

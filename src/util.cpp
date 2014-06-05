@@ -137,24 +137,6 @@ int compute_rank(const set<xor_func> & set) {
   return compute_rank_dest(tmp);
 }
 
-// Why take a set too?
-// TODO AUDIT
-int compute_rank(int n, const exponents_set & expnts, const set<xor_func> & lst) {
-  int ret;
-  int m = lst.size();
-  (void) n;
-
-  vector<xor_func> tmp;
-  for (const auto& xpt: expnts) {
-      // TODO audit.
-      if(xpt.second != 0) { // Nonzero coefficient
-          tmp.push_back(xpt.first);
-      }
-  }
-  ret = compute_rank_dest(tmp);
-  return ret;
-}
-
 int to_upper_echelon(int m, int n,
         vector<xor_func> bits,
         std::function<void(int)> do_negate,
