@@ -2,6 +2,7 @@
 #define XOR_FUNC_H
 
 #include <boost/dynamic_bitset.hpp>
+#include "types.h"
 
 class xor_func {
     private:

@@ -1,7 +1,5 @@
-
 #include <boost/dynamic_bitset.hpp>
 #include "gtest/gtest.h"
-
 
 #include "util.h"
 

@@ -22,6 +22,7 @@ Author: Matthew Amy
 #include <list>
 #include <set>
 #include <iostream>
+
 #include "util.h"
 
 std::ostream& operator<<(std::ostream& output, const partitioning& part);

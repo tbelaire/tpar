@@ -1,4 +1,6 @@
+#include <ostream>
 
+#include "types.h"
 #include "util.h"
 
 using namespace std;

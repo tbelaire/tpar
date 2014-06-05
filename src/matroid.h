@@ -19,6 +19,9 @@
 Author: Matthew Amy
 ---------------------------------------------------------------------*/
 
+#ifndef MATROID_H
+#define MATROID_H
+
 #include <vector>
 #include <deque>
 #include <assert.h>
@@ -26,10 +29,6 @@ Author: Matthew Amy
 
 #include "oracle.h"
 #include "partition.h"
-
-
-#ifndef MATROID
-#define MATROID
 
 struct path {
   std::list<std::pair <xor_func, partitioning::iterator> > lst;
@@ -187,4 +186,4 @@ void repartition(partitioning & part, const std::vector<T> & elts, const oracle_
   }
 }
 
-#endif
+#endif // MATROID_H

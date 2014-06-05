@@ -26,19 +26,9 @@ Author: Matthew Amy
 #include <map>
 #include <set>
 
+#include "types.h"
 #include "xor_func.h"
 
-using exponent_val = unsigned char;
-using exponent = std::pair<xor_func, exponent_val>;
-using exponents_set = std::map<xor_func, exponent_val>;
-
-// [(Str, [Str])]
-using gatelist = std::list<std::pair<std::string, std::list<std::string>>>;
-
-using partitioning = std::list<std::set<xor_func>>;
-using path_iterator = std::list<std::pair<xor_func, partitioning::iterator>>::iterator;
-
-enum synth_type { AD_HOC, GAUSS, PMH };
 
 extern bool disp_log;
 extern synth_type synth_method;

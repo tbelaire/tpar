@@ -35,16 +35,6 @@ using namespace std;
 bool disp_log = true;
 synth_type synth_method = PMH;
 
-void print_wires(const vector<xor_func> wires) {
-  for (auto f : wires) {
-    for (int j = 0; j < f.size(); j++) {
-      if (f.test(j)) cout << "1";
-      else           cout << "0";
-    }
-    cout << "\n";
-  }
-}
-
 // Commands for making certain circuits
 gatelist xor_com(int a, int b, const vector<string> names) {
   return {{"tof", {names[a], names[b]}}};
