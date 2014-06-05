@@ -4,7 +4,7 @@ vpath %.cpp src
 vpath %.h   src
 
 # Excludes main.o since tests don't want to link with that.
-OBJS := partition.o util.o circuit.o
+OBJS := partition.o util.o circuit.o xor_func.o
 ####################
 
 include compiler.mk

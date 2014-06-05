@@ -33,21 +33,6 @@ using namespace std;
 bool disp_log = true;
 synth_type synth_method = PMH;
 
-// xor_func stuff
-xor_func::xor_func(bool neg, initializer_list<int> lst) :
-    bitset(lst.size()),
-    negated(neg)
-{
-    int index = 0;
-    for (const int i : lst) {
-        this->bitset.set(index++, (i > 0) ? 1 : 0);
-    }
-}
-std::ostream& operator<<(std::ostream& out, const xor_func& f) {
-    out << (f.is_negated() ? "~" : " ") << f.bitset;
-    return out;
-}
-
 void print_wires(const vector<xor_func> wires) {
   for (auto f : wires) {
     for (int j = 0; j < f.size(); j++) {
