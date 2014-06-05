@@ -61,9 +61,9 @@ struct Hadamard {
 
 // Characteristic of a circuit
 struct character {
-  int n;                        // number of unknown inputs
+  const int n;                        // number of unknown inputs
   int m;                        // number of zero-initialized ancilla qubits
-  int h;                        // number of hadamards
+  const int h;                        // number of hadamards
   std::vector<std::string>   names;  // names of qubits
   std::vector<bool>     zero;        // Which qubits start as 0
   std::map<int, int>    val_map;     // which value corresponds to which qubit
@@ -71,11 +71,10 @@ struct character {
   std::vector<xor_func> outputs;     // the xors computed into each qubit
   // TODO: make this a dependency graph instead
   std::list<Hadamard>   hadamards;   // a list of the hadamards in the order we saw them
-
+  character(const dotqc &input);
   void output(std::ostream& out) const;
   void print() {output(std::cout);}
   void print_outputs() const;
-  void parse_circuit(dotqc & input);
   void add_ancillae(int num);
   dotqc synthesize();
   dotqc synthesize_unbounded();

@@ -214,7 +214,7 @@ void dotqc::print_stats() const {
 }
 
 // Count the Hadamard gates
-int count_h(dotqc & qc) {
+int count_h(const dotqc & qc) {
   int ret = 0;
 
   for (const auto& gate : qc.circ) {
@@ -394,6 +394,140 @@ ostream& operator<<(ostream& out, const dotqc& circuit) {
 }
 
 //-------------------------------------- End of DOTQC stuff
+// Forward decl to use in construct
+void insert_phase (unsigned char c, xor_func f, map<xor_func, unsigned char> & phases);
+// Parse a {CNOT, T} circuit
+// NOTE: a qubit's number is NOT the same as the bit it's value represents
+character::character(const dotqc &input) :
+    n(input.n),
+    m(input.m),
+    h(count_h(input)),
+    names(n + m + h),
+    zero(n + m),
+    val_map(),
+    phase_expts(),
+    outputs(),
+    hadamards()
+{
+    int name_max = 0, val_max = 0;
+    map<string, int> name_map, gate_lookup;
+    gate_lookup["T"] = 1;
+    gate_lookup["T*"] = 7;
+    gate_lookup["P"] = 2;
+    gate_lookup["P*"] = 6;
+    gate_lookup["Z"] = 4;
+    gate_lookup["Y"] = 4;
+
+    // Initialize names and wires
+    vector<xor_func> wires( n + m );
+    vector<xor_func> &output = wires;
+    for (const auto& name : input.names) {
+        // name_map maps a name to a wire
+        name_map[name] = name_max;
+        // names maps a wire to a name
+        names[name_max] = name;
+        // zero mapping
+        zero[name_max]  = input.zero.at(name);
+        // each wire has an initial value j, unless it starts in the 0 state
+        wires[name_max] = xor_func(n + h + 1, 0);
+        if (!zero[name_max]) {
+            wires[name_max].set(val_max);
+            val_map[val_max++] = name_max;
+        }
+        name_max++;
+    }
+
+    // map<string, int> name_map
+    // type gatelist = [(Str, [Str]]
+    int gate_index = -1;
+    for (const auto& gate : input.circ ) {
+        bool flg = false;
+        gate_index++;
+        if (gate.first == "tof" && gate.second.size() == 2) {
+            auto gate_inputs_it = gate.second.begin();
+            int first_input = name_map[*gate_inputs_it];
+            gate_inputs_it++;
+            int second_input = name_map[*gate_inputs_it];
+            wires[second_input] ^= wires[first_input];
+        } else if ((gate.first == "tof" || gate.first == "X")
+                && gate.second.size() == 1) {
+            int first_input = name_map[*(gate.second.begin())];
+            wires[first_input].flip(n + h);
+        } else if (gate.first == "Y" && gate.second.size() == 1) {
+            int first_input = name_map[*(gate.second.begin())];
+            insert_phase(gate_lookup[gate.first], wires[first_input], phase_expts);
+            wires[name_map[*(gate.second.begin())]].flip(n + h);
+        } else if (gate.first == "T" || gate.first == "T*" ||
+                gate.first == "P" || gate.first == "P*" ||
+                (gate.first == "Z" && gate.second.size() == 1)) {
+            int first_input = name_map[*(gate.second.begin())];
+            insert_phase(gate_lookup[gate.first], wires[first_input], phase_expts);
+        } else if (gate.first == "Z" && gate.second.size() == 3) {
+            list<string>::const_iterator tmp_it = gate.second.begin();
+            // The three inputs
+            int a = name_map[*(tmp_it++)];
+            int b = name_map[*(tmp_it++)];
+            int c = name_map[*tmp_it];
+            insert_phase(1, wires[a], phase_expts);
+            insert_phase(1, wires[b], phase_expts);
+            insert_phase(1, wires[c], phase_expts);
+            insert_phase(7, wires[a] ^ wires[b], phase_expts);
+            insert_phase(7, wires[a] ^ wires[c], phase_expts);
+            insert_phase(7, wires[b] ^ wires[c], phase_expts);
+            insert_phase(1, wires[a] ^ wires[b] ^ wires[c], phase_expts);
+        } else if (gate.first == "H") {
+            // This WILL confuse you later on you idiot
+            //   You zero the "destroyed" qubit, compute the rank, then replace the
+            //   value with each of the phase exponents to see if the rank increases
+            //   i.e. the system is inconsistent. This is so you don't have to make
+            //   a new matrix -- i.e. instead of preparing the new value and computing
+            //   rank, then adding each phase exponent and checking the rank you do it
+            //   in place
+            Hadamard new_h;
+            new_h.qubit = name_map[*(gate.second.begin())];
+            new_h.prep  = val_max++;
+            new_h.wires = wires;
+
+            // Check previous exponents to see if they're inconsistent
+            wires[new_h.qubit].reset();
+            int rank = compute_rank(n + m, n + h, wires);
+            for (const auto& expt : phase_expts) {
+                if (expt.second != 0) {
+                    wires[new_h.qubit] = expt.first;
+                    if (compute_rank(n + m, n + h, wires) > rank) {
+                        new_h.in.insert(expt.first);
+                    }
+                }
+            }
+
+            // Done creating the new hadamard
+            hadamards.push_back(new_h);
+
+            // Prepare the new value
+            wires[new_h.qubit].reset();
+            wires[new_h.qubit].set(new_h.prep);
+
+            // Give this new value a name
+            val_map[new_h.prep] = name_max;
+            names[name_max] = names[new_h.qubit];
+            names[name_max++].append(to_string(new_h.prep));
+
+        } else {
+            cout << "ERROR: not a {H, CNOT, X, Y, Z, P, T} circuit" << endl;
+            cout << "on the " << gate_index << "th gate_index" << endl;
+            cout << "gate.first is: '" << gate.first << "'" << endl;
+            cout << "gate.second is: [";
+            for (const auto& i : gate.second) {
+                cout << i << ", ";
+            }
+            cout << "]" << endl;
+            throw logic_error("Can't parse circuit");
+
+            phase_expts.clear();
+        }
+    }
+
+}
 
 void character::output(ostream& out) const {
   bool flag;
@@ -476,134 +610,6 @@ void insert_phase (unsigned char c, xor_func f, map<xor_func, unsigned char> & p
   */
 }
 
-// Parse a {CNOT, T} circuit
-// NOTE: a qubit's number is NOT the same as the bit it's value represents
-void character::parse_circuit(dotqc & input) {
-  int name_max = 0, val_max = 0;
-  this->n = input.n;
-  this->m = input.m;
-  this->h = count_h(input);
-
-  hadamards.clear();
-  map<string, int> name_map, gate_lookup;
-  gate_lookup["T"] = 1;
-  gate_lookup["T*"] = 7;
-  gate_lookup["P"] = 2;
-  gate_lookup["P*"] = 6;
-  gate_lookup["Z"] = 4;
-  gate_lookup["Y"] = 4;
-
-  // Initialize names and wires
-  this->names.resize( n + m + h );
-  this->zero.resize( n + m );
-  vector<xor_func> wires( n + m );
-  vector<xor_func> &output = wires;
-  for (const auto& name : input.names) {
-    // name_map maps a name to a wire
-    name_map[name] = name_max;
-    // names maps a wire to a name
-    names[name_max] = name;
-    // zero mapping
-    zero[name_max]  = input.zero[name];
-    // each wire has an initial value j, unless it starts in the 0 state
-    wires[name_max] = xor_func(n + h + 1, 0);
-    if (!zero[name_max]) {
-      wires[name_max].set(val_max);
-      val_map[val_max++] = name_max;
-    }
-    name_max++;
-  }
-
-  // map<string, int> name_map
-  // type gatelist = [(Str, [Str]]
-  int gate_index = -1;
-  for (const auto& gate : input.circ ) {
-    bool flg = false;
-    gate_index++;
-    if (gate.first == "tof" && gate.second.size() == 2) {
-      auto gate_inputs_it = gate.second.begin();
-      int first_input = name_map[*gate_inputs_it];
-      gate_inputs_it++;
-      int second_input = name_map[*gate_inputs_it];
-      wires[second_input] ^= wires[first_input];
-    } else if ((gate.first == "tof" || gate.first == "X")
-            && gate.second.size() == 1) {
-      int first_input = name_map[*(gate.second.begin())];
-      wires[first_input].flip(n + h);
-    } else if (gate.first == "Y" && gate.second.size() == 1) {
-      int first_input = name_map[*(gate.second.begin())];
-      insert_phase(gate_lookup[gate.first], wires[first_input], phase_expts);
-      wires[name_map[*(gate.second.begin())]].flip(n + h);
-    } else if (gate.first == "T" || gate.first == "T*" ||
-        gate.first == "P" || gate.first == "P*" ||
-        (gate.first == "Z" && gate.second.size() == 1)) {
-      int first_input = name_map[*(gate.second.begin())];
-      insert_phase(gate_lookup[gate.first], wires[first_input], phase_expts);
-    } else if (gate.first == "Z" && gate.second.size() == 3) {
-      list<string>::const_iterator tmp_it = gate.second.begin();
-      // The three inputs
-      int a = name_map[*(tmp_it++)];
-      int b = name_map[*(tmp_it++)];
-      int c = name_map[*tmp_it];
-      insert_phase(1, wires[a], phase_expts);
-      insert_phase(1, wires[b], phase_expts);
-      insert_phase(1, wires[c], phase_expts);
-      insert_phase(7, wires[a] ^ wires[b], phase_expts);
-      insert_phase(7, wires[a] ^ wires[c], phase_expts);
-      insert_phase(7, wires[b] ^ wires[c], phase_expts);
-      insert_phase(1, wires[a] ^ wires[b] ^ wires[c], phase_expts);
-    } else if (gate.first == "H") {
-      // This WILL confuse you later on you idiot
-      //   You zero the "destroyed" qubit, compute the rank, then replace the
-      //   value with each of the phase exponents to see if the rank increases
-      //   i.e. the system is inconsistent. This is so you don't have to make
-      //   a new matrix -- i.e. instead of preparing the new value and computing
-      //   rank, then adding each phase exponent and checking the rank you do it
-      //   in place
-      Hadamard new_h;
-      new_h.qubit = name_map[*(gate.second.begin())];
-      new_h.prep  = val_max++;
-      new_h.wires = wires;
-
-      // Check previous exponents to see if they're inconsistent
-      wires[new_h.qubit].reset();
-      int rank = compute_rank(n + m, n + h, wires);
-      for (const auto& expt : phase_expts) {
-        if (expt.second != 0) {
-          wires[new_h.qubit] = expt.first;
-          if (compute_rank(n + m, n + h, wires) > rank) {
-              new_h.in.insert(expt.first);
-          }
-        }
-      }
-
-      // Done creating the new hadamard
-      hadamards.push_back(new_h);
-
-      // Prepare the new value
-      wires[new_h.qubit].reset();
-      wires[new_h.qubit].set(new_h.prep);
-
-      // Give this new value a name
-      val_map[new_h.prep] = name_max;
-      names[name_max] = names[new_h.qubit];
-      names[name_max++].append(to_string(new_h.prep));
-
-    } else {
-      cout << "ERROR: not a {H, CNOT, X, Y, Z, P, T} circuit" << endl;
-      cout << "on the " << gate_index << "th gate_index" << endl;
-      cout << "gate.first is: '" << gate.first << "'" << endl;
-      cout << "gate.second is: [";
-      for (const auto& i : gate.second) {
-          cout << i << ", ";
-      }
-      cout << "]" << endl;
-      throw logic_error("Can't parse circuit");
-
-      phase_expts.clear();
-    }
-  }
-}
 
 void character::add_ancillae(int num) {
   int num_qubits = this->n + this->m + num;
@@ -987,8 +993,7 @@ void metacircuit::partition_dotqc(dotqc & input) {
 void metacircuit::output(ostream& out) {
   for (auto it = circuit_list.begin(); it != circuit_list.end(); it++) {
     if (it->first == CNOTT) {
-      character tmp;
-      tmp.parse_circuit(it->second);
+      character tmp{it->second};
       out << "CNOT, T circuit: " << tmp.n << " " << tmp.m << "\n";
       tmp.output(out);
     }
@@ -1017,8 +1022,7 @@ dotqc metacircuit::to_dotqc() {
 void metacircuit::optimize() {
   for (auto it =circuit_list.begin(); it != circuit_list.end(); it++) {
     if (it->first == CNOTT) {
-      character tmp;
-      tmp.parse_circuit(it->second);
+      character tmp{it->second};
       it->second = tmp.synthesize();
     }
   }

@@ -65,13 +65,12 @@ TEST(dotqc, somewhatSimpleInput) {
 
 // character testing
 TEST(parsingFromDotQC, initalized) {
-    character c;
     dotqc input_dotqc {.n = 1, .m = 0,
         .names = {"1"},
         .zero = {{"1", false}},
         .circ = {{"Z", {"1"} }}
     };
-    c.parse_circuit(input_dotqc);
+    character c{input_dotqc};
     EXPECT_EQ(1, c.n);
     EXPECT_EQ(0, c.m);
     EXPECT_EQ(0, c.h);
@@ -319,7 +318,7 @@ TEST(depth, transitive2) {
     EXPECT_EQ(2, cir.count_t_depth());
 }
 
-int count_h(dotqc & qc);
+int count_h(const dotqc & qc);
 TEST(depth, countH) {
     dotqc cir {.n = 3, .m = 0,
         .names = {"A", "B", "C"},

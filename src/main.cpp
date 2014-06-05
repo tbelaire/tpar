@@ -85,9 +85,8 @@ int main(int argc, char *argv[]) {
   circuit.remove_ids();
   if (full_character) {
       if (disp_log) cerr << "With full character" << endl;
-      character c;
       if (disp_log) cerr << "Parsing circuit...\n" << flush;
-      c.parse_circuit(circuit);
+      character c{circuit};
       if (disp_log) cerr << "anc is " << anc << endl;
       if (anc == -1) c.add_ancillae(c.n + c.m);
       else if (anc > 0) c.add_ancillae(anc);
