@@ -35,6 +35,16 @@ using namespace std;
 bool disp_log = true;
 synth_type synth_method = PMH;
 
+void print_wires(const vector<xor_func>& wires) {
+  for (auto f : wires) {
+    for (int j = 0; j < f.size(); j++) {
+      if (f.test(j)) cout << "1";
+      else           cout << "0";
+    }
+    cout << "\n";
+  }
+}
+
 // Commands for making certain circuits
 gatelist xor_com(int a, int b, const vector<string> names) {
   return {{"tof", {names[a], names[b]}}};
@@ -51,11 +61,8 @@ gatelist swap_com(int a, int b, const vector<string> names) {
 gatelist x_com(int a, const vector<string> names) {
   return {{"tof", {names[a]}}};
 }
-// TODO, maybe there's errors because the last
-// entry in a xor_func represents it's negated status.
-// It's kinda like a "free" 000001 vec is added, and then
-// compute rank - 1, I think.  Further research required.
-//
+
+// TODO, can this just use to_upper_echelon?
 // Make triangular to determine the rank
 int compute_rank_dest(vector<xor_func> tmp) {
   int rank = 0;

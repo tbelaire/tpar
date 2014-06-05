@@ -33,7 +33,7 @@ Author: Matthew Amy
 extern bool disp_log;
 extern synth_type synth_method;
 
-void print_wires(const xor_func * wires, int num, int dim);
+void print_wires(const std::vector<xor_func>& wires);
 int compute_rank(int m, int n, const std::vector<xor_func> bits);
 int compute_rank(const std::vector<xor_func> bits);
 int compute_rank(int m, int n, const xor_func * bits);
