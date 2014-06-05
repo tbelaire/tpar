@@ -25,7 +25,6 @@ Author: Matthew Amy
 #include <list>
 #include <map>
 #include <set>
-#include <boost/optional.hpp>
 
 #include "xor_func.h"
 
@@ -44,22 +43,6 @@ enum synth_type { AD_HOC, GAUSS, PMH };
 extern bool disp_log;
 extern synth_type synth_method;
 
-
-class ind_oracle {
-  private:
-    int num;
-    int dim;
-    int length;
-  public:
-    ind_oracle() { num = 0; dim = 0; length = 0; }
-    ind_oracle(int numin, int dimin, int lengthin) { num = numin; dim = dimin; length = lengthin; }
-
-    void set_dim(int newdim) { dim = newdim; }
-    boost::optional<xor_func> retrieve_lin_dep(const std::set<xor_func> & lst) const;
-
-    bool operator()(const std::set<xor_func> & lst) const;
-};
-
 void print_wires(const xor_func * wires, int num, int dim);
 int compute_rank(int m, int n, const std::vector<xor_func> bits);
 int compute_rank(const std::vector<xor_func> bits);
@@ -75,7 +58,6 @@ gatelist construct_circuit(exponents_set & phase,
     const int dim,
     const std::vector<std::string> names);
 
-xor_func init_xor_func(std::initializer_list<int> lst);
 std::vector<xor_func> init_matrix(
         std::initializer_list<std::initializer_list<int>>);
 

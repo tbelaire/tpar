@@ -11,7 +11,7 @@
 #######################################################################
 # All tests produced by this Makefile.  Remember to add new tests you
 # created to the list.
-TESTS = util_test circuit_test partition_test
+TESTS = util_test circuit_test partition_test oracle_test
 #######################################################################
 
 # Please tweak the following variable definitions as needed by your

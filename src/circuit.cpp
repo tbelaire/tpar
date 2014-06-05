@@ -19,9 +19,14 @@
 Author: Matthew Amy
 ---------------------------------------------------------------------*/
 
-#include "circuit.h"
 #include <algorithm>
 #include <sstream>
+
+#include <boost/optional.hpp>
+
+#include "circuit.h"
+#include "xor_func.h"
+#include "oracle.h"
 
 using namespace std;
 

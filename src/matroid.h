@@ -21,9 +21,12 @@ Author: Matthew Amy
 
 #include <vector>
 #include <deque>
+#include <assert.h>
+#include <boost/optional.hpp>
+
+#include "oracle.h"
 #include "partition.h"
 
-#include <assert.h>
 
 #ifndef MATROID
 #define MATROID
