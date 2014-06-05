@@ -28,32 +28,80 @@ Author: Matthew Amy
 #include <boost/dynamic_bitset.hpp>
 #include <boost/optional.hpp>
 
-/* typedef boost::dynamic_bitset<>            xor_func; */
-// NOTE, the first n+h bits describe the combination of inputs,
-// and the final bit represents if it's negated or not.
-using xor_func = boost::dynamic_bitset<>;
-/* typedef unsigned char                      exponent_val; */
+class xor_func;
 using exponent_val = unsigned char;
-/* typedef std::pair<xor_func, exponent_val>  exponent; */
 using exponent = std::pair<xor_func, exponent_val>;
-/* typedef std::map<xor_func, exponent_val>   exponents_set; */
 using exponents_set = std::map<xor_func, exponent_val>;
 
-/* typedef std::list<std::pair<std::string, std::list<std::string> > > gatelist; */
 // [(Str, [Str])]
 using gatelist = std::list<std::pair<std::string, std::list<std::string>>>;
 
-
-/* typedef std::list<std::set<xor_func> > partitioning; */
 using partitioning = std::list<std::set<xor_func>>;
-
-/* typedef std::list<std::pair <int, partitioning::iterator> >::iterator path_iterator; */
 using path_iterator = std::list<std::pair<xor_func, partitioning::iterator>>::iterator;
 
 enum synth_type { AD_HOC, GAUSS, PMH };
 
 extern bool disp_log;
 extern synth_type synth_method;
+
+// NOTE, the first n+h bits describe the combination of inputs,
+// and the final bit represents if it's negated or not.
+class xor_func {
+    private:
+        boost::dynamic_bitset<> bitset;
+        bool negated;
+    public:
+        xor_func(bool neg, std::initializer_list<int> lst);
+        xor_func(size_t size) : bitset(size), negated(false) {}
+        /* xor_func() : bitset(), negated(false) {} */
+        xor_func(bool negated, boost::dynamic_bitset<> bitset)
+            : bitset(bitset), negated(negated) {}
+
+        bool is_negated() const { return negated; }
+        void negate() { negated = !negated; }
+
+        xor_func operator^(const xor_func& b) const {
+            return xor_func(negated ^ b.negated,
+                    bitset ^ b.bitset);
+        }
+
+        xor_func& operator^=(const xor_func& b) {
+            this->bitset ^= b.bitset;
+            this->negated ^= b.negated; // double check this
+            return *this;
+        }
+        bool operator==(const xor_func& b) const {
+            return this->bitset == b.bitset
+                && this->negated == b.negated;
+        }
+        bool operator<(const xor_func& b) const {
+            if(this->negated == b.negated) {
+                return this->bitset < b.bitset;
+            } else {
+                return this->negated < b.negated;
+            }
+        }
+        friend std::ostream& operator<<(std::ostream& out, const xor_func& f);
+        bool contains(const xor_func& b) const {
+            // Explicitly don't care about `negated`.
+            return ((~ this->bitset) & b.bitset).none();
+        }
+        // Pass through functions
+        size_t size() const { return bitset.size(); }
+        bool test(const size_t i) const { return bitset.test(i); }
+        void set(const size_t i, const bool val = true) {
+            bitset.set(i, val);
+        }
+        void reset(const size_t i) { bitset.reset(i); }
+        void reset() { bitset.reset(); }
+        void flip(const size_t i) { bitset.flip(i); }
+        bool none() const { return bitset.none(); }
+        bool any() const { return bitset.any(); }
+
+        bool operator[](const size_t& i) const {
+            return this->bitset[i];
+        }
+};
 
 class ind_oracle {
   private:
@@ -69,9 +117,6 @@ class ind_oracle {
 
     bool operator()(const std::set<xor_func> & lst) const;
 };
-
-bool is_negated(const xor_func f);
-void flip_negated(xor_func& f);
 
 void print_wires(const xor_func * wires, int num, int dim);
 int compute_rank(int m, int n, const std::vector<xor_func> bits);
@@ -89,7 +134,7 @@ gatelist construct_circuit(exponents_set & phase,
     const std::vector<std::string> names);
 
 xor_func init_xor_func(std::initializer_list<int> lst);
-std::vector<xor_func> init_matrix_transpose(
+std::vector<xor_func> init_matrix(
         std::initializer_list<std::initializer_list<int>>);
 
 // Note, requies the inputs to be sorted.

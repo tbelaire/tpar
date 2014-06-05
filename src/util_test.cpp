@@ -9,11 +9,11 @@ using namespace std;
 
 
 TEST(utilTest, initMaxtrix) {
-    xor_func f = init_xor_func({1,0,0,1});
+    xor_func f = {false, {1,0,0,1}};
     EXPECT_EQ(true, f.any());
     EXPECT_EQ(false, f.test(1));
 
-    vector<xor_func> bits = init_matrix_transpose({
+    vector<xor_func> bits = init_matrix({
                 {1,0,1,0},
                 {0,1,1,0}
             });
@@ -26,26 +26,26 @@ TEST(utilTest, initMaxtrix) {
 int compute_rank(int m, int n, const std::vector<xor_func> bits);
 TEST(computeRank, vectors) {
 
-    EXPECT_EQ(1, compute_rank(2, 4, init_matrix_transpose({
+    EXPECT_EQ(1, compute_rank(2, 4, init_matrix({
                 {1,0,1,0},
                 {1,0,1,0},
             })));
-    EXPECT_EQ(2, compute_rank(3, 4, init_matrix_transpose({
+    EXPECT_EQ(2, compute_rank(3, 4, init_matrix({
                 {1,0,1,0},
                 {1,1,1,0},
                 {1,0,1,0},
             })));
-    EXPECT_EQ(0, compute_rank(3, 4, init_matrix_transpose({
+    EXPECT_EQ(0, compute_rank(3, 4, init_matrix({
                 {0,0,0,0},
                 {0,0,0,0},
                 {0,0,0,0},
             })));
-    EXPECT_EQ(3, compute_rank(3, 4, init_matrix_transpose({
+    EXPECT_EQ(3, compute_rank(3, 4, init_matrix({
                 {1,1,1,1},
                 {1,0,0,0},
                 {1,0,1,1},
             })));
-    EXPECT_EQ(2, compute_rank(3, 4, init_matrix_transpose({
+    EXPECT_EQ(2, compute_rank(3, 4, init_matrix({
                 {1,1,1,1},
                 {1,0,1,0},
                 {0,1,0,1},
@@ -55,26 +55,26 @@ TEST(computeRank, vectors) {
 // Same test data, just fed in differently.
 int compute_rank(int m, int n, const xor_func * bits);
 TEST(computeRank, pointers) {
-    EXPECT_EQ(1, compute_rank(2, 4, &init_matrix_transpose({
+    EXPECT_EQ(1, compute_rank(2, 4, &init_matrix({
                 {1,0,1,0},
                 {1,0,1,0},
             })[0]));
-    EXPECT_EQ(2, compute_rank(3, 4, &init_matrix_transpose({
+    EXPECT_EQ(2, compute_rank(3, 4, &init_matrix({
                 {1,0,1,0},
                 {1,1,1,0},
                 {1,0,1,0},
             })[0]));
-    EXPECT_EQ(0, compute_rank(3, 4, &init_matrix_transpose({
+    EXPECT_EQ(0, compute_rank(3, 4, &init_matrix({
                 {0,0,0,0},
                 {0,0,0,0},
                 {0,0,0,0},
             })[0]));
-    EXPECT_EQ(3, compute_rank(3, 4, &init_matrix_transpose({
+    EXPECT_EQ(3, compute_rank(3, 4, &init_matrix({
                 {1,1,1,1},
                 {1,0,0,0},
                 {1,0,1,1},
             })[0]));
-    EXPECT_EQ(2, compute_rank(3, 4, &init_matrix_transpose({
+    EXPECT_EQ(2, compute_rank(3, 4, &init_matrix({
                 {1,1,1,1},
                 {1,0,1,0},
                 {0,1,0,1},
@@ -91,13 +91,31 @@ int compute_rank(int n, const exponents_set & expnts, const std::set<xor_func> &
 //}
 TEST(computeRank, sets) {
     EXPECT_EQ(3, compute_rank(set<xor_func>{
-                init_xor_func({0,0,0,0,1}),
-                init_xor_func({0,0,0,1,0}),
-                init_xor_func({0,0,0,1,1}),
-                init_xor_func({0,0,1,0,1}),
-                init_xor_func({0,0,1,1,1}),
+                {false, {0,0,0,0,1}},
+                {false, {0,0,0,1,0}},
+                {false, {0,0,0,1,1}},
+                {false, {0,0,1,0,1}},
+                {false, {0,0,1,1,1}},
                 }));
     EXPECT_EQ(0, compute_rank(set<xor_func>{ }));
+}
+
+TEST(computeRank, negatedFuncs) {
+    EXPECT_EQ(2, compute_rank(vector<xor_func>{
+                {false, {0,0,0,0,1}},
+                {false, {0,0,0,1,0}},
+                {true,  {0,0,0,0,1}},
+                {true,  {0,0,0,1,0}},
+            }));
+    EXPECT_EQ(1, compute_rank(vector<xor_func>{
+                {false, {0,0,0,0,1}},
+                {true,  {0,0,0,0,1}},
+            }));
+    EXPECT_EQ(2, compute_rank(vector<xor_func>{
+                {false, {0,0,0,0,1}},
+                {false, {0,0,0,1,0}},
+                {true,  {0,0,0,1,1}},
+            }));
 }
 
 gatelist xor_com(int a, int b, const vector<string> names);
@@ -152,12 +170,12 @@ int to_upper_echelon(int m, int n,
         std::function<void(int, int)> do_swap,
         std::function<void(int, int)> do_xor);
 TEST(echelon, upperCallCount) {
-    const auto arr = init_matrix_transpose({
-            {0,1,/* negated */0},
-            {1,0,/* negated */1},
-        });
-    int num_swaps = 0;
+    const vector<xor_func>arr{
+            {false, {0,1}},
+            {true, {1,0}},
+        };
     int num_negates = 0;
+    int num_swaps = 0;
     int num_xors = 0;
     const int rank = to_upper_echelon(2,2, arr,
             [&num_negates](int j){
@@ -182,11 +200,11 @@ TEST(echelon, upperCallCount) {
 }
 
 TEST(echelon, upperZeroRow) {
-    const auto arr = init_matrix_transpose({
-            {0,1,/* negated */0},
-            {1,0,/* negated */1},
-            {1,1,/* negated */0},
-        });
+    const vector<xor_func>arr {
+            {true, {0,1}},
+            {true, {1,0}},
+            {false, {1,1}},
+        };
     int num_swaps = 0;
     int num_negates = 0;
     int num_xors = 0;
@@ -208,7 +226,7 @@ TEST(echelon, upperZeroRow) {
         );
     EXPECT_EQ(2, rank);
     EXPECT_EQ(1, num_swaps);
-    EXPECT_EQ(1, num_negates);
+    EXPECT_EQ(2, num_negates);
     EXPECT_EQ(2, num_xors);
 }
 
@@ -247,10 +265,11 @@ TEST(DISABLED_compose, basic) {
 // num = N = |A'|
 bool construct_and_test(int dim, int num, initializer_list<initializer_list<int>> lst) {
 
-    const auto arr = init_matrix_transpose(lst);
+    // Causing a segfault on a operator= in xor_func
+    const auto arr = init_matrix(lst);
     set<xor_func> set;
     for(const auto& f_lst : lst){
-        set.insert(init_xor_func(f_lst));
+        set.insert(xor_func{false, f_lst});
     }
     const int length = arr[0].size();
     ind_oracle oracle{num, dim, length};
@@ -321,7 +340,7 @@ TEST(utilTest, printing) {
     cout << "1000" << endl;
     cout << "1011" << endl << endl;
 
-    print_wires( init_matrix_transpose({
+    print_wires( init_matrix({
                 {1,1,1,1},
                 {1,0,0,0},
                 {1,0,1,1},

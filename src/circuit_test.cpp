@@ -353,10 +353,10 @@ TEST(dotqc, append) {
 //using exponent = pair<u8, xor_func>
 void insert_phase (unsigned char c, xor_func f, vector<pair<exponent_val, xor_func>> & phases);
 TEST(character, insertPhase) {
-    const xor_func f0101 = init_xor_func({0,1,0,1});
-    const xor_func f1010 = init_xor_func({1,0,1,0});
-    const xor_func f1111 = init_xor_func({1,1,1,1});
-    const xor_func f1000 = init_xor_func({1,0,0,0});
+    const xor_func f0101 = {false, {0,1,0,1}};
+    const xor_func f1010 = {false, {1,0,1,0}};
+    const xor_func f1111 = {false, {1,1,1,1}};
+    const xor_func f1000 = {false, {1,0,0,0}};
     vector<pair<exponent_val, xor_func>> xpt{ {1, f0101}, {3, f1010}, {1, f1111} };
     insert_phase(1, f0101, xpt);
     EXPECT_EQ(2, xpt[0].first);
@@ -369,10 +369,10 @@ TEST(character, insertPhase) {
 
 void insert_phase (unsigned char c, xor_func f, exponents_set& phases);
 TEST(character, insertPhaseMap) {
-    const xor_func f0101 = init_xor_func({0,1,0,1});
-    const xor_func f1010 = init_xor_func({1,0,1,0});
-    const xor_func f1111 = init_xor_func({1,1,1,1});
-    const xor_func f1000 = init_xor_func({1,0,0,0});
+    const xor_func f0101 = {false, {0,1,0,1}};
+    const xor_func f1010 = {false, {1,0,1,0}};
+    const xor_func f1111 = {false, {1,1,1,1}};
+    const xor_func f1000 = {false, {1,0,0,0}};
     exponents_set xpt{ {f0101, 1}, {f1010, 3}, {f1111, 1} };
     insert_phase(1, f0101, xpt);
     EXPECT_EQ(2, xpt[f0101]);

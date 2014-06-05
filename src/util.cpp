@@ -34,15 +34,19 @@ bool disp_log = true;
 synth_type synth_method = PMH;
 
 // xor_func stuff
-// TODO this displeases me
-// It doesn't feel safe when adding hadamards
-bool is_negated(const xor_func f) {
-    return f.test(f.size() - 1);
+xor_func::xor_func(bool neg, initializer_list<int> lst) :
+    bitset(lst.size()),
+    negated(neg)
+{
+    int index = 0;
+    for (const int i : lst) {
+        this->bitset.set(index++, (i > 0) ? 1 : 0);
+    }
 }
-void flip_negated(xor_func& f) {
-    f.flip(f.size() - 1);
+std::ostream& operator<<(std::ostream& out, const xor_func& f) {
+    out << (f.is_negated() ? "~" : " ") << f.bitset;
+    return out;
 }
-
 
 void print_wires(const vector<xor_func> wires) {
   for (auto f : wires) {
@@ -131,9 +135,9 @@ int compute_rank(int m, int n, const xor_func * bits) {
   (void) n;
 
   // Make a copy of the bitset
-  vector<xor_func> tmp(m);
+  vector<xor_func> tmp;
   for(int i = 0; i < m; i++) {
-    tmp[i] = bits[i];
+    tmp.push_back(bits[i]);
   }
   ret = compute_rank_dest(tmp);
   return ret;
@@ -181,9 +185,10 @@ int to_upper_echelon(int m, int n,
         std::function<void(int, int)> do_swap,
         std::function<void(int, int)> do_xor){
 
+  // Clear out all the X gate caused negations
   for (int j = 0; j < m; j++) {
-    if (is_negated(bits[j])) {
-        flip_negated(bits[j]);
+    if (bits[j].is_negated()) {
+        bits[j].negate();
         do_negate(j);
     }
   }
@@ -482,7 +487,7 @@ gatelist CNOT_synth(int n, vector<xor_func> bits, const vector<string> names) {
   acc.splice(acc.end(), Lwr_CNOT_synth(n, m, bits, names, false));
   for (i = 0; i < n; i++) {
     for (j = i + 1; j < n; j++) {
-      bits[j][i] = bits[i][j];
+      bits[j].set(i, bits[i][j]); // Transpose
       bits[i].reset(j);
     }
   }
@@ -501,7 +506,7 @@ gatelist construct_circuit(exponents_set & phase,
     const int dim,
     const vector<string> names) {
   gatelist ret, tmp, rev;
-  vector<xor_func> bits(num), pre(num), post(num);
+  vector<xor_func> bits, pre, post;
   bool flg = true;
 
   assert(in.size() == num);
@@ -513,8 +518,8 @@ gatelist construct_circuit(exponents_set & phase,
   for (int i = 0; i < num; i++) {
     /* flg &= (in[i] == out[i]); */
     if (synth_method != AD_HOC) {
-      pre[i] = xor_func(num + 1, 0);
-      post[i] = xor_func(num + 1, 0);
+      pre.emplace_back(xor_func(num));
+      post.emplace_back(xor_func(num));
       pre[i].set(i);
       post[i].set(i);
     }
@@ -536,7 +541,7 @@ gatelist construct_circuit(exponents_set & phase,
           /* exit(4); */
       }
       if (i < it->size()) { bits[i] = *ti; }
-      else                { bits[i] = xor_func(dim + 1, 0); }
+      else                { bits[i] = xor_func(dim); }
     }
 
     // prepare the bits
@@ -576,7 +581,7 @@ gatelist construct_circuit(exponents_set & phase,
       pre = post;
       // re-initialize post
       for (int i = 0; i < num; i++) {
-        post[i] = xor_func(num + 1, 0);
+        post[i] = xor_func(num);
         post[i].set(i);
       }
     }
@@ -610,10 +615,10 @@ bool ind_oracle::operator()(const set<xor_func> & lst) const {
   set<xor_func>::const_iterator it;
   int i, j, rank = 0;
   bool flg;
-  vector<xor_func> tmp{lst.size()};
+  vector<xor_func> tmp{};
 
-  for (i = 0, it = lst.begin(); it != lst.end(); it++, i++) {
-    tmp[i] = *it;
+  for (const xor_func& f : lst) {
+    tmp.push_back(f);
   }
 
   rank = compute_rank(tmp);
@@ -626,37 +631,42 @@ bool ind_oracle::operator()(const set<xor_func> & lst) const {
 boost::optional<xor_func>
 ind_oracle::retrieve_lin_dep(const set<xor_func> & lst) const {
   set<xor_func>::const_iterator it;
-  int i, j, rank = 0;
   map<int, xor_func> mp;
   bool flg;
-  vector<xor_func> tmp{lst.size()};
+  vector<xor_func> tmp;
 
-  for (i = 0, it = lst.begin(); it != lst.end(); it++, i++) {
-    tmp[i] = *it;
-    mp[i] = *it;
+  int rank = 0;
+
+  {
+    int i = 0;
+    for (const xor_func& f : lst) {
+        tmp.push_back(f);
+        mp.emplace(i, f);
+        i++;
+    }
   }
 
-  for (j = 0; j < lst.size(); j++) {
+  for (int j = 0; j < lst.size(); j++) {
     if (tmp[j].test(length)) tmp[j].reset(length);
   }
 
-  for (i = 0; i < length; i++) {
+  for (int i = 0; i < length; i++) {
     flg = false;
-    for (j = rank; j < lst.size(); j++) {
+    for (int j = rank; j < lst.size(); j++) {
       if (tmp[j].test(i)) {
         // If we haven't yet seen a vector with bit i set...
         if (!flg) {
           // If it wasn't the first vector we tried, swap to the front
           if (j != rank) {
             swap(tmp[rank], tmp[j]);
-            auto tmpr = mp[rank];
-            mp[rank] = mp[j];
-            mp[j] = tmpr;
+            xor_func tmpr = mp.at(rank);
+            mp.at(rank) = mp.at(j);
+            mp.at(j) = tmpr;
           }
           flg = true;
         } else {
           tmp[j] ^= tmp[rank];
-          if (tmp[j].none()) return mp[j];
+          if (tmp[j].none()) return mp.at(j);
         }
       }
     }
@@ -667,21 +677,12 @@ ind_oracle::retrieve_lin_dep(const set<xor_func> & lst) const {
   return boost::optional<xor_func>();
 }
 
-xor_func init_xor_func(initializer_list<int> lst){
-    xor_func f(lst.size());
-    int index = 0;
-    for (const int i : lst) {
-        f.set(index++, i);
-    }
-    return f;
-}
-
-vector<xor_func> init_matrix_transpose(
+vector<xor_func> init_matrix(
         initializer_list<initializer_list<int>> lst){
     vector<xor_func> cols{};
     for (const auto& l : lst)
      {
-         cols.push_back(init_xor_func(l));
+         cols.push_back({false, l});
      }
     return cols;
 }

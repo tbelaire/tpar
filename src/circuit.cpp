@@ -409,7 +409,7 @@ character::character(const dotqc &input) :
     outputs(),
     hadamards()
 {
-    int name_max = 0, val_max = 0;
+    int val_max = 0;
     map<string, int> name_map, gate_lookup;
     gate_lookup["T"] = 1;
     gate_lookup["T*"] = 7;
@@ -419,8 +419,10 @@ character::character(const dotqc &input) :
     gate_lookup["Y"] = 4;
 
     // Initialize names and wires
-    vector<xor_func> wires( n + m );
+    vector<xor_func> wires;
+    wires.reserve( n + m );
     vector<xor_func> &output = wires;
+    int name_max = 0;
     for (const auto& name : input.names) {
         // name_map maps a name to a wire
         name_map[name] = name_max;
@@ -429,7 +431,7 @@ character::character(const dotqc &input) :
         // zero mapping
         zero[name_max]  = input.zero.at(name);
         // each wire has an initial value j, unless it starts in the 0 state
-        wires[name_max] = xor_func(n + h + 1, 0);
+        wires.push_back(xor_func(n + h));
         if (!zero[name_max]) {
             wires[name_max].set(val_max);
             val_map[val_max++] = name_max;
@@ -545,7 +547,7 @@ void character::output(ostream& out) const {
   for (auto it = phase_expts.begin(); it != phase_expts.end(); it++) {
     if (it != phase_expts.begin()) out << "+";
     out << (int)(it->second) << "*";
-    if (it->first.test(n + h)) out << "~";
+    if (it->first.is_negated()) out << "~";
     for (int i = 0; i < (n + h); i++) {
       if (it->first.test(i)) out << names.at(val_map.at(i));
     }
@@ -557,7 +559,7 @@ void character::output(ostream& out) const {
       for (int i = 0; i < (n + m); i++) {
           flag = false;
           out << "(";
-          if (outputs[i].test(n + h)) out << "~";
+          if (outputs[i].is_negated()) out << "~";
           for (int j = 0; j < (n + h); j++) {
               if (outputs[i].test(j)) {
                   if (flag) out << " ";
@@ -618,11 +620,12 @@ void character::add_ancillae(int num) {
   int new_m = this->m + num;
   vector<string> new_names(num_qubits);
   vector<bool> new_zero(num_qubits);
-  vector<xor_func> new_out(num_qubits);
+  vector<xor_func> new_out;
+  new_out.reserve(num_qubits);
 
   for (auto it = hadamards.begin(); it != hadamards.end(); it++) {
     for (int i = n + m; i < num_qubits; i++) {
-      it->wires.push_back(xor_func(n + h + 1, 0));
+      it->wires.push_back(xor_func(n + h));
     }
   }
 
@@ -630,13 +633,13 @@ void character::add_ancillae(int num) {
     if (i < (n + m)) {
       new_names[i] = names[i];
       new_zero[i]  = zero[i];
-      new_out[i]   = outputs[i];
+      new_out.push_back(outputs[i]);
     } else {
       ss.str("");
       ss << "__anc" << i - (n + m);
       new_names[i] = ss.str();
       new_zero[i] = true;
-      new_out[i] = xor_func(n + h + 1, 0);
+      new_out.push_back(xor_func(n + h));
     }
   }
 
@@ -651,8 +654,10 @@ void character::add_ancillae(int num) {
 dotqc character::synthesize() {
   partitioning floats[2], frozen[2];
   dotqc ret{};
-  xor_func mask(n + h + 1, 0);      // Tells us what values we have prepared
-  vector<xor_func> wires(n + m);        // Current state of the wires
+  // TODO investigate mask, is +1 needed?
+  xor_func mask(n + h);      // Tells us what values we have prepared
+  vector<xor_func> wires;        // Current state of the wires
+  wires.reserve(n+m);
   list<xor_func> remaining[2];          // Which terms we still have to partition
   int dim = n;
   int tdepth = 0, h_count = 1, applied = 0;
@@ -661,11 +666,11 @@ dotqc character::synthesize() {
   // initialize some stuff
   ret.n = n;
   ret.m = m;
-  mask.set(n + h);
+  mask.negate();
   for (int i = 0, j = 0; i < n + m; i++) {
     ret.names.push_back(names[i]);
     ret.zero[names[i]] = zero[i];
-    wires[i] = xor_func(n + h + 1, 0);
+    wires.push_back(xor_func(n + h));
     if (!zero[i]) {
       wires[i].set(j);
       mask.set(j++);
@@ -682,8 +687,7 @@ dotqc character::synthesize() {
   // cerr << "Adding new functions to the partition... " << flush;
   for (int j = 0; j < 2; j++) {
     for (auto it = remaining[j].begin(); it != remaining[j].end();) {
-      xor_func tmp = (~mask) & (*it);
-      if (tmp.none()) {
+      if (mask.contains(*it)) {
         add_to_partition(floats[j], *it, phase_expts, oracle);
         it = remaining[j].erase(it);
       } else it++;
@@ -736,8 +740,7 @@ dotqc character::synthesize() {
     // Add new functions to the partition
     for (int j = 0; j < 2; j++) {
       for (auto it = remaining[j].begin(); it != remaining[j].end();) {
-        xor_func tmp = (~mask) & *it;
-        if (tmp.none()) {
+        if (mask.contains(*it)) {
           add_to_partition(floats[j], *it, phase_expts, oracle);
           it = remaining[j].erase(it);
         } else it++;
@@ -772,18 +775,18 @@ dotqc character::synthesize() {
 dotqc character::synthesize_unbounded() {
   partitioning floats[2], frozen[2];
   dotqc ret;
-  xor_func mask(n + h + 1, 0);      // Tells us what values we have prepared
-  vector<xor_func> wires( n + m ); // Current state of the wires
+  xor_func mask(n + h);      // Tells us what values we have prepared
+  vector<xor_func> wires; // Current state of the wires
+  wires.reserve(n + m);
   list<xor_func> remaining[2];          // Which terms we still have to partition
   int dim = n, tmp1, tmp2, tdepth = 0, h_count = 1, applied = 0, j;
   ind_oracle oracle(n + m, dim, n + h);
   gatelist circ;
   list<Hadamard>::iterator it;
 
-  // initialize some stuff
-  mask.set(n + h);
+  // initialize the wires
   for (int i = 0, j = 0; i < n + m; i++) {
-    wires[i] = xor_func(n + h + 1, 0);
+    wires.push_back(xor_func(n + h));
     if (!zero[i]) {
       wires[i].set(j);
       mask.set(j++);
@@ -800,8 +803,7 @@ dotqc character::synthesize_unbounded() {
   // cerr << "Adding new functions to the partition... " << flush;
   for (int j = 0; j < 2; j++) {
     for (auto it = remaining[j].begin(); it != remaining[j].end();) {
-      xor_func tmp = (~mask) & (*it);
-      if (tmp.none()) {
+      if (mask.contains(*it)) {
         add_to_partition(floats[j], *it, phase_expts, oracle);
         it = remaining[j].erase(it);
       } else it++;
@@ -828,7 +830,7 @@ dotqc character::synthesize_unbounded() {
         int etc = ((tmp1 - tmp2 < 0)?tmp1:tmp1 - tmp2) + num_elts(frozen[j]) - n - m;
         if (etc > 0) {
           for (int i = n + m; i < n + m + etc; i++) {
-            wires.push_back(xor_func(n + h + 1, 0));
+            wires.push_back(xor_func(n + h));
           }
           this->add_ancillae(etc);
         }
@@ -855,8 +857,7 @@ dotqc character::synthesize_unbounded() {
     // Add new functions to the partition
     for (int j = 0; j < 2; j++) {
       for (auto it = remaining[j].begin(); it != remaining[j].end();) {
-        xor_func tmp = (~mask) & *it;
-        if (tmp.none()) {
+        if (mask.contains(*it)) {
           if (floats[j].size() == 0) {
               floats[j].push_back(set<xor_func>());
           }
@@ -882,7 +883,7 @@ dotqc character::synthesize_unbounded() {
         if (etc > 0) {
           if (disp_log) cerr << "    " << "Adding " << etc << " ancilla(e)\n" << flush;
           for (int i = n + m; i < n + m + etc; i++) {
-            wires.push_back(xor_func(n + h + 1, 0));
+            wires.push_back(xor_func(n + h));
           }
           this->add_ancillae(etc);
         }
