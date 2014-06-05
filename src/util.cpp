@@ -155,14 +155,6 @@ int compute_rank(int n, const exponents_set & expnts, const set<xor_func> & lst)
   return ret;
 }
 
-int to_upper_echelon(int m, int n, vector<xor_func> arr,
-        std::function<void(int)> do_negate,
-        std::function<void(int, int)> do_swap);
-gatelist to_upper_echelon(int m, int n, vector<xor_func> bits,
-        const vector<string> names);
-void to_upper_echelon(int m, int n, vector<xor_func> bits,
-        vector<xor_func> mat);
-
 int to_upper_echelon(int m, int n,
         vector<xor_func> bits,
         std::function<void(int)> do_negate,
