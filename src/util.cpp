@@ -503,33 +503,33 @@ gatelist CNOT_synth(int n, vector<xor_func> bits, const vector<string> names) {
 }
 
 // Construct a circuit for a given partition
-gatelist construct_circuit(exponents_set & phase,
-    const partitioning & part,
-    const vector<xor_func> in,
-    const vector<xor_func> out,
-    const int num,
-    const int dim,
-    const vector<string> names) {
+gatelist construct_circuit(
+        const exponents_set & phase,
+        const partitioning & part,
+        const vector<xor_func>& in,
+        const vector<xor_func>& out,
+        const int num,
+        const int dim,
+        const vector<string>& names) {
   gatelist ret, tmp, rev;
   vector<xor_func> bits, pre, post;
-  bool flg = true;
 
   assert(in.size() == num);
   assert(out.size() == num);
   // flg = forall i. in[i] == out[i]
+  bool ins_equal_outs = true;
   for (int i = 0; i < num; i++) {
-    flg &= (in[i] == out[i]);
+    ins_equal_outs &= (in[i] == out[i]);
   }
   for (int i = 0; i < num; i++) {
-    /* flg &= (in[i] == out[i]); */
     if (synth_method != AD_HOC) {
-      pre.emplace_back(xor_func(num));
-      post.emplace_back(xor_func(num));
+      pre.emplace_back(num);
+      post.emplace_back(num);
       pre[i].set(i);
       post[i].set(i);
     }
   }
-  if (flg && (part.size() == 0)) return ret;
+  if (ins_equal_outs && (part.size() == 0)) return ret;
 
   // Reduce in to echelon form to decide on a basis
   if (synth_method == AD_HOC) ret.splice(ret.end(), to_upper_echelon(num, dim, in, names));
@@ -570,13 +570,13 @@ gatelist construct_circuit(exponents_set & phase,
     for (int i = 0; ti != it->end(); ti++, i++) {
       tmp_lst.clear();
       tmp_lst.push_back(names[i]);
-      if (phase[*ti] <= 4) {
-        if (phase[*ti] / 4 == 1) ret.push_back(make_pair("Z", tmp_lst));
-        if (phase[*ti] / 2 == 1) ret.push_back(make_pair("P", tmp_lst));
-        if (phase[*ti] % 2 == 1) ret.push_back(make_pair("T", tmp_lst));
+      if (phase.at(*ti) <= 4) {
+        if (phase.at(*ti) / 4 == 1) ret.push_back(make_pair("Z", tmp_lst));
+        if (phase.at(*ti) / 2 == 1) ret.push_back(make_pair("P", tmp_lst));
+        if (phase.at(*ti) % 2 == 1) ret.push_back(make_pair("T", tmp_lst));
       } else {
-        if (phase[*ti] == 5 || phase[*ti] == 6) ret.push_back(make_pair("P*", tmp_lst));
-        if (phase[*ti] % 2 == 1) ret.push_back(make_pair("T*", tmp_lst));
+        if (phase.at(*ti) == 5 || phase.at(*ti) == 6) ret.push_back(make_pair("P*", tmp_lst));
+        if (phase.at(*ti) % 2 == 1) ret.push_back(make_pair("T*", tmp_lst));
       }
     }
 

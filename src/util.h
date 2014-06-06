@@ -65,13 +65,14 @@ void to_lower_echelon(const int m, const int n,
         std::vector<xor_func>& bits,
         std::vector<xor_func>& mat);
 
-gatelist construct_circuit(exponents_set & phase,
-    const partitioning & part,
-    const std::vector<xor_func> in,
-    const std::vector<xor_func> out,
-    const int num,
-    const int dim,
-    const std::vector<std::string> names);
+gatelist construct_circuit(
+        const exponents_set & phase,
+        const partitioning & part,
+        const std::vector<xor_func>& in,
+        const std::vector<xor_func>& out,
+        const int num,
+        const int dim,
+        const std::vector<std::string>& names);
 
 std::vector<xor_func> init_matrix(
         std::initializer_list<std::initializer_list<int>>);
