@@ -162,13 +162,8 @@ TEST(components, x) {
     EXPECT_EQ("C", *(inputs.begin()));
 }
 
-int to_upper_echelon(int m, int n,
-        vector<xor_func> bits,
-        std::function<void(int)> do_negate,
-        std::function<void(int, int)> do_swap,
-        std::function<void(int, int)> do_xor);
 TEST(echelon, upperCallCount) {
-    const vector<xor_func>arr{
+    vector<xor_func>arr{
             {false, {0,1}},
             {true, {1,0}},
         };
@@ -198,7 +193,7 @@ TEST(echelon, upperCallCount) {
 }
 
 TEST(echelon, upperZeroRow) {
-    const vector<xor_func>arr {
+    vector<xor_func>arr {
             {true, {0,1}},
             {true, {1,0}},
             {false, {1,1}},
@@ -229,30 +224,201 @@ TEST(echelon, upperZeroRow) {
 }
 
 
-gatelist to_upper_echelon(int m, int n, vector<xor_func> bits, const vector<string> names);
 TEST(DISABLED_echelon, upperGates) {
     // TODO
     EXPECT_EQ(1,0);
 }
-void to_upper_echelon(int m, int n, vector<xor_func> bits, vector<xor_func> mat);
 TEST(DISABLED_echelon, upperMat) {
     // TODO
     EXPECT_EQ(1,0);
 }
-gatelist to_lower_echelon(int m, int n, vector<xor_func> bits, const vector<string> names);
+gatelist to_lower_echelon(const int m, const int n, vector<xor_func>& bits, const vector<string> names);
 TEST(DISABLED_echelon, lower) {
     // TODO
     EXPECT_EQ(1,0);
 }
-void to_lower_echelon(int m, int n, vector<xor_func>& bits, vector<xor_func>& mat);
+void to_lower_echelon(const int m, const int n, vector<xor_func>& bits, vector<xor_func>& mat);
+TEST(echelon, lowerMat2x2) {
+    vector<xor_func>arr {
+            {false, {1,1}},
+            {false, {0,1}},
+        };
+    vector<xor_func>arr2 = arr;
+    to_lower_echelon(2, 2, arr, arr2);
+
+    EXPECT_EQ(arr, arr2);
+    EXPECT_EQ(true, arr[0][0]);
+    EXPECT_EQ(false, arr[0][1]);
+    EXPECT_EQ(false, arr[1][0]);
+    EXPECT_EQ(true, arr[1][1]);
+}
+TEST(echelon, lowerMat2x2EmptyCol1) {
+    vector<xor_func>arr {
+            {false, {0,1,1}},
+            {false, {0,0,1}},
+        };
+    vector<xor_func>arr2 = arr;
+    to_lower_echelon(3, 2, arr, arr2);
+
+    EXPECT_EQ(arr, arr2);
+    EXPECT_EQ(false, arr[0][0]);
+    EXPECT_EQ(true,  arr[0][1]);
+    EXPECT_EQ(false, arr[0][2]);
+
+    EXPECT_EQ(false, arr[1][0]);
+    EXPECT_EQ(false, arr[1][1]);
+    EXPECT_EQ(true,  arr[1][2]);
+}
+TEST(echelon, lowerMat2x2EmptyCol2) {
+    vector<xor_func>arr {
+            {false, {1,0,1}},
+            {false, {0,0,1}},
+        };
+    vector<xor_func>arr2 = arr;
+    to_lower_echelon(3, 2, arr, arr2);
+
+    EXPECT_EQ(arr, arr2);
+    EXPECT_EQ(true,  arr[0][0]);
+    EXPECT_EQ(false, arr[0][1]);
+    EXPECT_EQ(false, arr[0][2]);
+
+    EXPECT_EQ(false, arr[1][0]);
+    EXPECT_EQ(false, arr[1][1]);
+    EXPECT_EQ(true,  arr[1][2]);
+}
+TEST(echelon, lowerMat2x2EmptyCol3) {
+    vector<xor_func>arr {
+            {false, {1,1,0}},
+            {false, {0,1,0}},
+        };
+    vector<xor_func>arr2 = arr;
+    to_lower_echelon(3, 2, arr, arr2);
+
+    EXPECT_EQ(arr, arr2);
+    EXPECT_EQ(true,  arr[0][0]);
+    EXPECT_EQ(false, arr[0][1]);
+    EXPECT_EQ(false, arr[0][2]);
+
+    EXPECT_EQ(false, arr[1][0]);
+    EXPECT_EQ(true,  arr[1][1]);
+    EXPECT_EQ(false, arr[1][2]);
+}
+TEST(echelon, lowerMat2x3) {
+    vector<xor_func>arr {
+            {false, {1,1,1}},
+            {false, {0,1,1}},
+        };
+    vector<xor_func>arr2 = arr;
+    to_lower_echelon(3, 2, arr, arr2);
+
+    EXPECT_EQ(arr, arr2);
+    EXPECT_EQ(true, arr[0][0]);
+    EXPECT_EQ(false, arr[0][1]);
+    EXPECT_EQ(false, arr[0][2]);
+    EXPECT_EQ(false, arr[1][0]);
+    EXPECT_EQ(true, arr[1][1]);
+    EXPECT_EQ(true, arr[1][2]);
+}
+TEST(echelon, lowerMat3x3) {
+    vector<xor_func>arr {
+            {false, {1,1,1}},
+            {false, {0,1,1}},
+            {false, {0,0,1}},
+        };
+    vector<xor_func>arr2 = arr;
+    to_lower_echelon(3, 3, arr, arr2);
+
+    EXPECT_EQ(arr, arr2);
+    EXPECT_EQ(true,  arr[0][0]);
+    EXPECT_EQ(false, arr[0][1]);
+    EXPECT_EQ(false, arr[0][2]);
+
+    EXPECT_EQ(false, arr[1][0]);
+    EXPECT_EQ(true,  arr[1][1]);
+    EXPECT_EQ(false, arr[1][2]);
+
+    EXPECT_EQ(false, arr[2][0]);
+    EXPECT_EQ(false, arr[2][1]);
+    EXPECT_EQ(true,  arr[2][2]);
+}
+TEST(echelon, lowerMat3x5) {
+    vector<xor_func>arr {
+            {false, {1,1,1,1,0}},
+            {false, {0,1,1,0,1}},
+            {false, {0,0,0,1,0}},
+        };
+    vector<xor_func>arr2 = arr;
+    to_lower_echelon(5, 3, arr, arr2);
+
+    EXPECT_EQ(arr, arr2);
+    EXPECT_EQ(true,  arr[0][0]);
+    EXPECT_EQ(false, arr[0][1]);
+    EXPECT_EQ(false, arr[0][2]);
+    EXPECT_EQ(false, arr[0][3]);
+    EXPECT_EQ(true,  arr[0][4]);
+
+    EXPECT_EQ(false, arr[1][0]);
+    EXPECT_EQ(true,  arr[1][1]);
+    EXPECT_EQ(true,  arr[1][2]);
+    EXPECT_EQ(false, arr[1][3]);
+    EXPECT_EQ(true,  arr[1][4]);
+
+    EXPECT_EQ(false, arr[2][0]);
+    EXPECT_EQ(false, arr[2][1]);
+    EXPECT_EQ(false, arr[2][2]);
+    EXPECT_EQ(true,  arr[2][3]);
+    EXPECT_EQ(false, arr[2][4]);
+
+    // And the tag along matrix too
+    EXPECT_EQ(true,  arr2[0][0]);
+    EXPECT_EQ(false, arr2[0][1]);
+    EXPECT_EQ(false, arr2[0][2]);
+    EXPECT_EQ(false, arr2[0][3]);
+    EXPECT_EQ(true,  arr2[0][4]);
+
+    EXPECT_EQ(false, arr2[1][0]);
+    EXPECT_EQ(true,  arr2[1][1]);
+    EXPECT_EQ(true,  arr2[1][2]);
+    EXPECT_EQ(false, arr2[1][3]);
+    EXPECT_EQ(true,  arr2[1][4]);
+
+    EXPECT_EQ(false, arr2[2][0]);
+    EXPECT_EQ(false, arr2[2][1]);
+    EXPECT_EQ(false, arr2[2][2]);
+    EXPECT_EQ(true,  arr2[2][3]);
+    EXPECT_EQ(false, arr2[2][4]);
+}
 
 // TODO fix_basis
 TEST(DISABLED_fixBasis, basic) {
     EXPECT_EQ(1,0);
 }
 // TODO compose
-TEST(DISABLED_compose, basic) {
-    EXPECT_EQ(1,0);
+void compose(int num, vector<xor_func>& A, const vector<xor_func>& B);
+TEST(compose, basic) {
+
+    vector<xor_func>A {
+            {false, {1,0,0}},
+            {false, {0,1,0}},
+            {false, {0,0,1}},
+        };
+    vector<xor_func>B {
+            {false, {1,0,0}},
+            {false, {0,0,1}},
+            {false, {0,1,0}},
+        };
+    compose(3, A, B);
+    EXPECT_EQ(true,  A[0][0]);
+    EXPECT_EQ(false, A[0][1]);
+    EXPECT_EQ(false, A[0][2]);
+
+    EXPECT_EQ(false, A[1][0]);
+    EXPECT_EQ(false, A[1][1]);
+    EXPECT_EQ(true,  A[1][2]);
+
+    EXPECT_EQ(false, A[2][0]);
+    EXPECT_EQ(true,  A[2][1]);
+    EXPECT_EQ(false, A[2][2]);
 }
 
 // MAYBE test *_CNOT_synth

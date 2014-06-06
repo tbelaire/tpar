@@ -138,11 +138,14 @@ int compute_rank(const set<xor_func> & set) {
 }
 
 int to_upper_echelon(int m, int n,
-        vector<xor_func> bits,
+        vector<xor_func>& bits,
         std::function<void(int)> do_negate,
         std::function<void(int, int)> do_swap,
         std::function<void(int, int)> do_xor){
 
+  assert(m == bits.size());
+  if(bits.size() == 0){ return 0; }
+  assert(n == bits[0].size());
   // Clear out all the X gate caused negations
   for (int j = 0; j < m; j++) {
     if (bits[j].is_negated()) {
@@ -177,10 +180,13 @@ int to_upper_echelon(int m, int n,
   return rank;
 }
 
-// Make echelon form
-gatelist to_upper_echelon(int m, int n, vector<xor_func> bits, const vector<string> names) {
+// Const version only, since that's the only one used.
+gatelist to_upper_echelon(int m, int n,
+        const vector<xor_func>& bits,
+        const vector<string>& names) {
   gatelist acc;
-  to_upper_echelon(m, n, bits,
+  vector<xor_func> tmp{bits};
+  to_upper_echelon(m, n, tmp,
           [&acc, &names](int j){
             acc.splice(acc.end(), x_com(j, names));
           },
@@ -193,9 +199,27 @@ gatelist to_upper_echelon(int m, int n, vector<xor_func> bits, const vector<stri
   return acc;
 }
 
-
-// Make echelon form
-void to_upper_echelon(int m, int n, vector<xor_func> bits, vector<xor_func> mat) {
+// Sorry about the const overload.
+// Perhaps they should have different names?
+void to_upper_echelon(int m, int n,
+        const vector<xor_func>& bits,
+        vector<xor_func>& mat) {
+  vector<xor_func> tmp{bits};
+  to_upper_echelon(m, n, tmp,
+          [&mat, m](int j){
+            mat[j].set(m);
+          },
+          [&mat](int r1, int r2){
+            swap(mat[r1], mat[r2]);
+          },
+          [&mat](int target, int i){
+            mat[target] ^= mat[i];
+          });
+}
+// Used in compose.
+void to_upper_echelon(int m, int n,
+        vector<xor_func>& bits,
+        vector<xor_func>& mat) {
   to_upper_echelon(m, n, bits,
           [&mat, m](int j){
             mat[j].set(m);
@@ -208,33 +232,56 @@ void to_upper_echelon(int m, int n, vector<xor_func> bits, vector<xor_func> mat)
           });
 }
 
-// TODO audit
-gatelist to_lower_echelon(int m, int n, vector<xor_func> bits, const vector<string> names) {
-  gatelist acc;
+void backfill_matrix(int m, int n,
+        vector<xor_func>& bits,
+        std::function<void(int, int)> do_xor){
+    assert(n == bits.size());
+    if(bits.size() == 0){ return; }
+    assert(m == bits[0].size());
 
-  (void) m;
-  for (int i = n-1; i > 0; i--) {
-    for (int j = i - 1; j >= 0; j--) {
-      if (bits[j].test(i)) {
-        bits[j] ^= bits[i];
-        acc.splice(acc.end(), xor_com(i, j, names));
-      }
+    vector<int> leading_ones(n);
+    for(int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++) {
+            if (bits[i][j]){
+                leading_ones[i] = j;
+                /* cout << "Leading one for row " << i << " is " << j <<endl; */
+                break;
+            }
+        }
     }
-  }
-  return acc;
+
+
+    // i and k are rows
+    // j is a column
+    for (int i = 1; i < n; i++) {
+        int j = leading_ones[i];
+        if(bits[i][j]) {
+            for (int k = i-1; k >= 0; k--) {
+                if(bits[k][j]) {
+                    bits[k] ^= bits[i];
+                    do_xor(k, i);
+                    /* cout << "Swapping " << k << ", " << i <<endl; */
+                }
+            }
+        }
+    }
 }
 
-// TODO audit
-void to_lower_echelon(int m, int n, vector<xor_func>& bits, vector<xor_func>& mat) {
-  (void) m;
-  for (int i = n-1; i > 0; i--) {
-    for (int j = i - 1; j >= 0; j--) {
-      if (bits[j].test(i)) {
-        bits[j] ^= bits[i];
-        mat[j] ^= mat[i];
-      }
-    }
-  }
+gatelist to_lower_echelon(const int m, const int n, vector<xor_func>& bits, const vector<string> names) {
+    gatelist acc;
+
+    backfill_matrix(m, n, bits,
+            [&acc, &names](int i, int j) {
+                acc.splice(acc.end(), xor_com(i, j, names));
+            });
+    return acc;
+}
+
+void to_lower_echelon(const int m, const int n, vector<xor_func>& bits, vector<xor_func>& mat) {
+    backfill_matrix(m, n, bits,
+            [&mat](int i, int j) {
+                    mat[i] ^= mat[j];
+            });
 }
 
 // Existing code version with bool instead of NULLs
@@ -318,7 +365,7 @@ gatelist fix_basis(int m, int n, int k, const xor_func * fst, xor_func * snd, xo
 }
 
 // A := B^{-1} A
-void compose(int num, vector<xor_func> A, const vector<xor_func> B) {
+void compose(int num, vector<xor_func>& A, const vector<xor_func>& B) {
   vector<xor_func> tmp = B;
   to_upper_echelon(num, num, tmp, A);
   to_lower_echelon(num, num, tmp, A);

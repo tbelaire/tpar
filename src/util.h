@@ -39,13 +39,21 @@ int compute_rank(const std::vector<xor_func> bits);
 int compute_rank(int m, int n, const xor_func * bits);
 int compute_rank(const std::set<xor_func> & lst);
 
-int to_upper_echelon(int m, int n, std::vector<xor_func> arr,
+int to_upper_echelon(int m, int n,
+        std::vector<xor_func>& arr,
         std::function<void(int)> do_negate,
-        std::function<void(int, int)> do_swap);
-gatelist to_upper_echelon(int m, int n, std::vector<xor_func> bits,
-        const std::vector<std::string> names);
-void to_upper_echelon(int m, int n, std::vector<xor_func> bits,
-        std::vector<xor_func> mat);
+        std::function<void(int, int)> do_swap,
+        std::function<void(int, int)> do_xor);
+gatelist to_upper_echelon(int m, int n,
+        const std::vector<xor_func>& bits,
+        const std::vector<std::string>& names);
+// Pair of matrix versions
+void to_upper_echelon(int m, int n,
+        const std::vector<xor_func>& bits,
+        std::vector<xor_func>& mat);
+void to_upper_echelon(int m, int n,
+        std::vector<xor_func>& bits,
+        std::vector<xor_func>& mat);
 
 gatelist construct_circuit(exponents_set & phase,
     const partitioning & part,
