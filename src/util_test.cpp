@@ -454,10 +454,50 @@ TEST(compose, basic) {
     EXPECT_EQ(false, A[2][2]);
 }
 
-// MAYBE test *_CNOT_synth
+gatelist Lwr_CNOT_synth(int n, int m, vector<xor_func>& bits, const vector<string>& names, bool rev);
+TEST(LwrCNotSynth, id3x3) {
+    auto arr = vector<xor_func>{
+            {false, {1,0,0}},
+            {false, {0,1,0}},
+            {false, {0,0,1}},
+        };
+    auto gates = Lwr_CNOT_synth(3, 1, arr, {"A", "B", "C"}, false);
+    EXPECT_EQ(0, gates.size());
+}
+TEST(LwrCNotSynth, revId3x3) {
+    auto arr = vector<xor_func>{
+            {false, {0,0,1}},
+            {false, {0,1,0}},
+            {false, {1,0,0}},
+        };
+    auto gates = Lwr_CNOT_synth(3, 1, arr, {"A", "B", "C"}, false);
+    // Should be just a swap
+    EXPECT_EQ(3, gates.size());
+    auto g = gates.begin();
+    EXPECT_EQ("tof", g->first);
+    EXPECT_EQ(2, g->second.size());
+    g++;
+    EXPECT_EQ("tof", g->first);
+    EXPECT_EQ(2, g->second.size());
+    g++;
+    EXPECT_EQ("tof", g->first);
+    EXPECT_EQ(2, g->second.size());
+}
 
+
+gatelist CNOT_synth(int n,
+        vector<xor_func>& bits,
+        const vector<string> names);
+TEST(DISABLED_CNotSynth, I3x3) {
+    vector<xor_func> arr{
+        {false, {1,0,0}},
+        {false, {0,1,0}},
+        {false, {0,0,1}},
+    };
+    gatelist gates = CNOT_synth(3, arr, {"A", "B", "C"});
+    EXPECT_EQ(0, gates.size());
+}
 // Future TODO construct_curcuit
-
 
 
 TEST(listCompare, baseline) {

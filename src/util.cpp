@@ -425,7 +425,7 @@ gatelist gauss_CNOT_synth(int n, int m, vector<xor_func> bits, const vector<stri
 }
 
 // Patel/Markov/Hayes CNOT synthesis
-gatelist Lwr_CNOT_synth(int n, int m, vector<xor_func> bits, const vector<string> names, bool rev) {
+gatelist Lwr_CNOT_synth(int n, int m, vector<xor_func>& bits, const vector<string>& names, bool rev) {
   gatelist acc;
   int sec, tmp, row, col, i;
   int patt[1<<m];
@@ -478,13 +478,14 @@ gatelist Lwr_CNOT_synth(int n, int m, vector<xor_func> bits, const vector<string
   return acc;
 }
 
-gatelist CNOT_synth(int n, vector<xor_func> bits, const vector<string> names) {
+gatelist CNOT_synth(int n, vector<xor_func>& bits, const vector<string> names) {
   gatelist acc, tmp;
-  int i, j, m = (int)(log((double)n) / (log(2) * 2));
+  int i, j;
+  int m = (int)(log((double)n) / (log(2) * 2));
 
   for (j = 0; j < n; j++) {
-    if (bits[j].test(n)) {
-      bits[j].reset(n);
+    if (bits[j].is_negated()) {
+      bits[j].negate();
       acc.splice(acc.begin(), x_com(j, names));
     }
   }
@@ -521,13 +522,15 @@ gatelist construct_circuit(
   for (int i = 0; i < num; i++) {
     ins_equal_outs &= (in[i] == out[i]);
   }
-  for (int i = 0; i < num; i++) {
-    if (synth_method != AD_HOC) {
-      pre.emplace_back(num);
-      post.emplace_back(num);
-      pre[i].set(i);
-      post[i].set(i);
-    }
+
+  if (synth_method != AD_HOC) {
+      // Create two identity matricies
+      for (int i = 0; i < num; i++) {
+          pre.emplace_back(num);
+          post.emplace_back(num);
+          pre[i].set(i);
+          post[i].set(i);
+      }
   }
   if (ins_equal_outs && (part.size() == 0)) return ret;
 
@@ -565,18 +568,17 @@ gatelist construct_circuit(
     }
 
     // apply the T gates
-    list<string> tmp_lst;
     ti = it-> begin();
     for (int i = 0; ti != it->end(); ti++, i++) {
-      tmp_lst.clear();
-      tmp_lst.push_back(names[i]);
+      list<string> tmp_lst{names[i]};
       if (phase.at(*ti) <= 4) {
-        if (phase.at(*ti) / 4 == 1) ret.push_back(make_pair("Z", tmp_lst));
-        if (phase.at(*ti) / 2 == 1) ret.push_back(make_pair("P", tmp_lst));
-        if (phase.at(*ti) % 2 == 1) ret.push_back(make_pair("T", tmp_lst));
+        if (phase.at(*ti) / 4 == 1) ret.emplace_back("Z", tmp_lst);
+        if (phase.at(*ti) / 2 == 1) ret.emplace_back("P", tmp_lst);
+        if (phase.at(*ti) % 2 == 1) ret.emplace_back("T", tmp_lst);
       } else {
-        if (phase.at(*ti) == 5 || phase.at(*ti) == 6) ret.push_back(make_pair("P*", tmp_lst));
-        if (phase.at(*ti) % 2 == 1) ret.push_back(make_pair("T*", tmp_lst));
+        if (phase.at(*ti) == 5 ||
+            phase.at(*ti) == 6) ret.emplace_back("P*", tmp_lst);
+        if (phase.at(*ti) % 2 == 1) ret.emplace_back("T*", tmp_lst);
       }
     }
 
