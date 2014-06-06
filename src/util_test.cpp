@@ -151,12 +151,13 @@ TEST(components, swap) {
     EXPECT_EQ(inputs, c.second);
 }
 
+// TODO X instead of tof is ok, right?
 gatelist x_com(int a, const vector<string> names);
 TEST(components, x) {
     const gatelist x = x_com(2, {"A", "B", "C"});
     EXPECT_EQ(1, x.size());
     const pair<string, list<string>> gate = *x.begin();
-    EXPECT_EQ("tof", gate.first);
+    EXPECT_EQ("X", gate.first);
     const auto inputs = gate.second;
     EXPECT_EQ(1, inputs.size());
     EXPECT_EQ("C", *(inputs.begin()));
@@ -224,20 +225,53 @@ TEST(echelon, upperZeroRow) {
 }
 
 
-TEST(DISABLED_echelon, upperGates) {
-    // TODO
-    EXPECT_EQ(1,0);
+TEST(echelon, upperGates) {
+    const vector<xor_func>arr {
+            {true, {0,1}},
+            {false, {1,1}},
+        };
+    gatelist gates = to_upper_echelon(2,2, arr, {"A", "B"});
+    auto g = gates.begin();
+    EXPECT_EQ(4, gates.size()); // 1 X, 3 Swap
+    EXPECT_EQ("X", g->first);
+    EXPECT_EQ(1, g->second.size());
+    EXPECT_EQ("A", *(g->second.begin()));
+    g++;
+    // Swap
+    EXPECT_EQ("tof", g->first);
+    EXPECT_EQ(2, g->second.size());
+    g++;
+    EXPECT_EQ("tof", g->first);
+    EXPECT_EQ(2, g->second.size());
+    g++;
+    EXPECT_EQ("tof", g->first);
+    EXPECT_EQ(2, g->second.size());
 }
 TEST(DISABLED_echelon, upperMat) {
-    // TODO
+    vector<xor_func>A {
+            {false, {1,0,0}},
+            {false, {0,0,1}},
+            {false, {0,1,0}},
+        };
+    vector<xor_func>B {
+            {false, {1,0,0}},
+            {false, {0,1,0}},
+            {false, {0,0,1}},
+        };
+    to_upper_echelon(3, 3, A, B);
+    EXPECT_EQ(true,  B[0][0]);
+    EXPECT_EQ(false, B[0][1]);
+    EXPECT_EQ(false, B[0][2]);
+
+    EXPECT_EQ(false, B[1][0]);
+    EXPECT_EQ(false, B[1][1]);
+    EXPECT_EQ(true,  B[1][2]);
+
+    EXPECT_EQ(false, B[2][0]);
+    EXPECT_EQ(true,  B[2][1]);
+    EXPECT_EQ(false, B[2][2]);
     EXPECT_EQ(1,0);
 }
-gatelist to_lower_echelon(const int m, const int n, vector<xor_func>& bits, const vector<string> names);
-TEST(DISABLED_echelon, lower) {
-    // TODO
-    EXPECT_EQ(1,0);
-}
-void to_lower_echelon(const int m, const int n, vector<xor_func>& bits, vector<xor_func>& mat);
 TEST(echelon, lowerMat2x2) {
     vector<xor_func>arr {
             {false, {1,1}},

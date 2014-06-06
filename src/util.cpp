@@ -59,7 +59,7 @@ gatelist swap_com(int a, int b, const vector<string> names) {
 }
 
 gatelist x_com(int a, const vector<string> names) {
-  return {{"tof", {names[a]}}};
+  return {{"X", {names[a]}}};
 }
 
 // TODO, can this just use to_upper_echelon?

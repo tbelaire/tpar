@@ -55,6 +55,16 @@ void to_upper_echelon(int m, int n,
         std::vector<xor_func>& bits,
         std::vector<xor_func>& mat);
 
+void backfill_matrix(int m, int n,
+        std::vector<xor_func>& bits,
+        std::function<void(int, int)> do_xor);
+gatelist to_lower_echelon(const int m, const int n,
+        std::vector<xor_func>& bits,
+        const std::vector<std::string> names);
+void to_lower_echelon(const int m, const int n,
+        std::vector<xor_func>& bits,
+        std::vector<xor_func>& mat);
+
 gatelist construct_circuit(exponents_set & phase,
     const partitioning & part,
     const std::vector<xor_func> in,
