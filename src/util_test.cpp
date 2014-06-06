@@ -427,7 +427,6 @@ TEST(echelon, lowerMat3x5) {
 TEST(DISABLED_fixBasis, basic) {
     EXPECT_EQ(1,0);
 }
-// TODO compose
 void compose(int num, vector<xor_func>& A, const vector<xor_func>& B);
 TEST(compose, basic) {
 

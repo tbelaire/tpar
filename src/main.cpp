@@ -48,15 +48,12 @@ using namespace std;
 int main(int argc, char *argv[]) {
   struct timespec start, end;
   dotqc circuit, synth;
-  bool full_character = true;
   bool post_process = true;
   int anc = 0;
   // Quick and dirty solution, don't judge me
   for (int i = 0; i < argc; i++)
   {
-      if ((string)argv[i] == "-no-hadamard") {
-          full_character = false;
-      } else if ((string)argv[i] == "-ancillae") {
+      if ((string)argv[i] == "-ancillae") {
           i++;
           if ((string)argv[i] == "n") {
               anc = -1;
@@ -83,29 +80,17 @@ int main(int argc, char *argv[]) {
   cout << flush;
 
   circuit.remove_ids();
-  if (full_character) {
-      if (disp_log) cerr << "With full character" << endl;
-      if (disp_log) cerr << "Parsing circuit...\n" << flush;
-      character c{circuit};
-      if (disp_log) cerr << "anc is " << anc << endl;
-      if (anc == -1) c.add_ancillae(c.n + c.m);
-      else if (anc > 0) c.add_ancillae(anc);
-      if (disp_log) cerr << "Resynthesizing circuit...\n" << flush;
-      clock_gettime(CLOCK_MONOTONIC, &start);
-      if (anc == -2) synth = c.synthesize_unbounded();
-      else           synth = c.synthesize();
-      clock_gettime(CLOCK_MONOTONIC, &end);
-  } else {
-      if (disp_log) cerr << "With metacircuit" << endl;
-      metacircuit meta;
-      if (disp_log) cerr << "Parsing circuit...\n" << flush;
-      meta.partition_dotqc(circuit);
-      if (disp_log) cerr << "Resynthesizing circuit...\n" << flush;
-      clock_gettime(CLOCK_MONOTONIC, &start);
-      meta.optimize();
-      clock_gettime(CLOCK_MONOTONIC, &end);
-      synth = meta.to_dotqc();
-  }
+  if (disp_log) cerr << "With full character" << endl;
+  if (disp_log) cerr << "Parsing circuit...\n" << flush;
+  character c{circuit};
+  if (disp_log) cerr << "anc is " << anc << endl;
+  if (anc == -1) c.add_ancillae(c.n + c.m);
+  else if (anc > 0) c.add_ancillae(anc);
+  if (disp_log) cerr << "Resynthesizing circuit...\n" << flush;
+  clock_gettime(CLOCK_MONOTONIC, &start);
+  if (anc == -2) synth = c.synthesize_unbounded();
+  else           synth = c.synthesize();
+  clock_gettime(CLOCK_MONOTONIC, &end);
 
   if (post_process) {
       if (disp_log) cerr << "Applying post-processing...\n" << flush;

@@ -915,6 +915,8 @@ dotqc character::synthesize_unbounded() {
   return ret;
 }
 
+// TODO bring back metacircuit
+/*
 //-------------------------------- old {CNOT, T} version code. Still used for the "no hadamards" option
 
 void metacircuit::partition_dotqc(dotqc & input) {
@@ -1035,3 +1037,4 @@ void metacircuit::optimize() {
     }
   }
 }
+*/
