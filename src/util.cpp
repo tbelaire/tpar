@@ -427,32 +427,36 @@ gatelist gauss_CNOT_synth(int n, int m, vector<xor_func> bits, const vector<stri
 // Patel/Markov/Hayes CNOT synthesis
 gatelist Lwr_CNOT_synth(int n, int m, vector<xor_func>& bits, const vector<string>& names, bool rev) {
   gatelist acc;
-  int sec, tmp, row, col, i;
   int patt[1<<m];
 
-  for (sec = 0; sec < ceil(n / m); sec++) {
+  // Use doubles with ceil?
+  for (int sec = 0; sec < ceil(n / m); sec++) {
 
-    for (i = 0; i < (1<<m); i++) {
+    for (int i = 0; i < (1<<m); i++) {
       patt[i] = -1;
     }
-    for (row = sec*m; row < n; row++) {
-      tmp = 0;
-      for (i = 0; i < m; i++) {
-        if (bits[row].test(sec*m + i)) tmp += (1 << i);
+    for (int row = sec*m; row < n; row++) {
+      int tmp = 0;
+      for (int i = 0; i < m; i++) {
+        if (bits[row].test(sec*m + i)) {
+            tmp += (1 << i);
+        }
       }
       if (patt[tmp] == -1) {
         patt[tmp] = row;
       } else if (tmp != 0) {
         bits[row] ^= bits[patt[tmp]];
+        // Step A
         if (rev) acc.splice(acc.begin(), xor_com(row, patt[tmp], names));
         else acc.splice(acc.end(), xor_com(patt[tmp], row, names));
       }
     }
 
-    for (col = sec*m; col < (sec+1)*m; col++) {
-      for (row=col + 1; row < n; row++) {
+    for (int col = sec*m; col < (sec+1)*m; col++) {
+      for (int row=col + 1; row < n; row++) {
         if (bits[row].test(col)) {
           if (not(bits[col].test(col))) {
+            // Step B
             bits[col] ^= bits[row];
             bits[row] ^= bits[col];
             bits[col] ^= bits[row];
@@ -466,6 +470,7 @@ gatelist Lwr_CNOT_synth(int n, int m, vector<xor_func>& bits, const vector<strin
               acc.splice(acc.end(), xor_com(row, col, names));
             }
           } else {
+            // Step C
             bits[row] ^= bits[col];
             if (rev) acc.splice(acc.begin(), xor_com(row, col, names));
             else acc.splice(acc.end(), xor_com(col, row, names));
@@ -482,6 +487,10 @@ gatelist CNOT_synth(int n, vector<xor_func>& bits, const vector<string> names) {
   gatelist acc, tmp;
   int i, j;
   int m = (int)(log((double)n) / (log(2) * 2));
+  m = min(m, 1);
+
+  // m = log(n) / (log(2) * 2)
+  // e^m = n * e^(1/log(2)) * e^(1/2)
 
   for (j = 0; j < n; j++) {
     if (bits[j].is_negated()) {
