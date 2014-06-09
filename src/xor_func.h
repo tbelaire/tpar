@@ -18,6 +18,8 @@ class xor_func {
         bool is_negated() const { return negated; }
         void negate() { negated = !negated; }
 
+        unsigned long slice(size_t start, size_t offset);
+
         xor_func operator^(const xor_func& b) const {
             return xor_func(negated ^ b.negated,
                     bitset ^ b.bitset);
