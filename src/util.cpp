@@ -436,45 +436,35 @@ gatelist Lwr_CNOT_synth(int n, int m, vector<xor_func>& bits, const vector<strin
       patt[i] = -1;
     }
     for (int row = sec*m; row < n; row++) {
-      int tmp = 0;
-      for (int i = 0; i < m; i++) {
-        if (bits[row].test(sec*m + i)) {
-            tmp += (1 << i);
-        }
-      }
+      int tmp = bits[row].slice(sec*m, m);
       if (patt[tmp] == -1) {
+        /* cout << "Setting patt[" << tmp << "] to row " << row << endl; */
         patt[tmp] = row;
       } else if (tmp != 0) {
         bits[row] ^= bits[patt[tmp]];
         // Step A
         if (rev) acc.splice(acc.begin(), xor_com(row, patt[tmp], names));
-        else acc.splice(acc.end(), xor_com(patt[tmp], row, names));
+        else acc.splice(acc.end(), xor_com(row, patt[tmp], names));
       }
     }
 
     for (int col = sec*m; col < (sec+1)*m; col++) {
+      bool one_diag = bits[col].test(col);
       for (int row=col + 1; row < n; row++) {
         if (bits[row].test(col)) {
-          if (not(bits[col].test(col))) {
+          if (not(one_diag)) {
             // Step B
-            bits[col] ^= bits[row];
-            bits[row] ^= bits[col];
             bits[col] ^= bits[row];
             if (rev) {
               acc.splice(acc.begin(), xor_com(col, row, names));
-              acc.splice(acc.begin(), xor_com(row, col, names));
-              acc.splice(acc.begin(), xor_com(col, row, names));
             } else {
-              acc.splice(acc.end(), xor_com(row, col, names));
               acc.splice(acc.end(), xor_com(col, row, names));
-              acc.splice(acc.end(), xor_com(row, col, names));
             }
-          } else {
-            // Step C
-            bits[row] ^= bits[col];
-            if (rev) acc.splice(acc.begin(), xor_com(row, col, names));
-            else acc.splice(acc.end(), xor_com(col, row, names));
           }
+          // Step C
+          bits[row] ^= bits[col];
+          if (rev) acc.splice(acc.begin(), xor_com(row, col, names));
+          else acc.splice(acc.end(), xor_com(row, col, names));
         }
       }
     }
@@ -649,3 +639,16 @@ list_compare(const list<string> & a, const list<string> & b) {
     }
 
 }
+std::string
+stringify_gate(const std::pair<std::string,std::list<std::string>>& gate) {
+    stringstream s{};
+    s << gate.first << ": ";
+    bool first = true;
+    for(const string& input : gate.second) {
+        if(!first) {s << ", ";}
+        first = false;
+        s << input;
+    }
+    return s.str();
+}
+

@@ -100,4 +100,5 @@ size_t set_intersection_count(InputIt1 first1, InputIt1 last1,
 enum class list_compare_result { EQUAL, DISJOINT, OVERLAPPED };
 list_compare_result
 list_compare(const std::list<std::string> & a, const std::list<std::string> & b);
+std::string stringify_gate(const std::pair<std::string,std::list<std::string>>& gate);
 #endif // UTIL_H

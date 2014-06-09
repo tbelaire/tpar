@@ -15,7 +15,7 @@ TEST(utilTest, initMaxtrix) {
                 {1,0,1,0},
                 {0,1,1,0}
             });
-    EXPECT_EQ(2, bits.size());
+    ASSERT_EQ(2, bits.size());
     EXPECT_EQ(true, bits.at(0).test(0));
     EXPECT_EQ(false, bits.at(0).test(1));
     EXPECT_EQ(false, bits.at(1).test(0));
@@ -119,13 +119,8 @@ TEST(computeRank, negatedFuncs) {
 gatelist xor_com(int a, int b, const vector<string> names);
 TEST(components, xor) {
     const gatelist x = xor_com(1,2, {"A", "B", "C"});
-    EXPECT_EQ(1, x.size());
-    const pair<string, list<string>> gate = *x.begin();
-    EXPECT_EQ("tof", gate.first);
-    const auto inputs = gate.second;
-    EXPECT_EQ(2, inputs.size());
-    EXPECT_EQ("B", *(inputs.begin()));
-    EXPECT_EQ("C", *(++inputs.begin()));
+    ASSERT_EQ(1, x.size());
+    EXPECT_EQ("tof: B, C", stringify_gate(*x.begin()));
 }
 
 gatelist swap_com(int a, int b, const vector<string> names);
@@ -136,19 +131,10 @@ TEST(components, swap) {
     const auto a = *it; it++;
     const auto b = *it; it++;
     const auto c = *it; it++;
+    EXPECT_EQ("tof: B, C", stringify_gate(a));
+    EXPECT_EQ("tof: C, B", stringify_gate(b));
+    EXPECT_EQ("tof: B, C", stringify_gate(c));
 
-    EXPECT_EQ("tof", a.first);
-    EXPECT_EQ("tof", b.first);
-    EXPECT_EQ("tof", c.first);
-    EXPECT_EQ(2, a.second.size());
-    EXPECT_EQ(2, b.second.size());
-    EXPECT_EQ(2, c.second.size());
-
-    list<string> inputs{"B", "C"};
-    list<string> inputs_r{"C", "B"};
-    EXPECT_EQ(inputs, a.second);
-    EXPECT_EQ(inputs_r, b.second);
-    EXPECT_EQ(inputs, c.second);
 }
 
 // TODO X instead of tof is ok, right?
@@ -156,11 +142,7 @@ gatelist x_com(int a, const vector<string> names);
 TEST(components, x) {
     const gatelist x = x_com(2, {"A", "B", "C"});
     EXPECT_EQ(1, x.size());
-    const pair<string, list<string>> gate = *x.begin();
-    EXPECT_EQ("X", gate.first);
-    const auto inputs = gate.second;
-    EXPECT_EQ(1, inputs.size());
-    EXPECT_EQ("C", *(inputs.begin()));
+    EXPECT_EQ("X: C", stringify_gate(*x.begin()));
 }
 
 TEST(echelon, upperCallCount) {
@@ -233,19 +215,15 @@ TEST(echelon, upperGates) {
     gatelist gates = to_upper_echelon(2,2, arr, {"A", "B"});
     auto g = gates.begin();
     EXPECT_EQ(4, gates.size()); // 1 X, 3 Swap
-    EXPECT_EQ("X", g->first);
-    EXPECT_EQ(1, g->second.size());
-    EXPECT_EQ("A", *(g->second.begin()));
+    EXPECT_EQ("X: A", stringify_gate(*g));
     g++;
     // Swap
-    EXPECT_EQ("tof", g->first);
-    EXPECT_EQ(2, g->second.size());
+    EXPECT_EQ("tof: B, A", stringify_gate(*g));
     g++;
-    EXPECT_EQ("tof", g->first);
-    EXPECT_EQ(2, g->second.size());
+    EXPECT_EQ("tof: A, B", stringify_gate(*g));
     g++;
-    EXPECT_EQ("tof", g->first);
-    EXPECT_EQ(2, g->second.size());
+    EXPECT_EQ("tof: B, A", stringify_gate(*g));
+    g++;
 }
 TEST(DISABLED_echelon, upperMat) {
     vector<xor_func>A {
@@ -472,16 +450,80 @@ TEST(LwrCNotSynth, revId3x3) {
         };
     auto gates = Lwr_CNOT_synth(3, 1, arr, {"A", "B", "C"}, false);
     // Should be just a swap
-    EXPECT_EQ(3, gates.size());
+    ASSERT_EQ(2, gates.size());
     auto g = gates.begin();
-    EXPECT_EQ("tof", g->first);
-    EXPECT_EQ(2, g->second.size());
+    // Parial swap
+    EXPECT_EQ("tof: A, C", stringify_gate(*g));
     g++;
-    EXPECT_EQ("tof", g->first);
-    EXPECT_EQ(2, g->second.size());
+    EXPECT_EQ("tof: C, A", stringify_gate(*g));
     g++;
-    EXPECT_EQ("tof", g->first);
-    EXPECT_EQ(2, g->second.size());
+}
+TEST(LwrCNotSynth, 4x4) {
+    auto arr = vector<xor_func>{
+            {false, {1,1,0,0}},
+            {false, {1,0,0,1}},
+            {false, {0,1,0,0}},
+            {false, {1,1,1,0}},
+        };
+    auto gates = Lwr_CNOT_synth(4, 2, arr, {"A", "B", "C", "D"}, false);
+    for(const auto& g : gates){
+        cout << stringify_gate(g) << endl;
+    }
+    // Fix last 2
+    // 4 -> 1 + 4
+    auto g = gates.begin();
+    // Fix bottom row
+    EXPECT_EQ("tof: D, A", stringify_gate(*g));
+    g++;
+    // Fix box 0,0
+    EXPECT_EQ("tof: B, A", stringify_gate(*g));
+    g++;
+    EXPECT_EQ("tof: C, B", stringify_gate(*g));
+    g++;
+
+}
+TEST(LwrCNotSynth, 6x6) {
+    auto arr = vector<xor_func>{
+            {false, {1,1,0,0,0,0}},
+            {false, {1,0,0,1,1,0}},
+            {false, {0,1,0,0,1,0}},
+            {false, {1,1,1,1,1,1}},
+            {false, {1,1,0,1,1,1}},
+            {false, {0,0,1,1,1,0}},
+        };
+    auto gates = Lwr_CNOT_synth(6, 2, arr,
+            {"A", "B", "C", "D", "E", "F"}, false);
+    for(const auto& g : gates){
+        cout << stringify_gate(g) << endl;
+    }
+    // Fix last 2
+    // 4 -> 1 + 4
+    auto g = gates.begin();
+    // A -> D
+    EXPECT_EQ("tof: D, A", stringify_gate(*g));
+    g++;
+    // A -> E
+    EXPECT_EQ("tof: E, A", stringify_gate(*g));
+    g++;
+    // A -> B
+    EXPECT_EQ("tof: B, A", stringify_gate(*g));
+    g++;
+    // B -> C
+    EXPECT_EQ("tof: C, B", stringify_gate(*g));
+    g++;
+    // C -> E
+    EXPECT_EQ("tof: E, C", stringify_gate(*g));
+    g++;
+    // D -> F
+    EXPECT_EQ("tof: F, D", stringify_gate(*g));
+    g++;
+    // D -> C
+    EXPECT_EQ("tof: C, D", stringify_gate(*g));
+    g++;
+    // C -> D
+    EXPECT_EQ("tof: D, C", stringify_gate(*g));
+    g++;
+    EXPECT_EQ(g, gates.end());
 }
 
 
@@ -518,6 +560,16 @@ TEST(listCompare, abABC) {
 
 TEST(listCompare, orderingTest) {
     EXPECT_EQ(list_compare_result::EQUAL, list_compare({"A", "C", "B"}, {"A", "B", "C"}));
+}
+
+TEST(stringifyGate, basic) {
+    gatelist g = {
+        {"tof", {"A", "B", "C"}},
+        {"X", {"A", "D", "boom"}}};
+    auto it = g.begin();
+    EXPECT_EQ("tof: A, B, C", stringify_gate(*it));
+    it++;
+    EXPECT_EQ("X: A, D, boom", stringify_gate(*it));
 }
 /*  Needs to be manually inspected.
 void print_wires(const vector<xor_func> wires);

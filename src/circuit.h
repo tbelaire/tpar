@@ -82,7 +82,7 @@ struct character {
 };
 
 // ------------------------- {CNOT, T} version
-
+/*
 enum circuit_type { CNOTT, OTHER, UNKNOWN };
 
 struct metacircuit {
@@ -98,3 +98,4 @@ struct metacircuit {
   void optimize();
   dotqc to_dotqc();
 };
+*/
