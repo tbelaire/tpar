@@ -453,9 +453,9 @@ TEST(LwrCNotSynth, revId3x3) {
     ASSERT_EQ(2, gates.size());
     auto g = gates.begin();
     // Parial swap
-    EXPECT_EQ("tof: A, C", stringify_gate(*g));
-    g++;
     EXPECT_EQ("tof: C, A", stringify_gate(*g));
+    g++;
+    EXPECT_EQ("tof: A, C", stringify_gate(*g));
     g++;
 }
 TEST(LwrCNotSynth, 4x4) {
@@ -469,16 +469,19 @@ TEST(LwrCNotSynth, 4x4) {
     for(const auto& g : gates){
         cout << stringify_gate(g) << endl;
     }
+    // All the arguments to the gates are backwards,
+    // because we're going in the forwards direction.
+    // I'm not quite sure why.
     // Fix last 2
     // 4 -> 1 + 4
     auto g = gates.begin();
     // Fix bottom row
-    EXPECT_EQ("tof: D, A", stringify_gate(*g));
+    EXPECT_EQ("tof: A, D", stringify_gate(*g));
     g++;
     // Fix box 0,0
-    EXPECT_EQ("tof: B, A", stringify_gate(*g));
+    EXPECT_EQ("tof: A, B", stringify_gate(*g));
     g++;
-    EXPECT_EQ("tof: C, B", stringify_gate(*g));
+    EXPECT_EQ("tof: B, C", stringify_gate(*g));
     g++;
 
 }
@@ -500,28 +503,28 @@ TEST(LwrCNotSynth, 6x6) {
     // 4 -> 1 + 4
     auto g = gates.begin();
     // A -> D
-    EXPECT_EQ("tof: D, A", stringify_gate(*g));
+    EXPECT_EQ("tof: A, D", stringify_gate(*g));
     g++;
     // A -> E
-    EXPECT_EQ("tof: E, A", stringify_gate(*g));
+    EXPECT_EQ("tof: A, E", stringify_gate(*g));
     g++;
     // A -> B
-    EXPECT_EQ("tof: B, A", stringify_gate(*g));
+    EXPECT_EQ("tof: A, B", stringify_gate(*g));
     g++;
     // B -> C
-    EXPECT_EQ("tof: C, B", stringify_gate(*g));
+    EXPECT_EQ("tof: B, C", stringify_gate(*g));
     g++;
     // C -> E
-    EXPECT_EQ("tof: E, C", stringify_gate(*g));
+    EXPECT_EQ("tof: C, E", stringify_gate(*g));
     g++;
     // D -> F
-    EXPECT_EQ("tof: F, D", stringify_gate(*g));
+    EXPECT_EQ("tof: D, F", stringify_gate(*g));
     g++;
     // D -> C
-    EXPECT_EQ("tof: C, D", stringify_gate(*g));
+    EXPECT_EQ("tof: D, C", stringify_gate(*g));
     g++;
     // C -> D
-    EXPECT_EQ("tof: D, C", stringify_gate(*g));
+    EXPECT_EQ("tof: C, D", stringify_gate(*g));
     g++;
     EXPECT_EQ(g, gates.end());
 }

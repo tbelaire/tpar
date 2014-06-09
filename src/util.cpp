@@ -444,7 +444,7 @@ gatelist Lwr_CNOT_synth(int n, int m, vector<xor_func>& bits, const vector<strin
         bits[row] ^= bits[patt[tmp]];
         // Step A
         if (rev) acc.splice(acc.begin(), xor_com(row, patt[tmp], names));
-        else acc.splice(acc.end(), xor_com(row, patt[tmp], names));
+        else acc.splice(acc.end(), xor_com(patt[tmp], row, names));
       }
     }
 
@@ -458,13 +458,13 @@ gatelist Lwr_CNOT_synth(int n, int m, vector<xor_func>& bits, const vector<strin
             if (rev) {
               acc.splice(acc.begin(), xor_com(col, row, names));
             } else {
-              acc.splice(acc.end(), xor_com(col, row, names));
+              acc.splice(acc.end(), xor_com(row, col, names));
             }
           }
           // Step C
           bits[row] ^= bits[col];
           if (rev) acc.splice(acc.begin(), xor_com(row, col, names));
-          else acc.splice(acc.end(), xor_com(row, col, names));
+          else acc.splice(acc.end(), xor_com(col, row, names));
         }
       }
     }
