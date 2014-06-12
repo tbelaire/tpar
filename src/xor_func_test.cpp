@@ -1,7 +1,10 @@
 #include "gtest/gtest.h"
 
+#include <vector>
+
 #include "xor_func.h"
 
+using namespace std;
 
 TEST(xorFuncSlice, one) {
     xor_func bits{false, {0, 0, 0, 1}};
@@ -21,3 +24,34 @@ TEST(xorFuncSlice, mid) {
     /* EXPECT_EQ(3, slow_slice(bits,1,3)); */
 }
 
+TEST(constructors, copyConstructor) {
+    const xor_func a{false, {0, 1, 1, 0, 0}};
+    xor_func b{a};
+
+    EXPECT_EQ(a,b);
+    EXPECT_EQ(5, b.size());
+}
+
+TEST(vectorInit, size2) {
+    const xor_func temp{false, {0,1}};
+    vector<xor_func> arr{2, temp};
+    for(xor_func& f : arr) {
+        EXPECT_EQ(2, f.size()) << f;
+    }
+    for(int i = 0; i < 2; i++) {
+        EXPECT_EQ(2, arr[i].size()) << "for i=" << i;
+        EXPECT_EQ(true, arr[i].test(1));
+    }
+}
+
+TEST(vectorInit, size3) {
+    const xor_func temp{false, {0,0,0}};
+    vector<xor_func> arr( 3, temp );
+    for(xor_func& f : arr) {
+        EXPECT_EQ(3, f.size()) << f;
+    }
+    for(int i = 0; i < 3; i++) {
+        ASSERT_EQ(3, arr[i].size()) << "for i=" << i;
+        arr[i].set(i);
+    }
+}

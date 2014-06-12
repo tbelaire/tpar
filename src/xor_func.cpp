@@ -7,7 +7,7 @@
 using namespace std;
 
 
-xor_func::xor_func(bool neg, initializer_list<int> lst) :
+xor_func::xor_func(const bool neg, const initializer_list<int> lst) :
     bitset(lst.size()),
     negated(neg)
 {
@@ -17,7 +17,17 @@ xor_func::xor_func(bool neg, initializer_list<int> lst) :
     }
 }
 std::ostream& operator<<(std::ostream& out, const xor_func& f) {
-    out << (f.is_negated() ? "~" : " ") << f.bitset;
+    out << (f.is_negated() ? "~" : " ");
+    for (int i = 0; i < f.size(); i++) {
+        out << (int) f.test(i);
+    }
+    return out;
+}
+
+std::ostream& operator<<(std::ostream& out, const std::vector<xor_func>& arr) {
+    for (const xor_func& f : arr) {
+        out << f << endl;
+    }
     return out;
 }
 

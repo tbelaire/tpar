@@ -9,10 +9,10 @@ class xor_func {
         boost::dynamic_bitset<> bitset;
         bool negated;
     public:
-        xor_func(bool neg, std::initializer_list<int> lst);
-        xor_func(size_t size) : bitset(size), negated(false) {}
+        xor_func(const bool neg, const std::initializer_list<int> lst);
+        explicit xor_func(const size_t size) : bitset(size), negated(false) {}
         /* xor_func() : bitset(), negated(false) {} */
-        xor_func(bool negated, boost::dynamic_bitset<> bitset)
+        xor_func(const bool negated, const boost::dynamic_bitset<> bitset)
             : bitset(bitset), negated(negated) {}
 
         bool is_negated() const { return negated; }
@@ -63,4 +63,5 @@ class xor_func {
         }
 };
 
+std::ostream& operator<<(std::ostream& out, const std::vector<xor_func>& arr);
 #endif // XOR_FUNC_H

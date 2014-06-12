@@ -453,10 +453,8 @@ TEST(LwrCNotSynth, revId3x3) {
     ASSERT_EQ(2, gates.size());
     auto g = gates.begin();
     // Parial swap
-    EXPECT_EQ("tof: C, A", stringify_gate(*g));
-    g++;
-    EXPECT_EQ("tof: A, C", stringify_gate(*g));
-    g++;
+    EXPECT_EQ("tof: A, C", stringify_gate(*g)); g++;
+    EXPECT_EQ("tof: C, A", stringify_gate(*g)); g++;
 }
 TEST(LwrCNotSynth, 4x4) {
     auto arr = vector<xor_func>{
@@ -466,9 +464,11 @@ TEST(LwrCNotSynth, 4x4) {
             {false, {1,1,1,0}},
         };
     auto gates = Lwr_CNOT_synth(4, 2, arr, {"A", "B", "C", "D"}, false);
+    /*
     for(const auto& g : gates){
         cout << stringify_gate(g) << endl;
     }
+    */
     // All the arguments to the gates are backwards,
     // because we're going in the forwards direction.
     // I'm not quite sure why.
@@ -476,12 +476,12 @@ TEST(LwrCNotSynth, 4x4) {
     // 4 -> 1 + 4
     auto g = gates.begin();
     // Fix bottom row
-    EXPECT_EQ("tof: A, D", stringify_gate(*g));
+    EXPECT_EQ("tof: D, A", stringify_gate(*g));
     g++;
     // Fix box 0,0
-    EXPECT_EQ("tof: A, B", stringify_gate(*g));
+    EXPECT_EQ("tof: B, A", stringify_gate(*g));
     g++;
-    EXPECT_EQ("tof: B, C", stringify_gate(*g));
+    EXPECT_EQ("tof: C, B", stringify_gate(*g));
     g++;
 
 }
@@ -496,39 +496,147 @@ TEST(LwrCNotSynth, 6x6) {
         };
     auto gates = Lwr_CNOT_synth(6, 2, arr,
             {"A", "B", "C", "D", "E", "F"}, false);
-    for(const auto& g : gates){
+    /*for(const auto& g : gates){
         cout << stringify_gate(g) << endl;
-    }
+    }*/
     // Fix last 2
     // 4 -> 1 + 4
     auto g = gates.begin();
     // A -> D
-    EXPECT_EQ("tof: A, D", stringify_gate(*g));
-    g++;
+    EXPECT_EQ("tof: D, A", stringify_gate(*g)); g++;
     // A -> E
-    EXPECT_EQ("tof: A, E", stringify_gate(*g));
-    g++;
+    EXPECT_EQ("tof: E, A", stringify_gate(*g)); g++;
     // A -> B
-    EXPECT_EQ("tof: A, B", stringify_gate(*g));
-    g++;
+    EXPECT_EQ("tof: B, A", stringify_gate(*g)); g++;
     // B -> C
-    EXPECT_EQ("tof: B, C", stringify_gate(*g));
-    g++;
+    EXPECT_EQ("tof: C, B", stringify_gate(*g)); g++;
     // C -> E
-    EXPECT_EQ("tof: C, E", stringify_gate(*g));
-    g++;
+    EXPECT_EQ("tof: E, C", stringify_gate(*g)); g++;
     // D -> F
-    EXPECT_EQ("tof: D, F", stringify_gate(*g));
-    g++;
+    EXPECT_EQ("tof: F, D", stringify_gate(*g)); g++;
     // D -> C
-    EXPECT_EQ("tof: D, C", stringify_gate(*g));
-    g++;
+    EXPECT_EQ("tof: C, D", stringify_gate(*g)); g++;
     // C -> D
-    EXPECT_EQ("tof: C, D", stringify_gate(*g));
-    g++;
+    EXPECT_EQ("tof: D, C", stringify_gate(*g)); g++;
     EXPECT_EQ(g, gates.end());
 }
 
+gatelist CNOT_synth(int n, int num_segments, vector<xor_func>& bits, const vector<string> names);
+gatelist CNOT_synth(int n, vector<xor_func>& bits, const vector<string> names);
+TEST(CNotSynth, 2x2upper) {
+    auto arr = vector<xor_func>{
+        {false, {1, 1}},
+        {false, {0, 1}},
+    };
+    const auto arr_initial = arr;
+    // That'll have the gate produced after the transpose
+    auto gates = CNOT_synth(2, 1, arr, {"A", "B"});
+    ASSERT_EQ(1, gates.size());
+    auto g = gates.begin();
+    EXPECT_EQ("tof: A, B", stringify_gate(*g)); g++;
+    EXPECT_EQ(gates.end(), g);
+    auto reconstructed = CNOT_gates_to_matrix(2, 2, gates,
+            {"A", "B"});
+    EXPECT_EQ(arr_initial, reconstructed);
+}
+TEST(CNotSynth, 2x2lowwer) {
+    auto arr = vector<xor_func>{
+        {false, {1, 0}},
+        {false, {1, 1}},
+    };
+    const auto arr_initial = arr;
+    // That'll have the gate produced after the transpose
+    auto gates = CNOT_synth(2, 1, arr, {"A", "B"});
+    ASSERT_EQ(1, gates.size());
+    auto g = gates.begin();
+    EXPECT_EQ("tof: B, A", stringify_gate(*g)); g++;
+    EXPECT_EQ(gates.end(), g);
+    auto reconstructed = CNOT_gates_to_matrix(2, 2, gates,
+            {"A", "B"});
+    EXPECT_EQ(arr_initial, reconstructed);
+
+}
+TEST(CNotSynth, revId3x3) {
+    auto arr = vector<xor_func>{
+            {false, {0,0,1}},
+            {false, {0,1,0}},
+            {false, {1,0,0}},
+        };
+    const auto arr_initial = arr;
+    auto gates = CNOT_synth(3, 1, arr, {"A", "B", "C"});
+    // Should be just a swap
+    ASSERT_EQ(3, gates.size());
+    auto g = gates.begin();
+    // Parial swap
+    EXPECT_EQ("tof: A, C", stringify_gate(*g));
+    g++;
+    EXPECT_EQ("tof: C, A", stringify_gate(*g));
+    g++;
+    EXPECT_EQ("tof: A, C", stringify_gate(*g));
+    g++;
+
+    const auto recreated_arr = CNOT_gates_to_matrix(3, 3, gates,
+            {"A", "B", "C"});
+    EXPECT_EQ(arr_initial, recreated_arr);
+}
+TEST(CNotSynth, 6x6) {
+    auto arr = vector<xor_func>{
+            {false, {1,1,0,0,0,0}},
+            {false, {1,0,0,1,1,0}},
+            {false, {0,1,0,0,1,0}},
+            {false, {1,1,1,1,1,1}},
+            {false, {1,1,0,1,1,1}},
+            {false, {0,0,1,1,1,0}},
+        };
+    const auto arr_initial = arr;
+    auto gates = CNOT_synth(6, 2, arr,
+            {"A", "B", "C", "D", "E", "F"});
+    /*
+    for(const auto& g : gates){
+        cout << stringify_gate(g) << endl;
+    }
+    */
+
+    EXPECT_EQ(15, gates.size());
+    // Going through it backwards.
+    auto g = gates.begin();
+    // A -> D
+    EXPECT_EQ("tof: D, E", stringify_gate(*g)); g++;
+    EXPECT_EQ("tof: A, B", stringify_gate(*g)); g++;
+    EXPECT_EQ("tof: B, D", stringify_gate(*g)); g++;
+    EXPECT_EQ("tof: C, F", stringify_gate(*g)); g++;
+    EXPECT_EQ("tof: C, E", stringify_gate(*g)); g++;
+    EXPECT_EQ("tof: D, E", stringify_gate(*g)); g++;
+    EXPECT_EQ("tof: E, F", stringify_gate(*g)); g++;
+    // Flip
+    EXPECT_EQ("tof: D, C", stringify_gate(*g)); g++;
+    EXPECT_EQ("tof: C, D", stringify_gate(*g)); g++;
+    EXPECT_EQ("tof: F, D", stringify_gate(*g)); g++;
+    EXPECT_EQ("tof: E, C", stringify_gate(*g)); g++;
+    EXPECT_EQ("tof: C, B", stringify_gate(*g)); g++;
+    EXPECT_EQ("tof: B, A", stringify_gate(*g)); g++;
+    EXPECT_EQ("tof: E, A", stringify_gate(*g)); g++;
+    EXPECT_EQ("tof: D, A", stringify_gate(*g)); g++;
+    EXPECT_EQ(g, gates.end());
+    /* cout << "Recreating matrix" << endl; */
+    const auto recreated_arr =
+        CNOT_gates_to_matrix(6,6, gates, {"A", "B", "C", "D", "E", "F"});
+
+    /* cout << recreated_arr; */
+    EXPECT_EQ(arr_initial, recreated_arr);
+
+}
+
+TEST(CNotGatesToMatrix, 2x2) {
+    auto arr = CNOT_gates_to_matrix(2, 2,
+            {{"tof", {"A", "B"}}},
+            {"A", "B"});
+    ASSERT_EQ(2, arr.size());
+    ASSERT_EQ(2, arr[0].size());
+    EXPECT_EQ((xor_func{false, {1, 1}}), arr[0]);
+    EXPECT_EQ((xor_func{false, {0, 1}}), arr[1]);
+}
+// TODO more tests
 
 gatelist CNOT_synth(int n,
         vector<xor_func>& bits,

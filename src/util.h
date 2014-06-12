@@ -101,4 +101,6 @@ enum class list_compare_result { EQUAL, DISJOINT, OVERLAPPED };
 list_compare_result
 list_compare(const std::list<std::string> & a, const std::list<std::string> & b);
 std::string stringify_gate(const std::pair<std::string,std::list<std::string>>& gate);
+std::vector<xor_func>
+CNOT_gates_to_matrix(const size_t num_wires, const size_t dim, const gatelist& gates, const std::vector<std::string>& names);
 #endif // UTIL_H

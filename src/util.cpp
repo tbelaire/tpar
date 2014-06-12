@@ -443,8 +443,9 @@ gatelist Lwr_CNOT_synth(int n, int m, vector<xor_func>& bits, const vector<strin
       } else if (tmp != 0) {
         bits[row] ^= bits[patt[tmp]];
         // Step A
-        if (rev) acc.splice(acc.begin(), xor_com(row, patt[tmp], names));
-        else acc.splice(acc.end(), xor_com(patt[tmp], row, names));
+        /* cout << "Setting " << names[row] << " to " << names[row] << " + " << names[patt[tmp]] << endl; */
+        if (rev) acc.splice(acc.begin(), xor_com(patt[tmp], row, names));
+        else acc.splice(acc.end(), xor_com(row, patt[tmp], names));
       }
     }
 
@@ -456,15 +457,15 @@ gatelist Lwr_CNOT_synth(int n, int m, vector<xor_func>& bits, const vector<strin
             // Step B
             bits[col] ^= bits[row];
             if (rev) {
-              acc.splice(acc.begin(), xor_com(col, row, names));
+              acc.splice(acc.begin(), xor_com(row, col, names));
             } else {
-              acc.splice(acc.end(), xor_com(row, col, names));
+              acc.splice(acc.end(), xor_com(col, row, names));
             }
           }
           // Step C
           bits[row] ^= bits[col];
-          if (rev) acc.splice(acc.begin(), xor_com(row, col, names));
-          else acc.splice(acc.end(), xor_com(col, row, names));
+          if (rev) acc.splice(acc.begin(), xor_com(col, row, names));
+          else acc.splice(acc.end(), xor_com(row, col, names));
         }
       }
     }
@@ -473,11 +474,20 @@ gatelist Lwr_CNOT_synth(int n, int m, vector<xor_func>& bits, const vector<strin
   return acc;
 }
 
+// Split up to allow overridding the number of segments in test code
+// to match the example in the paper.
+gatelist CNOT_synth(int n, int num_segments, vector<xor_func>& bits, const vector<string> names);
+
 gatelist CNOT_synth(int n, vector<xor_func>& bits, const vector<string> names) {
+  int m = round(log((double)n) / (log(2) * 2));
+  m = min(m, 1);
+  return CNOT_synth(n, m, bits, names);
+}
+
+gatelist CNOT_synth(int n, int num_segments, vector<xor_func>& bits, const vector<string> names) {
   gatelist acc, tmp;
   int i, j;
-  int m = (int)(log((double)n) / (log(2) * 2));
-  m = min(m, 1);
+  const int m = num_segments;
 
   // m = log(n) / (log(2) * 2)
   // e^m = n * e^(1/log(2)) * e^(1/2)
@@ -639,8 +649,7 @@ list_compare(const list<string> & a, const list<string> & b) {
     }
 
 }
-std::string
-stringify_gate(const std::pair<std::string,std::list<std::string>>& gate) {
+string stringify_gate(const pair<string,list<string>>& gate) {
     stringstream s{};
     s << gate.first << ": ";
     bool first = true;
@@ -651,4 +660,35 @@ stringify_gate(const std::pair<std::string,std::list<std::string>>& gate) {
     }
     return s.str();
 }
+
+
+vector<xor_func>
+CNOT_gates_to_matrix(const size_t num_wires, const size_t dim, const gatelist& gates, const vector<string>& names) {
+    assert(num_wires <= dim);
+    vector<xor_func> res(num_wires, xor_func{dim});
+    // Start with identity and zeros.
+    for(int i = 0; i < num_wires; i++) {
+        res[i].set(i);
+    }
+    // loopup make for name to wire.
+    map<string,int> name_to_wire;
+    for(int i = 0; i < names.size(); i++) {
+        name_to_wire.insert(make_pair(names[i], i));
+    }
+
+    for(const auto& g : gates) {
+        if (g.first == "tof" && g.second.size() == 2) {
+            auto inputs = g.second.begin();
+            int target = name_to_wire.at(*inputs);
+            inputs++;
+            int control = name_to_wire.at(*inputs);
+            res[target] ^= res[control];
+        } else {
+            cout << "Bad gate in CNOT_gates_to_matrix:";
+            cout << stringify_gate(g) << endl;
+        }
+    }
+    return res;
+}
+
 
