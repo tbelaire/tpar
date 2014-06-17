@@ -34,7 +34,7 @@ TEST(partitions, n2d2) {
     EXPECT_EQ(3, p.size());
     add_to_partition(p, {false, {0,1,1,1}}, oracle);
     EXPECT_EQ(3, p.size());
-    cout << p << endl;
+    /* cout << p << endl; */
 }
 
 TEST(partitions, foo) {
@@ -47,9 +47,9 @@ TEST(partitions, foo) {
     add_to_partition(p, {false, {0,1,0,0}}, oracle);
     add_to_partition(p, {false, {0,1,1,0}}, oracle);
     EXPECT_EQ(2, p.size());
-    cout << p << endl;
+    /* cout << p << endl; */
     oracle.set_dim(2);
     repartition(p, oracle);
     EXPECT_EQ(2, p.size());
-    cout << p << endl;
+    /* cout << p << endl; */
 }
