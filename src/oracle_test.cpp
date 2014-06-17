@@ -50,6 +50,22 @@ TEST(oracle, simple) {
 }
 
 // optional<xor_func> ind_oracle::retrieve_lin_dep(const set<xor_func> & lst) const;
-TEST(DISABLED_oracle, retrieveLinDep) {
-    EXPECT_EQ(0, 1);
+TEST(oracle, retrieveLinDep) {
+    ind_oracle oracle(3, 3, 4);
+
+    boost::optional<xor_func> res;
+
+    res = oracle.retrieve_lin_dep({
+            {false, {0,0,1,1}},
+            {false, {0,0,1,0}},
+            {false, {0,0,0,1}},
+        });
+    EXPECT_EQ(true, (bool)res);
+
+    res = oracle.retrieve_lin_dep({
+            {false, {0,1,1,1}},
+            {false, {0,0,1,0}},
+            {false, {0,0,0,1}},
+        });
+    EXPECT_EQ(false, (bool)res);
 }
