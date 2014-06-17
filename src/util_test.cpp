@@ -225,7 +225,7 @@ TEST(echelon, upperGates) {
     EXPECT_EQ("tof: B, A", stringify_gate(*g));
     g++;
 }
-TEST(DISABLED_echelon, upperMat) {
+TEST(echelon, upperMat) {
     vector<xor_func>A {
             {false, {1,0,0}},
             {false, {0,0,1}},
@@ -248,7 +248,6 @@ TEST(DISABLED_echelon, upperMat) {
     EXPECT_EQ(false, B[2][0]);
     EXPECT_EQ(true,  B[2][1]);
     EXPECT_EQ(false, B[2][2]);
-    EXPECT_EQ(1,0);
 }
 TEST(echelon, lowerMat2x2) {
     vector<xor_func>arr {
@@ -641,7 +640,7 @@ TEST(CNotGatesToMatrix, 2x2) {
 gatelist CNOT_synth(int n,
         vector<xor_func>& bits,
         const vector<string> names);
-TEST(DISABLED_CNotSynth, I3x3) {
+TEST(CNotSynth, I3x3) {
     vector<xor_func> arr{
         {false, {1,0,0}},
         {false, {0,1,0}},
