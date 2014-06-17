@@ -24,9 +24,13 @@ Author: Matthew Amy
 #include <iostream>
 
 #include "util.h"
+#include "matroid.h"
 
 std::ostream& operator<<(std::ostream& output, const partitioning& part);
 partitioning freeze_partitions(partitioning & part, std::set<xor_func> & st);
 
 int num_elts(partitioning & part);
-partitioning create(std::set<xor_func> & st);
+partitioning create(const std::set<xor_func> & st);
+void add_to_partition(partitioning & ret, xor_func i, const ind_oracle & oracle);
+void repartition(partitioning & partition, const ind_oracle & oracle );
+partitioning partition_matroid(const std::vector<xor_func> & elts, const ind_oracle & oracle);

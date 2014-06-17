@@ -32,6 +32,8 @@ ind_oracle::retrieve_lin_dep(const set<xor_func> & lst) const {
   bool flg;
   vector<xor_func> tmp;
 
+  assert(lst.size() == 0 || this->length == (*lst.begin()).size());
+
   int rank = 0;
 
   {
@@ -44,7 +46,7 @@ ind_oracle::retrieve_lin_dep(const set<xor_func> & lst) const {
   }
 
   for (int j = 0; j < lst.size(); j++) {
-    if (tmp[j].test(length)) tmp[j].reset(length);
+    if (tmp[j].is_negated()) tmp[j].negate();
   }
 
   for (int i = 0; i < length; i++) {
