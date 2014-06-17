@@ -37,7 +37,7 @@ TEST(partitions, n2d2) {
     /* cout << p << endl; */
 }
 
-TEST(partitions, foo) {
+TEST(partitions, repartition) {
     xor_func a{false, {0,0,1,0}};
     xor_func b{false, {0,0,0,1}};
 
