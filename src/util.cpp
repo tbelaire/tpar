@@ -285,21 +285,47 @@ void to_lower_echelon(const int m, const int n, vector<xor_func>& bits, vector<x
 }
 
 // Existing code version with bool instead of NULLs
-gatelist fix_basis(int m, int n, int k, const xor_func * fst, xor_func * snd, xor_func * mat, const vector<string> names, bool has_mat);
+gatelist
+fix_basis(int m, int n, int k,
+        const xor_func * fst,
+        xor_func * snd,
+        xor_func * mat,
+        const vector<string>& names,
+        bool has_mat);
 
 // Fixed interface versions
-gatelist fix_basis(int m, int n, int k, const vector<xor_func> fst, vector<xor_func> snd, const vector<string> names);
-void fix_basis(int m, int n, int k, const vector<xor_func> fst, vector<xor_func> snd, vector<xor_func> mat);
+gatelist
+fix_basis(int m, int n, int k,
+        const vector<xor_func>& fst,
+        vector<xor_func>& snd,
+        const vector<string>& names);
+void
+fix_basis(int m, int n, int k,
+        const vector<xor_func>& fst,
+        vector<xor_func>& snd,
+        vector<xor_func>& mat);
 
-gatelist fix_basis(int m, int n, int k, const vector<xor_func> fst, vector<xor_func> snd, const vector<string> names) {
+// Implementations
+gatelist fix_basis(int m, int n, int k,
+        const vector<xor_func>& fst,
+        vector<xor_func>& snd,
+        const vector<string>& names) {
     return fix_basis(m, n, k, &fst[0], &snd[0], nullptr, names, false);
 }
-void fix_basis(int m, int n, int k, const vector<xor_func> fst, vector<xor_func> snd, vector<xor_func> mat) {
+void fix_basis(int m, int n, int k,
+        const vector<xor_func>& fst,
+        vector<xor_func>& snd,
+        vector<xor_func>& mat) {
     fix_basis(m, n, k, &fst[0], &snd[0], &mat[0], {}, true);
 }
 // Expects two matrices in echelon form, the second being a subset of the
 //   rowspace of the first. It then morphs the second matrix into the first
-gatelist fix_basis(int m, int n, int k, const xor_func * fst, xor_func * snd, xor_func * mat, const vector<string> names, bool has_mat) {
+gatelist fix_basis(int m, int n, int k,
+        const xor_func * fst,
+        xor_func * snd,
+        xor_func * mat,
+        const vector<string>& names,
+        bool has_mat) {
   gatelist acc;
   int j = 0;
   bool flg = false;

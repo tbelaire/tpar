@@ -400,9 +400,51 @@ TEST(echelon, lowerMat3x5) {
     EXPECT_EQ(false, arr2[2][4]);
 }
 
-// TODO fix_basis
-TEST(DISABLED_fixBasis, basic) {
-    EXPECT_EQ(1,0);
+
+// Existing code version with bool instead of NULLs
+gatelist
+fix_basis(int m, int n, int k,
+        const xor_func * fst,
+        xor_func * snd,
+        xor_func * mat,
+        const vector<string> names,
+        bool has_mat);
+
+// Fixed interface versions
+gatelist
+fix_basis(int m, int n, int k,
+        const vector<xor_func>& fst,
+        vector<xor_func>& snd,
+        const vector<string>& names);
+void
+fix_basis(int m, int n, int k,
+        const vector<xor_func>& fst,
+        vector<xor_func>& snd,
+        vector<xor_func>& mat);
+// Expects two matrices in echelon form, the second being a subset of the
+// rowspace of the first. It then morphs the second matrix into the first
+TEST(fixBasis, basic) {
+    vector<xor_func> A {
+            {false, {1,0,0}},
+            {false, {0,1,0}},
+            {false, {0,0,1}},
+        };
+    vector<xor_func> B {
+            {false, {1,0,0}},
+            {false, {0,0,1}},
+            {false, {0,0,0}},
+        };
+    vector<xor_func> C {
+            {false, {1,0,0}},
+            {false, {0,1,0}},
+            {false, {0,0,1}},
+        };
+
+    fix_basis(3, 3, 2, A, B, C);
+    cout << A << endl;
+    cout << B << endl;
+    cout << C << endl;
+
 }
 void compose(int num, vector<xor_func>& A, const vector<xor_func>& B);
 TEST(compose, basic) {
