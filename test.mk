@@ -11,7 +11,8 @@
 #######################################################################
 # All tests produced by this Makefile.  Remember to add new tests you
 # created to the list.
-TESTS = util_test circuit_test partition_test oracle_test xor_func_test
+# The tests seems to be run in this order.
+TESTS = util_test circuit_test partition_test oracle_test dotqc_test
 #######################################################################
 
 # Please tweak the following variable definitions as needed by your

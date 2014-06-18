@@ -551,7 +551,11 @@ gatelist construct_circuit(
   vector<xor_func> bits, pre, post;
 
   assert(in.size() == num);
-  assert(out.size() == num);
+  if(out.size() != num) {
+      cout << "out.size() = " << out.size() << endl;
+      cout << "num = " << num << endl;
+      assert(out.size() == num);
+  }
   // flg = forall i. in[i] == out[i]
   bool ins_equal_outs = true;
   for (int i = 0; i < num; i++) {
