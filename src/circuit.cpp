@@ -693,7 +693,7 @@ dotqc character::synthesize() {
   for (int j = 0; j < 2; j++) {
     for (auto it = remaining[j].begin(); it != remaining[j].end();) {
       if (mask.contains(*it)) {
-        add_to_partition(floats[j], *it, phase_expts, oracle);
+        add_to_partition(floats[j], *it, oracle);
         it = remaining[j].erase(it);
       } else it++;
     }
@@ -738,15 +738,15 @@ dotqc character::synthesize() {
       if (disp_log) cerr << "    Dimension increased to " << rank << ", fixing partitions...\n" << flush;
       dim = rank;
       oracle.set_dim(dim);
-      repartition(floats[0], phase_expts, oracle);
-      repartition(floats[1], phase_expts, oracle);
+      repartition(floats[0], oracle);
+      repartition(floats[1], oracle);
     }
 
     // Add new functions to the partition
     for (int j = 0; j < 2; j++) {
       for (auto it = remaining[j].begin(); it != remaining[j].end();) {
         if (mask.contains(*it)) {
-          add_to_partition(floats[j], *it, phase_expts, oracle);
+          add_to_partition(floats[j], *it, oracle);
           it = remaining[j].erase(it);
         } else it++;
       }
@@ -809,7 +809,7 @@ dotqc character::synthesize_unbounded() {
   for (int j = 0; j < 2; j++) {
     for (auto it = remaining[j].begin(); it != remaining[j].end();) {
       if (mask.contains(*it)) {
-        add_to_partition(floats[j], *it, phase_expts, oracle);
+        add_to_partition(floats[j], *it, oracle);
         it = remaining[j].erase(it);
       } else it++;
     }
