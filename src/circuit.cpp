@@ -52,12 +52,11 @@ character::character(const dotqc &input) :
     gate_lookup["P"] = 2;
     gate_lookup["P*"] = 6;
     gate_lookup["Z"] = 4;
-    gate_lookup["Y"] = 4;
+    gate_lookup["Y"] = 4; // TODO investigate
 
     // Initialize names and wires
     vector<xor_func> wires;
     wires.reserve( n + m );
-    vector<xor_func> &output = wires;
     int name_max = 0;
     for (const auto& name : input.names) {
         // name_map maps a name to a wire

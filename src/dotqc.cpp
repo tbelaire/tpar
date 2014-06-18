@@ -24,6 +24,9 @@ void dotqc::input(istream& in) {
     ignore_white(in);
   }
 
+  this->input_wires.clear();
+  this->output_wires.clear();
+
   // Primary inputs
   while (buf != ".i") in >> buf;
   ignore_white(in);
@@ -31,10 +34,18 @@ void dotqc::input(istream& in) {
     n++;
     in >> buf;
     zero[buf] = 0;
+    input_wires.push_back(buf);
     ignore_white(in);
   }
 
   m = names.size() - n;
+  while (buf != ".o") in >> buf;
+  ignore_white(in);
+  while (in.peek() != '\n' && in.peek() != '\r') {
+    in >> buf;
+    output_wires.push_back(buf);
+    ignore_white(in);
+  }
 
   // Circuit
   while (buf != "BEGIN") in >> buf;
@@ -362,7 +373,9 @@ bool dotqc::operator==(const dotqc& other) const {
             && other.m == m
             && other.names == names
             && other.zero == zero
-            && other.circ == circ);
+            && other.circ == circ
+            && other.input_wires == input_wires
+            && other.output_wires == output_wires);
 }
 
 ostream& operator<<(ostream& out, const dotqc& circuit) {

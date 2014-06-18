@@ -13,6 +13,7 @@ struct dotqc {
   int m;                   // number of known inputs (initialized to |0>)
   std::list<std::string> names;      // names of qubits
   std::map<std::string, bool> zero;  // mapping from qubits to 0 (non-zero) or 1 (zero)
+  std::vector<std::string> input_wires, output_wires; // the .i and .o lines
   gatelist circ;           // Circuit
 
   void input(std::istream& in);
