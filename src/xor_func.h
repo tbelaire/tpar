@@ -58,10 +58,15 @@ class xor_func {
         bool none() const { return bitset.none(); }
         bool any() const { return bitset.any(); }
 
+        void resize(size_t num_bits, bool value = false) {
+            bitset.resize(num_bits, value);
+        }
+
         bool operator[](const size_t& i) const {
             return this->bitset[i];
         }
 };
 
 std::ostream& operator<<(std::ostream& out, const std::vector<xor_func>& arr);
+void extend_row_length(std::vector<xor_func>& arr, int length);
 #endif // XOR_FUNC_H

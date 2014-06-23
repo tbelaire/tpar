@@ -47,3 +47,10 @@ xor_func::slice(size_t start, size_t offset) {
     const unsigned long mask = ~((~0) << left_edge);
     return aligned & mask;
 }
+
+
+void extend_row_length(vector<xor_func>& arr, int length) {
+    for(xor_func& f : arr) {
+        f.resize(length);
+    }
+}

@@ -548,7 +548,7 @@ gatelist construct_circuit(
         const int dim,
         const vector<string>& names) {
   gatelist ret, tmp, rev;
-  vector<xor_func> bits, pre, post;
+  vector<xor_func> pre, post;
 
   assert(in.size() == num);
   if(out.size() != num) {
@@ -577,18 +577,31 @@ gatelist construct_circuit(
   if (synth_method == AD_HOC) ret.splice(ret.end(), to_upper_echelon(num, dim, in, names));
   else to_upper_echelon(num, dim, in, pre);
 
+  cerr << "Partition is" << endl;
+  {
+  int tmp = 0;
+  for (const auto& p : part) {
+    tmp++;
+    cerr << "Part " << tmp << " of " << part.size() << endl;
+    vector<xor_func> arr;
+    for (const xor_func& f : p) {
+        arr.push_back(f);
+    }
+    cerr << arr;
+  }
+  }
   // For each partition... Compute *it, apply T gates, uncompute
   for (partitioning::const_iterator it = part.begin(); it != part.end(); it++) {
-    cerr << "List is of length: " << it->size() << endl;
-    auto ti = it->begin();
-    for (int i = 0; i < num;  i++) {
-      if (ti != it->end()){
-          it++;
-          /* cerr << "Ran out of list" << endl; */
-          /* exit(4); */
-      }
-      if (i < it->size()) { bits[i] = *ti; }
-      else                { bits[i] = xor_func(dim); }
+    vector<xor_func> bits;
+    {
+        int i = 0;
+        for(const xor_func& f : *it) {
+            bits.emplace_back(f);
+            i++;
+        }
+        for(; i < num; i++) {
+            bits.emplace_back(dim);
+        }
     }
 
     // prepare the bits
@@ -599,7 +612,10 @@ gatelist construct_circuit(
       rev.reverse();
       ret.splice(ret.end(), rev);
     } else {
-      to_upper_echelon(it->size(), dim, bits, post);
+      /* to_upper_echelon(it->size(), dim, bits, post); */
+      cout << "Bits size is " << bits.size() << endl;
+      cout << bits;
+      to_upper_echelon(num, dim, bits, post);
       fix_basis(num, dim, it->size(), in, bits, post);
       compose(num, pre, post);
       if (synth_method == GAUSS) ret.splice(ret.end(), gauss_CNOT_synth(num, 0, pre, names));
@@ -607,7 +623,7 @@ gatelist construct_circuit(
     }
 
     // apply the T gates
-    ti = it-> begin();
+    auto ti = it-> begin();
     for (int i = 0; ti != it->end(); ti++, i++) {
       list<string> tmp_lst{names[i]};
       if (phase.at(*ti) <= 4) {
@@ -633,21 +649,25 @@ gatelist construct_circuit(
     }
   }
 
-  // Reduce out to the basis of in
-  for (int i = 0; i < num; i++) {
-    bits[i] = out[i];
-  }
-  if (synth_method == AD_HOC) {
-    tmp = to_upper_echelon(num, dim, bits, names);
-    tmp.splice(tmp.end(), fix_basis(num, dim, num, in, bits, names));
-    tmp.reverse();
-    ret.splice(ret.end(), tmp);
-  } else {
-    to_upper_echelon(num, dim, bits, post);
-    fix_basis(num, dim, num, in, bits, post);
-    compose(num, pre, post);
-    if (synth_method == GAUSS) ret.splice(ret.end(), gauss_CNOT_synth(num, 0, pre, names));
-    else if (synth_method == PMH) ret.splice(ret.end(), CNOT_synth(num, pre, names));
+  {
+    vector<xor_func> bits;
+    // Reduce out to the basis of in
+    for (int i = 0; i < num; i++) {
+        bits.push_back(out[i]);
+    }
+    extend_row_length(bits, dim);
+    if (synth_method == AD_HOC) {
+        tmp = to_upper_echelon(num, dim, bits, names);
+        tmp.splice(tmp.end(), fix_basis(num, dim, num, in, bits, names));
+        tmp.reverse();
+        ret.splice(ret.end(), tmp);
+    } else {
+        to_upper_echelon(num, dim, bits, post);
+        fix_basis(num, dim, num, in, bits, post);
+        compose(num, pre, post);
+        if (synth_method == GAUSS) ret.splice(ret.end(), gauss_CNOT_synth(num, 0, pre, names));
+        else if (synth_method == PMH) ret.splice(ret.end(), CNOT_synth(num, pre, names));
+    }
   }
 
   return ret;
