@@ -19,6 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 Author: Matthew Amy
 ---------------------------------------------------------------------*/
 
+#ifndef PARTITION_H
+#define PARTITION_H
+
 #include <list>
 #include <set>
 #include <iostream>
@@ -34,3 +37,4 @@ partitioning create(const std::set<xor_func> & st);
 void add_to_partition(partitioning & ret, xor_func i, const ind_oracle & oracle);
 void repartition(partitioning & partition, const ind_oracle & oracle );
 partitioning partition_matroid(const std::vector<xor_func> & elts, const ind_oracle & oracle);
+#endif

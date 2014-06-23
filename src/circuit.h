@@ -19,6 +19,9 @@
 Author: Matthew Amy
 ---------------------------------------------------------------------*/
 
+#ifndef CIRCUIT_H
+#define CIRCUIT_H
+
 #include <string>
 #include <list>
 #include <iostream>
@@ -77,3 +80,4 @@ struct metacircuit {
   dotqc to_dotqc();
 };
 */
+#endif

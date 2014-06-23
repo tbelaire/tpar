@@ -1,3 +1,6 @@
+#ifndef DOTQC_H
+#define DOTQC_H
+
 #include <string>
 #include <list>
 #include <iostream>
@@ -30,3 +33,5 @@ struct dotqc {
 };
 std::ostream& operator<<(std::ostream& out, const dotqc& circuit);
 
+
+#endif
