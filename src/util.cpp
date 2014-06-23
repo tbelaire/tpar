@@ -284,15 +284,11 @@ void to_lower_echelon(const int m, const int n, vector<xor_func>& bits, vector<x
             });
 }
 
-// Existing code version with bool instead of NULLs
-gatelist
-fix_basis(int m, int n, int k,
-        const xor_func * fst,
-        xor_func * snd,
-        xor_func * mat,
-        const vector<string>& names,
-        bool has_mat);
-
+gatelist fix_basis(int m, int n, int k,
+        const vector<xor_func>& fst,
+        vector<xor_func>& snd,
+        std::function<void(int, int)> do_swap,
+        std::function<void(int, int)> do_xor);
 // Fixed interface versions
 gatelist
 fix_basis(int m, int n, int k,
@@ -310,22 +306,38 @@ gatelist fix_basis(int m, int n, int k,
         const vector<xor_func>& fst,
         vector<xor_func>& snd,
         const vector<string>& names) {
-    return fix_basis(m, n, k, &fst[0], &snd[0], nullptr, names, false);
+    gatelist acc;
+    fix_basis(m, n, k, fst, snd,
+          [&acc, &names](int r1, int r2){
+            acc.splice(acc.end(), swap_com(r1, r2, names));
+          },
+          [&acc, &names](int target, int i){
+            // The existing code did swap the two, I'm not sure why
+            // I guess I need more tests
+            acc.splice(acc.end(), xor_com(i, target, names));
+          });
+    return acc;
 }
 void fix_basis(int m, int n, int k,
         const vector<xor_func>& fst,
         vector<xor_func>& snd,
         vector<xor_func>& mat) {
-    fix_basis(m, n, k, &fst[0], &snd[0], &mat[0], {}, true);
+    fix_basis(m, n, k, fst, snd,
+          [&mat](int r1, int r2){
+            swap(mat[r1], mat[r2]);
+          },
+          [&mat](int target, int i){
+            mat[target] ^= mat[i];
+          });
 }
 // Expects two matrices in echelon form, the second being a subset of the
 //   rowspace of the first. It then morphs the second matrix into the first
 gatelist fix_basis(int m, int n, int k,
-        const xor_func * fst,
-        xor_func * snd,
-        xor_func * mat,
-        const vector<string>& names,
-        bool has_mat) {
+        const vector<xor_func>& fst,
+        vector<xor_func>& snd,
+        std::function<void(int, int)> do_swap,
+        std::function<void(int, int)> do_xor){
+
   gatelist acc;
   int j = 0;
   bool flg = false;
@@ -345,8 +357,9 @@ gatelist fix_basis(int m, int n, int k,
           flg = true;
           if (h != i) {
             swap(snd[h], snd[i]);
-            if (!has_mat)  acc.splice(acc.end(), swap_com(h, i, names));
-            else           swap(mat[h], mat[i]);
+            do_swap(h, i);
+            /* if (!has_mat)  acc.splice(acc.end(), swap_com(h, i, names)); */
+            /* else           swap(mat[h], mat[i]); */
           }
         }
       }
@@ -354,13 +367,12 @@ gatelist fix_basis(int m, int n, int k,
       if (!flg) {
         if (k >= m) {
           cout << "FATAL ERROR: second space not a subspace\n" << flush;
-          exit(1);
+          assert(k < m);
         }
         snd[k] = fst[i];
         if (k != i) {
           swap(snd[k], snd[i]);
-          if (!has_mat) acc.splice(acc.end(), swap_com(k, i, names));
-          else          swap(mat[k], mat[i]);
+          do_swap(k, i);
         }
         k++;
       }
@@ -373,11 +385,12 @@ gatelist fix_basis(int m, int n, int k,
       if (fst[i][j] != snd[i][j]) {
         if (pivots[j] == -1) {
           cout << "FATAL ERROR: cannot fix basis\n" << flush;
-          exit(1);
+          assert(false);
         } else {
           snd[i] ^= snd[pivots[j]];
-          if (! has_mat) acc.splice(acc.end(), xor_com(pivots[j], i, names));
-          else           mat[i] ^= mat[pivots[j]];
+          do_xor(i, pivots[j]);
+          /* if (! has_mat) acc.splice(acc.end(), xor_com(pivots[j], i, names)); */
+          /* else           mat[i] ^= mat[pivots[j]]; */
         }
       }
     }
