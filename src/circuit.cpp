@@ -54,6 +54,11 @@ character::character(const dotqc &input) :
     gate_lookup["Z"] = 4;
     gate_lookup["Y"] = 4; // TODO investigate
 
+    // TODO fix for permutations by actually reading the output list
+    for(int i = 0; i < input.output_wires.size(); i++) {
+        outputs.push_back(xor_func(n+m));
+        outputs.at(i).set(i);
+    }
     // Initialize names and wires
     vector<xor_func> wires;
     wires.reserve( n + m );
