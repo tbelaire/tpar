@@ -284,30 +284,30 @@ void to_lower_echelon(const int m, const int n, vector<xor_func>& bits, vector<x
             });
 }
 
-gatelist fix_basis(int m, int n, int k,
+gatelist fix_basis(int m, int n,
         const vector<xor_func>& fst,
         vector<xor_func>& snd,
         std::function<void(int, int)> do_swap,
         std::function<void(int, int)> do_xor);
 // Fixed interface versions
 gatelist
-fix_basis(int m, int n, int k,
+fix_basis(int m, int n,
         const vector<xor_func>& fst,
         vector<xor_func>& snd,
         const vector<string>& names);
 void
-fix_basis(int m, int n, int k,
+fix_basis(int m, int n,
         const vector<xor_func>& fst,
         vector<xor_func>& snd,
         vector<xor_func>& mat);
 
 // Implementations
-gatelist fix_basis(int m, int n, int k,
+gatelist fix_basis(int m, int n,
         const vector<xor_func>& fst,
         vector<xor_func>& snd,
         const vector<string>& names) {
     gatelist acc;
-    fix_basis(m, n, k, fst, snd,
+    fix_basis(m, n, fst, snd,
           [&acc, &names](int r1, int r2){
             acc.splice(acc.end(), swap_com(r1, r2, names));
           },
@@ -318,11 +318,11 @@ gatelist fix_basis(int m, int n, int k,
           });
     return acc;
 }
-void fix_basis(int m, int n, int k,
+void fix_basis(int m, int n,
         const vector<xor_func>& fst,
         vector<xor_func>& snd,
         vector<xor_func>& mat) {
-    fix_basis(m, n, k, fst, snd,
+    fix_basis(m, n, fst, snd,
           [&mat](int r1, int r2){
             swap(mat[r1], mat[r2]);
           },
@@ -332,12 +332,13 @@ void fix_basis(int m, int n, int k,
 }
 // Expects two matrices in echelon form, the second being a subset of the
 //   rowspace of the first. It then morphs the second matrix into the first
-gatelist fix_basis(int m, int n, int k,
+gatelist fix_basis(int m, int n,
         const vector<xor_func>& fst,
         vector<xor_func>& snd,
         std::function<void(int, int)> do_swap,
         std::function<void(int, int)> do_xor){
 
+  int k = compute_rank(snd);
   gatelist acc;
   int j = 0;
   bool flg = false;
@@ -625,7 +626,7 @@ gatelist construct_circuit(
     // prepare the bits
     if (synth_method == AD_HOC) {
       tmp = to_upper_echelon(it->size(), dim, bits, names);
-      tmp.splice(tmp.end(), fix_basis(num, dim, it->size(), in, bits, names));
+      tmp.splice(tmp.end(), fix_basis(num, dim, in, bits, names));
       rev = tmp;
       rev.reverse();
       ret.splice(ret.end(), rev);
@@ -634,7 +635,7 @@ gatelist construct_circuit(
       cout << "Bits size is " << bits.size() << endl;
       cout << bits;
       to_upper_echelon_mut(num, dim, bits, post);
-      fix_basis(num, dim, it->size(), in, bits, post);
+      fix_basis(num, dim, in, bits, post);
       compose(num, pre, post);
       if (synth_method == GAUSS) ret.splice(ret.end(), gauss_CNOT_synth(num, 0, pre, names));
       else if (synth_method == PMH) ret.splice(ret.end(), CNOT_synth(num, pre, names));
@@ -676,12 +677,12 @@ gatelist construct_circuit(
     extend_row_length(bits, dim);
     if (synth_method == AD_HOC) {
         tmp = to_upper_echelon(num, dim, bits, names);
-        tmp.splice(tmp.end(), fix_basis(num, dim, num, in, bits, names));
+        tmp.splice(tmp.end(), fix_basis(num, dim, in, bits, names));
         tmp.reverse();
         ret.splice(ret.end(), tmp);
     } else {
         to_upper_echelon_mut(num, dim, bits, post);
-        fix_basis(num, dim, num, in, bits, post);
+        fix_basis(num, dim, in, bits, post);
         compose(num, pre, post);
         if (synth_method == GAUSS) ret.splice(ret.end(), gauss_CNOT_synth(num, 0, pre, names));
         else if (synth_method == PMH) ret.splice(ret.end(), CNOT_synth(num, pre, names));

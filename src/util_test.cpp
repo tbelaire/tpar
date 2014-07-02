@@ -419,7 +419,7 @@ TEST(echelon, lowerMat3x5) {
 
 // Existing code version with bool instead of NULLs
 gatelist
-fix_basis(int m, int n, int k,
+fix_basis(int m, int n,
         const xor_func * fst,
         xor_func * snd,
         xor_func * mat,
@@ -428,12 +428,12 @@ fix_basis(int m, int n, int k,
 
 // Fixed interface versions
 gatelist
-fix_basis(int m, int n, int k,
+fix_basis(int m, int n,
         const vector<xor_func>& fst,
         vector<xor_func>& snd,
         const vector<string>& names);
 void
-fix_basis(int m, int n, int k,
+fix_basis(int m, int n,
         const vector<xor_func>& fst,
         vector<xor_func>& snd,
         vector<xor_func>& mat);
@@ -456,11 +456,38 @@ TEST(fixBasis, basic) {
             {false, {0,0,1}},
         };
 
-    fix_basis(3, 3, 2, A, B, C);
+    fix_basis(3, 3, A, B, C);
     cout << A << endl;
     cout << B << endl;
     cout << C << endl;
+}
 
+TEST(fixBasis, emptySnd) {
+    vector<xor_func> A {
+            {false, {1,1,0}},
+            {false, {0,1,0}},
+            {false, {0,0,1}},
+        };
+    vector<xor_func> B {
+            {false, {0,0,0}},
+            {false, {0,0,0}},
+            {false, {0,0,0}},
+        };
+    vector<xor_func> C {
+            {false, {1,0,0}},
+            {false, {0,1,0}},
+            {false, {0,0,1}},
+        };
+    vector<xor_func> id {
+            {false, {1,0,0}},
+            {false, {0,1,0}},
+            {false, {0,0,1}},
+        };
+
+    fix_basis(3, 3, A, B, C);
+    EXPECT_EQ(id, C);
+    // if we don't have any existing constraints
+    // on what the outputs should be, do nothing, get id out.
 }
 void compose(int num, vector<xor_func>& A, const vector<xor_func>& B);
 TEST(compose, basic) {
