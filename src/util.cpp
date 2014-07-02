@@ -596,23 +596,20 @@ gatelist construct_circuit(
   // Reduce in to echelon form to decide on a basis
   if (synth_method == AD_HOC) ret.splice(ret.end(), to_upper_echelon(num, dim, in, names));
   else {
-      cout << "Input to upper echelon" << endl << in;
-      cout << "Num, dim  " << num << "," << dim << endl;
       to_upper_echelon_mut(num, dim, in, pre);
-      cout << "Is this upper echelon?" << endl << in;
   }
 
-  cerr << "Partition is" << endl;
+  if(disp_log) cerr << "Partition is" << endl;
   {
   int tmp = 0;
   for (const auto& p : part) {
     tmp++;
-    cerr << "Part " << tmp << " of " << part.size() << endl;
+    if(disp_log) cerr << "Part " << tmp << " of " << part.size() << endl;
     vector<xor_func> arr;
     for (const xor_func& f : p) {
         arr.push_back(f);
     }
-    cerr << arr;
+    if(disp_log) cerr << arr;
   }
   }
   // For each partition... Compute *it, apply T gates, uncompute
@@ -637,9 +634,8 @@ gatelist construct_circuit(
       rev.reverse();
       ret.splice(ret.end(), rev);
     } else {
-      /* to_upper_echelon(it->size(), dim, bits, post); */
-      cout << "Bits size is " << bits.size() << endl;
-      cout << bits;
+      /* cout << "Bits size is " << bits.size() << endl; */
+      /* cout << bits; */
       to_upper_echelon_mut(num, dim, bits, post);
       fix_basis(num, dim, in, bits, post);
       compose(num, pre, post);

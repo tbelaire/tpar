@@ -55,7 +55,8 @@ character::character(const dotqc &input) :
     gate_lookup["Y"] = 4; // TODO investigate
 
     // TODO fix for permutations by actually reading the output list
-    for(int i = 0; i < input.output_wires.size(); i++) {
+    // TODO hm?
+    for(int i = 0; i < n + m; i++) {
         outputs.push_back(xor_func(n+m));
         /* outputs.at(i).set(i); */
     }
@@ -402,9 +403,6 @@ dotqc character::synthesize() {
       auto tmp = construct_circuit(this->phase_expts, floats[0],
               wires, wires, n + m, n + h, this->names);
       ret.circ.splice(ret.circ.end(), tmp);
-      cout << "Printing outputs" << endl;
-      this->print_outputs();
-      cout << "Printed outputs" << endl;
       tmp = construct_circuit(this->phase_expts, floats[1],
               wires, this->outputs, n + m, n + h, this->names);
       ret.circ.splice(ret.circ.end(), tmp);
