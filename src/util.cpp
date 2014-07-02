@@ -368,6 +368,8 @@ gatelist fix_basis(int m, int n,
       if (!flg) {
         if (k >= m) {
           cout << "FATAL ERROR: second space not a subspace\n" << flush;
+          cout << "fst" << endl << fst;
+          cout << "snd" << endl << snd;
           assert(k < m);
         }
         snd[k] = fst[i];
@@ -386,6 +388,8 @@ gatelist fix_basis(int m, int n,
       if (fst[i][j] != snd[i][j]) {
         if (pivots[j] == -1) {
           cout << "FATAL ERROR: cannot fix basis\n" << flush;
+          cout << "fst" << endl << fst;
+          cout << "snd" << endl << snd;
           assert(false);
         } else {
           snd[i] ^= snd[pivots[j]];
@@ -396,8 +400,10 @@ gatelist fix_basis(int m, int n,
       }
     }
     if (!(snd[i] == fst[i])) {
-      cout << "FATAL ERROR: basis differs\n" << flush;
-      exit(1);
+        cout << "FATAL ERROR: basis differs\n" << flush;
+        cout << "fst" << endl << fst;
+        cout << "snd" << endl << snd;
+        exit(1);
     }
   }
 
