@@ -51,7 +51,7 @@ gatelist to_upper_echelon(int m, int n,
 void to_upper_echelon(int m, int n,
         const std::vector<xor_func>& bits,
         std::vector<xor_func>& mat);
-void to_upper_echelon(int m, int n,
+void to_upper_echelon_mut(int m, int n,
         std::vector<xor_func>& bits,
         std::vector<xor_func>& mat);
 
@@ -68,7 +68,7 @@ void to_lower_echelon(const int m, const int n,
 gatelist construct_circuit(
         const exponents_set & phase,
         const partitioning & part,
-        const std::vector<xor_func>& in,
+        std::vector<xor_func> in,
         const std::vector<xor_func>& out,
         const int num,
         const int dim,

@@ -238,6 +238,33 @@ TEST(echelon, upperMat) {
     EXPECT_EQ(true,  B[2][1]);
     EXPECT_EQ(false, B[2][2]);
 }
+
+TEST(echelon, realFail) {
+    vector<xor_func> A {
+        {false, {1,0,0,0,0,0,0,0}},
+        {false, {0,1,0,0,0,0,0,0}},
+        {false, {0,0,0,0,0,0,1,0}},
+        {false, {0,0,0,0,0,0,0,0}},
+        {false, {0,0,0,0,0,1,0,0}},
+    };
+    vector<xor_func> pre {
+        {false, {1,0,0,0,0,0,0,0}},
+        {false, {0,1,0,0,0,0,0,0}},
+        {false, {0,0,1,0,0,0,0,0}},
+        {false, {0,0,0,1,0,0,0,0}},
+        {false, {0,0,0,0,1,0,0,0}},
+    };
+    vector<xor_func> aligned {
+        {false, {1,0,0,0,0,0,0,0}},
+        {false, {0,1,0,0,0,0,0,0}},
+        {false, {0,0,0,0,0,1,0,0}},
+        {false, {0,0,0,0,0,0,1,0}},
+        {false, {0,0,0,0,0,0,0,0}},
+    };
+    to_upper_echelon_mut(5, 8, A, pre);
+    EXPECT_EQ(A, aligned);
+}
+
 TEST(echelon, lowerMat2x2) {
     vector<xor_func>arr {
             {false, {1,1}},

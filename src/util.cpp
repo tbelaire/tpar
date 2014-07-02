@@ -217,7 +217,7 @@ void to_upper_echelon(int m, int n,
           });
 }
 // Used in compose.
-void to_upper_echelon(int m, int n,
+void to_upper_echelon_mut(int m, int n,
         vector<xor_func>& bits,
         vector<xor_func>& mat) {
   to_upper_echelon(m, n, bits,
@@ -406,7 +406,7 @@ gatelist fix_basis(int m, int n, int k,
 // A := B^{-1} A
 void compose(int num, vector<xor_func>& A, const vector<xor_func>& B) {
   vector<xor_func> tmp = B;
-  to_upper_echelon(num, num, tmp, A);
+  to_upper_echelon_mut(num, num, tmp, A);
   to_lower_echelon(num, num, tmp, A);
 }
 
@@ -555,7 +555,7 @@ gatelist CNOT_synth(int n, int num_segments, vector<xor_func>& bits, const vecto
 gatelist construct_circuit(
         const exponents_set & phase,
         const partitioning & part,
-        const vector<xor_func>& in,
+        vector<xor_func> in,  // Copy and mutate this
         const vector<xor_func>& out,
         const int num,
         const int dim,
@@ -588,7 +588,12 @@ gatelist construct_circuit(
 
   // Reduce in to echelon form to decide on a basis
   if (synth_method == AD_HOC) ret.splice(ret.end(), to_upper_echelon(num, dim, in, names));
-  else to_upper_echelon(num, dim, in, pre);
+  else {
+      cout << "Input to upper echelon" << endl << in;
+      cout << "Num, dim  " << num << "," << dim << endl;
+      to_upper_echelon_mut(num, dim, in, pre);
+      cout << "Is this upper echelon?" << endl << in;
+  }
 
   cerr << "Partition is" << endl;
   {
