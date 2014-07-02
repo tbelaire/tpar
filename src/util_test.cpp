@@ -21,7 +21,6 @@ TEST(utilTest, initMaxtrix) {
     EXPECT_EQ(false, bits.at(1).test(0));
 }
 
-int compute_rank(int m, int n, const std::vector<xor_func> bits);
 TEST(computeRank, vectors) {
 
     EXPECT_EQ(1, compute_rank(2, 4, init_matrix({
@@ -51,7 +50,6 @@ TEST(computeRank, vectors) {
 }
 
 // Same test data, just fed in differently.
-int compute_rank(int m, int n, const xor_func * bits);
 TEST(computeRank, pointers) {
     EXPECT_EQ(1, compute_rank(2, 4, &init_matrix({
                 {1,0,1,0},
@@ -78,15 +76,6 @@ TEST(computeRank, pointers) {
                 {0,1,0,1},
             })[0]));
 }
-int compute_rank(int n, const exponents_set & expnts, const std::set<xor_func> & lst);
-//TEST(computeRank, xptSets) {
-    // I have no idea what this is going to do.
-    // Looking at it's history, it only uses the set passed in for it's size
-    // but it'd make more sense to compute the rank of the subset.
-    // Which would involve reading the expoents_set and the set
-    // in past versions, where the set is a set of indecies into expnts,
-    // but now we can just compute directly.
-//}
 TEST(computeRank, sets) {
     EXPECT_EQ(3, compute_rank(set<xor_func>{
                 {false, {0,0,0,0,1}},

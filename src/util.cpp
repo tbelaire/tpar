@@ -92,7 +92,7 @@ int compute_rank_dest(vector<xor_func> tmp) {
 
 
 // If they're giving the info to me, might as well check it.
-int compute_rank(int m, int n, const vector<xor_func> bits) {
+int compute_rank(int m, int n, const vector<xor_func>& bits) {
     if( m != bits.size() ) {
         print_wires(bits);
         throw std::logic_error("Bad sizes in compute_rank: m="
@@ -108,7 +108,7 @@ int compute_rank(int m, int n, const vector<xor_func> bits) {
     return compute_rank_dest(bits);
 }
 
-int compute_rank(const vector<xor_func> bits) {
+int compute_rank(const vector<xor_func>& bits) {
     return compute_rank_dest(bits);
 }
 
