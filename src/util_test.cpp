@@ -142,7 +142,7 @@ TEST(echelon, upperCallCount) {
     int num_negates = 0;
     int num_swaps = 0;
     int num_xors = 0;
-    const int rank = to_upper_echelon(2,2, arr,
+    const int rank = to_upper_echelon_mut(2,2, arr,
             [&num_negates](int j){
                 (void)j;
                 num_negates++;
@@ -173,7 +173,7 @@ TEST(echelon, upperZeroRow) {
     int num_swaps = 0;
     int num_negates = 0;
     int num_xors = 0;
-    const int rank = to_upper_echelon(3,2, arr,
+    const int rank = to_upper_echelon_mut(3,2, arr,
             [&num_negates](int j){
                 (void)j;
                 num_negates++;

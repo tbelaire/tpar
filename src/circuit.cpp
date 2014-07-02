@@ -57,7 +57,7 @@ character::character(const dotqc &input) :
     // TODO fix for permutations by actually reading the output list
     for(int i = 0; i < input.output_wires.size(); i++) {
         outputs.push_back(xor_func(n+m));
-        outputs.at(i).set(i);
+        /* outputs.at(i).set(i); */
     }
     // Initialize names and wires
     vector<xor_func> wires;
