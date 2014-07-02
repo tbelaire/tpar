@@ -638,7 +638,7 @@ gatelist construct_circuit(
     // apply the T gates
     auto ti = it-> begin();
     for (int i = 0; ti != it->end(); ti++, i++) {
-      list<string> tmp_lst{names[i]};
+      const list<string> tmp_lst{names[i]};
       if (phase.at(*ti) <= 4) {
         if (phase.at(*ti) / 4 == 1) ret.emplace_back("Z", tmp_lst);
         if (phase.at(*ti) / 2 == 1) ret.emplace_back("P", tmp_lst);
