@@ -220,16 +220,16 @@ void to_upper_echelon(int m, int n,
 void to_upper_echelon_mut(int m, int n,
         vector<xor_func>& bits,
         vector<xor_func>& mat) {
-  to_upper_echelon_mut(m, n, bits,
-          [&mat, m](int j){
-            mat[j].set(m);
-          },
-          [&mat](int r1, int r2){
-            swap(mat[r1], mat[r2]);
-          },
-          [&mat](int target, int i){
-            mat[target] ^= mat[i];
-          });
+    to_upper_echelon_mut(m, n, bits,
+            [&mat, m](int j){ // Negate
+                mat[j].negate();
+            },
+            [&mat](int r1, int r2){
+                swap(mat[r1], mat[r2]);
+            },
+            [&mat](int target, int i){
+                mat[target] ^= mat[i];
+            });
 }
 
 void backfill_matrix(int m, int n,

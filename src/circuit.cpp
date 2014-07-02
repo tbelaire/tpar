@@ -95,11 +95,11 @@ character::character(const dotqc &input) :
         } else if ((gate.first == "tof" || gate.first == "X")
                 && gate.second.size() == 1) {
             int first_input = name_map[*(gate.second.begin())];
-            wires[first_input].flip(n + h);
+            wires[first_input].negate();
         } else if (gate.first == "Y" && gate.second.size() == 1) {
             int first_input = name_map[*(gate.second.begin())];
             insert_phase(gate_lookup[gate.first], wires[first_input], phase_expts);
-            wires[name_map[*(gate.second.begin())]].flip(n + h);
+            wires[first_input].negate();
         } else if (gate.first == "T" || gate.first == "T*" ||
                 gate.first == "P" || gate.first == "P*" ||
                 (gate.first == "Z" && gate.second.size() == 1)) {
