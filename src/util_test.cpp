@@ -164,6 +164,20 @@ TEST(echelon, upperCallCount) {
     EXPECT_EQ(0, num_xors);
 }
 
+TEST(echelon, negate) {
+    vector<xor_func>arr{
+            {false, {1,0}},
+            {true,  {0,1}},
+        };
+    vector<xor_func> pre{
+            {true,  {1,0}},
+            {false, {0,1}},
+        };
+    to_upper_echelon_mut(2,2, arr, pre);
+    EXPECT_EQ(true, pre[0].is_negated());
+    EXPECT_EQ(true, pre[1].is_negated());
+}
+
 TEST(echelon, upperZeroRow) {
     vector<xor_func>arr {
             {true, {0,1}},
@@ -440,7 +454,7 @@ fix_basis(int m, int n,
 // Expects two matrices in echelon form, the second being a subset of the
 // rowspace of the first. It then morphs the second matrix into the first
 TEST(fixBasis, basic) {
-    vector<xor_func> A {
+    const vector<xor_func> A {
             {false, {1,0,0}},
             {false, {0,1,0}},
             {false, {0,0,1}},
@@ -457,9 +471,15 @@ TEST(fixBasis, basic) {
         };
 
     fix_basis(3, 3, A, B, C);
-    cout << A << endl;
-    cout << B << endl;
-    cout << C << endl;
+
+    const vector<xor_func> C_out{
+        {false, {1,0,0}},
+            {false, {0,0,1}},
+            {false, {0,1,0}},
+    };
+
+    EXPECT_EQ(A, B);
+    EXPECT_EQ(C_out, C);
 }
 
 TEST(fixBasis, emptySnd) {
