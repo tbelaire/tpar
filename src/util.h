@@ -39,7 +39,7 @@ int compute_rank(const std::vector<xor_func>& bits);
 int compute_rank(int m, int n, const xor_func * bits);
 int compute_rank(const std::set<xor_func> & lst);
 
-int to_upper_echelon(int m, int n,
+int to_upper_echelon_mut(int m, int n,
         std::vector<xor_func>& arr,
         std::function<void(int)> do_negate,
         std::function<void(int, int)> do_swap,

@@ -137,7 +137,7 @@ int compute_rank(const set<xor_func> & set) {
   return compute_rank_dest(tmp);
 }
 
-int to_upper_echelon(int m, int n,
+int to_upper_echelon_mut(int m, int n,
         vector<xor_func>& bits,
         std::function<void(int)> do_negate,
         std::function<void(int, int)> do_swap,
@@ -186,7 +186,7 @@ gatelist to_upper_echelon(int m, int n,
         const vector<string>& names) {
   gatelist acc;
   vector<xor_func> tmp{bits};
-  to_upper_echelon(m, n, tmp,
+  to_upper_echelon_mut(m, n, tmp,
           [&acc, &names](int j){
             acc.splice(acc.end(), x_com(j, names));
           },
@@ -205,7 +205,7 @@ void to_upper_echelon(int m, int n,
         const vector<xor_func>& bits,
         vector<xor_func>& mat) {
   vector<xor_func> tmp{bits};
-  to_upper_echelon(m, n, tmp,
+  to_upper_echelon_mut(m, n, tmp,
           [&mat, m](int j){
             mat[j].set(m);
           },
@@ -220,7 +220,7 @@ void to_upper_echelon(int m, int n,
 void to_upper_echelon_mut(int m, int n,
         vector<xor_func>& bits,
         vector<xor_func>& mat) {
-  to_upper_echelon(m, n, bits,
+  to_upper_echelon_mut(m, n, bits,
           [&mat, m](int j){
             mat[j].set(m);
           },
@@ -633,7 +633,7 @@ gatelist construct_circuit(
       /* to_upper_echelon(it->size(), dim, bits, post); */
       cout << "Bits size is " << bits.size() << endl;
       cout << bits;
-      to_upper_echelon(num, dim, bits, post);
+      to_upper_echelon_mut(num, dim, bits, post);
       fix_basis(num, dim, it->size(), in, bits, post);
       compose(num, pre, post);
       if (synth_method == GAUSS) ret.splice(ret.end(), gauss_CNOT_synth(num, 0, pre, names));
@@ -680,7 +680,7 @@ gatelist construct_circuit(
         tmp.reverse();
         ret.splice(ret.end(), tmp);
     } else {
-        to_upper_echelon(num, dim, bits, post);
+        to_upper_echelon_mut(num, dim, bits, post);
         fix_basis(num, dim, num, in, bits, post);
         compose(num, pre, post);
         if (synth_method == GAUSS) ret.splice(ret.end(), gauss_CNOT_synth(num, 0, pre, names));
