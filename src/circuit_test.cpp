@@ -12,6 +12,8 @@ TEST(parsingFromDotQC, initalized) {
     dotqc input_dotqc {.n = 1, .m = 0,
         .names = {"1"},
         .zero = {{"1", false}},
+        .input_wires = {},
+        .output_wires = {},
         .circ = {{"Z", {"1"} }}
     };
     character c{input_dotqc};

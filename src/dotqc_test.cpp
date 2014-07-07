@@ -34,9 +34,9 @@ TEST(dotqc, superSimpleInput) {
     dotqc initalized_dotqc {.n = 1, .m = 0,
         .names = {"1"},
         .zero = {{"1", false}},
-        .circ = {{"Z", {"1"} }},
         .input_wires = {"1"},
-        .output_wires = {"1"}
+        .output_wires = {"1"},
+        .circ = {{"Z", {"1"} }},
     };
     EXPECT_EQ(input_dotqc, initalized_dotqc);
 }
@@ -60,9 +60,9 @@ TEST(dotqc, somewhatSimpleInput) {
     dotqc initalized_dotqc {.n = 4, .m = 0,
         .names = {"1", "2", "3", "4"},
         .zero = {{"1", false}, {"2", false}, {"3", false}, {"4", false}},
-        .circ = {{"Z", {"1"}}, {"Z", {"2", "3"}}},
         .input_wires = {"1", "2", "3", "4"},
         .output_wires = {"1", "2", "3", "4"},
+        .circ = {{"Z", {"1"}}, {"Z", {"2", "3"}}},
     };
     EXPECT_EQ(input_dotqc, initalized_dotqc);
 }
@@ -71,6 +71,8 @@ TEST(removeIds, zz) {
     dotqc zz {.n = 1, .m = 0,
         .names = {"1"},
         .zero = {{"1", false}},
+        .input_wires = {},
+        .output_wires = {},
         .circ = {
             {"Z", {"1"} },
             {"Z", {"1"} },
@@ -85,12 +87,12 @@ TEST(removeIds, czcz) {
     dotqc czcz {.n = 2, .m = 0,
         .names = {"A", "B"},
         .zero = {{"A", false}, {"B", false}},
+        .input_wires = {"A", "B"},
+        .output_wires = {"A", "B"},
         .circ = {
             {"Z", {"A", "B"} },
             {"Z", {"A", "B"} },
         },
-        .input_wires = {"A", "B"},
-        .output_wires = {"A", "B"},
     };
     czcz.remove_ids();
     EXPECT_EQ(0, czcz.circ.size());
@@ -100,13 +102,13 @@ TEST(removeIds, zazbza) {
     dotqc zazbza {.n = 2, .m = 0,
         .names = {"A", "B"},
         .zero = {{"A", false}, {"B", false}},
+        .input_wires = {"A", "B"},
+        .output_wires = {"A", "B"},
         .circ = {
             {"Z", {"A"} },
             {"Z", {"B"} },
             {"Z", {"A"} },
         },
-        .input_wires = {"A", "B"},
-        .output_wires = {"A", "B"},
     };
     zazbza.remove_ids();
     EXPECT_EQ(1, zazbza.circ.size());
@@ -120,13 +122,13 @@ TEST(removeIds, ztz) {
     dotqc ztz {.n = 2, .m = 0,
         .names = {"A", "B"},
         .zero = {{"A", false}, {"B", false}},
+        .input_wires = {"A", "B"},
+        .output_wires = {"A", "B"},
         .circ = {
             {"Z", {"A"} },
             {"T", {"A"} },
             {"Z", {"A"} },
         },
-        .input_wires = {"A", "B"},
-        .output_wires = {"A", "B"},
     };
     dotqc ztz_copy = ztz;
     ztz.remove_ids();
@@ -138,13 +140,13 @@ TEST(removeIds, ztz2) {
     dotqc ztz2 {.n = 2, .m = 0,
         .names = {"A", "B"},
         .zero = {{"A", false}, {"B", false}},
+        .input_wires = {"A", "B"},
+        .output_wires = {"A", "B"},
         .circ = {
             {"Z", {"A"} },
             {"T", {"A", "B"} },
             {"Z", {"A"} },
         },
-        .input_wires = {"A", "B"},
-        .output_wires = {"A", "B"},
     };
     dotqc ztz2_copy = ztz2;
     ztz2.remove_ids();
@@ -156,12 +158,12 @@ TEST(removeIDs, tt) {
     dotqc tt {.n = 1, .m = 0,
         .names = {"1"},
         .zero = {{"1", false}},
+        .input_wires = {"1"},
+        .output_wires = {"1"},
         .circ = {
             {"T", {"1"} },
             {"T", {"1"} },
         },
-        .input_wires = {"1"},
-        .output_wires = {"1"},
     };
     tt.remove_ids();
     EXPECT_EQ(2, tt.circ.size());
@@ -171,12 +173,12 @@ TEST(removeIDs, tts) {
     dotqc tt {.n = 1, .m = 0,
         .names = {"1"},
         .zero = {{"1", false}},
+        .input_wires = {"1"},
+        .output_wires = {"1"},
         .circ = {
             {"T", {"1"} },
             {"T*", {"1"} },
         },
-        .input_wires = {"1"},
-        .output_wires = {"1"},
     };
     tt.remove_ids();
     EXPECT_EQ(0, tt.circ.size());
@@ -186,12 +188,12 @@ TEST(removeIDs, superset) {
     dotqc zz {.n = 3, .m = 0,
         .names = {"A", "B", "C"},
         .zero = {{"A", false}, {"B", false}, {"C", false}},
+        .input_wires = {"A", "B", "C"},
+        .output_wires = {"A", "B", "C"},
         .circ = {
             {"Z", {"A", "B"} },
             {"Z", {"A", "B", "C"} },
         },
-        .input_wires = {"A", "B", "C"},
-        .output_wires = {"A", "B", "C"},
     };
     dotqc zz_copy = zz;
     zz.remove_ids();
@@ -206,12 +208,12 @@ TEST(removeIDs, yny) {
     dotqc yny {.n = 2, .m = 0,
         .names = {"A", "B"},
         .zero = {{"A", false}, {"B", false}},
+        .input_wires = {"A", "B"},
+        .output_wires = {"A", "B"},
         .circ = {
             {"Y", {"A", "B"} },
             {"Y", {"B", "A"} },
         },
-        .input_wires = {"A", "B"},
-        .output_wires = {"A", "B"},
     };
     yny.remove_ids();
     EXPECT_EQ(2, yny.circ.size());
@@ -221,12 +223,12 @@ TEST(removeIDs, yabc) {
     dotqc yny {.n = 3, .m = 0,
         .names = {"A", "B", "C"},
         .zero = {{"A", false}, {"B", false}, {"C", false}},
+        .input_wires = {"A", "B"},
+        .output_wires = {"A", "B"},
         .circ = {
             {"Y", {"A", "B", "C"} },
             {"Y", {"A", "C", "B"} },
         },
-        .input_wires = {"A", "B"},
-        .output_wires = {"A", "B"},
     };
     yny.remove_ids();
     EXPECT_EQ(2, yny.circ.size());
@@ -247,12 +249,12 @@ TEST(depth, countT) {
     dotqc t {.n = 3, .m = 0,
         .names = {"A", "B", "C"},
         .zero = {{"A", false}, {"B", false}, {"C", false}},
+        .input_wires = {"A", "B"},
+        .output_wires = {"A", "B"},
         .circ = {
             {"T", {"A"} },
             {"Y", {"A", "C", "B"} },
         },
-        .input_wires = {"A", "B"},
-        .output_wires = {"A", "B"},
     };
     EXPECT_EQ(1, t.count_t_depth());
 }
@@ -261,12 +263,12 @@ TEST(depth, countNone) {
     dotqc no_t {.n = 3, .m = 0,
         .names = {"A", "B", "C"},
         .zero = {{"A", false}, {"B", false}, {"C", false}},
+        .input_wires = {"A", "B"},
+        .output_wires = {"A", "B"},
         .circ = {
             {"Z", {"A"} },
             {"Y", {"A", "C", "B"} },
         },
-        .input_wires = {"A", "B"},
-        .output_wires = {"A", "B"},
     };
     EXPECT_EQ(0, no_t.count_t_depth());
 }
@@ -275,12 +277,12 @@ TEST(depth, countTT) {
     dotqc tt {.n = 3, .m = 0,
         .names = {"A", "B", "C"},
         .zero = {{"A", false}, {"B", false}, {"C", false}},
+        .input_wires = {"A", "B"},
+        .output_wires = {"A", "B"},
         .circ = {
             {"T", {"A"} },
             {"T", {"A"} },
         },
-        .input_wires = {"A", "B"},
-        .output_wires = {"A", "B"},
     };
     EXPECT_EQ(2, tt.count_t_depth());
 }
@@ -289,13 +291,13 @@ TEST(depth, transitive) {
     dotqc cir {.n = 3, .m = 0,
         .names = {"A", "B", "C"},
         .zero = {{"A", false}, {"B", false}, {"C", false}},
+        .input_wires = {"A", "B"},
+        .output_wires = {"A", "B"},
         .circ = {
             {"T", {"A"} },
             {"Y", {"A", "C", "B"} },
             {"T", {"C"} },
         },
-        .input_wires = {"A", "B"},
-        .output_wires = {"A", "B"},
     };
     EXPECT_EQ(2, cir.count_t_depth());
 }
@@ -304,14 +306,14 @@ TEST(depth, transitive2) {
     dotqc cir {.n = 3, .m = 0,
         .names = {"A", "B", "C"},
         .zero = {{"A", false}, {"B", false}, {"C", false}},
+        .input_wires = {"A", "B"},
+        .output_wires = {"A", "B"},
         .circ = {
             {"T", {"A"} },
             {"T", {"C"} },
             {"Y", {"A", "C", "B"} },
             {"T", {"C"} },
         },
-        .input_wires = {"A", "B"},
-        .output_wires = {"A", "B"},
     };
     EXPECT_EQ(2, cir.count_t_depth());
 }
@@ -320,14 +322,14 @@ TEST(depth, countH) {
     dotqc cir {.n = 3, .m = 0,
         .names = {"A", "B", "C"},
         .zero = {{"A", false}, {"B", false}, {"C", false}},
+        .input_wires = {"A", "B"},
+        .output_wires = {"A", "B"},
         .circ = {
             {"T", {"A"} },
             {"H", {"C"} },
             {"Y", {"A", "C", "B"} },
             {"H", {"C"} },
         },
-        .input_wires = {"A", "B"},
-        .output_wires = {"A", "B"},
     };
     EXPECT_EQ(2, cir.count_h());
 }
@@ -336,14 +338,14 @@ TEST(dotqc, append) {
     dotqc cir {.n = 3, .m = 0,
         .names = {"A", "B", "C"},
         .zero = {{"A", false}, {"B", false}, {"C", false}},
+        .input_wires = {"A", "B"},
+        .output_wires = {"A", "B"},
         .circ = {
             {"T", {"A"} },
             {"H", {"C"} },
             {"Y", {"A", "C", "B"} },
             {"H", {"C"} },
         },
-        .input_wires = {"A", "B"},
-        .output_wires = {"A", "B"},
     };
     cir.append({{"T"}, {"A", "B"}});
     EXPECT_EQ(5, cir.circ.size());
