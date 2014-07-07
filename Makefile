@@ -7,18 +7,24 @@ vpath %.h   src
 OBJS := partition.o util.o circuit.o xor_func.o oracle.o dotqc.o
 ####################
 
-include compiler.mk
+DEBUGFLAGS = -O0 -g
+
+# Pick one or the other
+include compiler.gcc.mk
+# Includes some clang++ 
+# include compiler.llvm.mk
+
+
+############# Warnings
 CXXFLAGS += -Wall
 # Fixed
-CXXFLAGS += -Wheader-hygiene -Wunused-function -Wunused-parameter -Wuninitialized
+CXXFLAGS += -Wunused-function -Wunused-parameter -Wuninitialized
 # Fixing
 CXXFLAGS +=
 # Not fixed yet
-CXXFLAGS += -Wno-sign-conversion -Wno-unused-variable
-# Don't care about these
-CXXFLAGS += -Wno-c99-extensions -Wno-c++98-compat
-# Turn on runtime checks for memory errors
-# CXXFLAGS += -fsanitize=address
+# CXXFLAGS += -Wno-sign-conversion -Wno-unused-variable
+##################################
+
 
 .PHONY: all clean check
 
