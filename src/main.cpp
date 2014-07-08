@@ -62,15 +62,17 @@ int main(int argc, char *argv[]) {
       ("no-post-process", po::value<bool>(&post_process)->implicit_value(false)->default_value(true),
        "Remove identities in a post processing step")
       ("synth", po::value<string>())
-      ("verbose,v", po::value<bool>(&disp_log)
-       ->implicit_value(true)
-       ->default_value(false), "Display additional logging")
+      ("verbose,v", "Display additional logging")
       ;
 
   po::variables_map vm;
   try {
       po::store(po::command_line_parser(argc, argv)
               .options(desc).run(), vm);
+      if (vm.count("help")) {
+          cout << desc << endl;
+          return 0;
+      }
       po::notify(vm);
   }
   catch(std::exception& e)
@@ -80,11 +82,7 @@ int main(int argc, char *argv[]) {
       return 1;
   }
 
-  if (vm.count("help")) {
-      cout << desc << endl;
-      return 0;
-  }
-
+  disp_log = vm.count("verbose");
   cout << "# Logging: " << (disp_log ? "Yes" : "No") << endl;
 
   if (vm.count("ancillae")) { // TODO unbounded and n
