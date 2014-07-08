@@ -23,6 +23,9 @@ Author: Matthew Amy
 #include <cstdio>
 #include <iomanip>
 
+#include <boost/program_options.hpp>
+namespace po = boost::program_options;
+
 #ifndef CLOCK_MONOTONIC
 #include <sys/time.h>
 #define CLOCK_MONOTONIC 0
@@ -50,29 +53,90 @@ int main(int argc, char *argv[]) {
   dotqc circuit, synth;
   bool post_process = true;
   int anc = 0;
-  // Quick and dirty solution, don't judge me
-  for (int i = 0; i < argc; i++)
+
+
+  po::options_description desc("Allowed Options");
+  desc.add_options()
+      ("help", "displays help")
+      ("ancillae", po::value<string>(), "Number of Ancillae (Or 'n' or 'unbounded')")
+      ("no-post-process", po::value<bool>(&post_process)->implicit_value(false)->default_value(true),
+       "Remove identities in a post processing step")
+      ("synth", po::value<string>())
+      ("verbose,v", po::value<bool>(&disp_log)
+       ->implicit_value(true)
+       ->default_value(false), "Display additional logging")
+      ;
+
+  po::variables_map vm;
+  try {
+      po::store(po::command_line_parser(argc, argv)
+              .options(desc).run(), vm);
+      po::notify(vm);
+  }
+  catch(std::exception& e)
   {
-      if ((string)argv[i] == "-ancillae") {
-          i++;
-          if ((string)argv[i] == "n") {
-              anc = -1;
-          } else if ((string)argv[i] == "unbounded") {
-              anc = -2;
-          } else {
-              anc = atoi(argv[i]);
-              if (anc <= 0) {
-                  cerr << "ERROR: less than 0 ancillae\n";
-                  exit(0);
-              }
+      cout << "Error: " << e.what() << endl;
+      cout << desc << endl;
+      return 1;
+  }
+
+  if (vm.count("help")) {
+      cout << desc << endl;
+      return 0;
+  }
+
+  cout << "# Logging: " << (disp_log ? "Yes" : "No") << endl;
+
+  if (vm.count("ancillae")) { // TODO unbounded and n
+      string ancillae = vm["ancillae"].as<string>();
+      if(ancillae == "n") {
+          anc = -1;
+      } else if (ancillae == "unbounded") {
+          anc = -2;
+      } else {
+          try {
+          anc = boost::lexical_cast<int>(ancillae);
+          if (anc < 0) {
+              cout << "Error: less than 0 ancillae" << endl;
+              return 1;
           }
-      } else if ((string)argv[i] == "-no-post-process") { post_process = false;
-      } else if ((string)argv[i] == "-synth=ADHOC") { synth_method = AD_HOC;
-      } else if ((string)argv[i] == "-synth=GAUSS") { synth_method = GAUSS;
-      } else if ((string)argv[i] == "-synth=PMH") { synth_method = PMH;
-      } else if ((string)argv[i] == "-log") { disp_log = true;
+          } catch (const boost::bad_lexical_cast &)
+          {
+              cout << "Error: Malformed argument to --ancillae" << endl;
+              cout << ancillae << endl;
+              return 1;
+          }
+      }
+      if(disp_log) {
+          cout << "ancillae: " << anc << endl;
+      }
+  } else {
+      if(disp_log) {
+          cout << "ancillae: No" << endl;
       }
   }
+  if (vm.count("synth")) {
+      string syth_opt = vm["synth"].as<string>();
+      if (syth_opt == "ADHOC") {
+          cout << "Warning, untested syth type" << endl; // TODO
+          synth_method = AD_HOC;
+      } else if (syth_opt == "GAUSS") {
+          cout << "Warning, untested syth type" << endl; // TODO
+          synth_method = GAUSS;
+      } else if (syth_opt == "PMH") {
+          synth_method = PMH;
+      } else {
+          cout << "Error: Invalid argument to --synth" << endl; // TODO
+      }
+      if(disp_log) {
+          cout << "synth method: " << syth_opt << endl;
+      }
+  } else {
+      if(disp_log) {
+          cout << "synth method: No" << endl;
+      }
+  }
+
   if (disp_log) cerr << "Reading circuit...\n" << flush;
   circuit.input(cin);
   cout << "# Original circuit\n" << flush;

@@ -10,10 +10,9 @@ OBJS := partition.o util.o circuit.o xor_func.o oracle.o dotqc.o
 DEBUGFLAGS = -O0 -g
 
 # Pick one or the other
-include compiler.gcc.mk
-# Includes some clang++ 
-# include compiler.llvm.mk
-
+# include compiler.gcc.mk
+# Includes some clang++
+include compiler.llvm.mk
 
 ############# Warnings
 CXXFLAGS += -Wall
@@ -24,6 +23,8 @@ CXXFLAGS +=
 # Not fixed yet
 # CXXFLAGS += -Wno-sign-conversion -Wno-unused-variable
 ##################################
+
+LDFLAGS += -lboost_program_options
 
 
 .PHONY: all clean check
