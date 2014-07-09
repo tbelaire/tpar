@@ -9,9 +9,7 @@ bool ind_oracle::operator()(const set<xor_func> & lst) const {
   if (lst.size() > this->num) return false;
   if (lst.size() == 1 || (this->num - lst.size()) >= this->dim) return true;
 
-  set<xor_func>::const_iterator it;
-  int i, j, rank = 0;
-  bool flg;
+  int rank = 0;
   vector<xor_func> tmp{};
 
   for (const xor_func& f : lst) {

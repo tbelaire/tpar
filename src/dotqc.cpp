@@ -9,7 +9,6 @@ void ignore_white(istream& in) {
 }
 
 void dotqc::input(istream& in) {
-  int i, j;
   string buf, tmp;
   list<string> namelist;
   n = 0;

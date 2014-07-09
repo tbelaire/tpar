@@ -84,7 +84,6 @@ character::character(const dotqc &input) :
     // type gatelist = [(Str, [Str]]
     int gate_index = -1;
     for (const auto& gate : input.circ ) {
-        bool flg = false;
         gate_index++;
         if (gate.first == "tof" && gate.second.size() == 2) {
             auto gate_inputs_it = gate.second.begin();
@@ -301,7 +300,7 @@ dotqc character::synthesize() {
   wires.reserve(n+m);
   list<xor_func> remaining[2];          // Which terms we still have to partition
   int dim = n;
-  int tdepth = 0, h_count = 1, applied = 0;
+  int h_count = 1, applied = 0;
   ind_oracle oracle(n + m, dim, n + h);
 
   assert(this->outputs.size() > 0);
@@ -419,7 +418,7 @@ dotqc character::synthesize_unbounded() {
   vector<xor_func> wires; // Current state of the wires
   wires.reserve(n + m);
   list<xor_func> remaining[2];          // Which terms we still have to partition
-  int dim = n, tmp1, tmp2, tdepth = 0, h_count = 1, applied = 0, j;
+  int dim = n, tmp1, tmp2, h_count = 1, applied = 0, j;
   ind_oracle oracle(n + m, dim, n + h);
   gatelist circ;
   list<Hadamard>::iterator it;
