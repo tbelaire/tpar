@@ -15,13 +15,13 @@ DEBUGFLAGS = -O0 -g
 include compiler.llvm.mk
 
 ############# Warnings
-CXXFLAGS += -Wall
+CXXFLAGS += -Wall -Werror
 # Fixed
-CXXFLAGS += -Wunused-function -Wunused-parameter -Wuninitialized
+CXXFLAGS += -Wunused-function -Wunused-parameter -Wuninitialized -Wunused-variable
 # Fixing
 CXXFLAGS +=
 # Not fixed yet
-# CXXFLAGS += -Wno-sign-conversion -Wno-unused-variable
+CXXFLAGS += -Wno-sign-conversion
 ##################################
 
 LDFLAGS += -lboost_program_options
