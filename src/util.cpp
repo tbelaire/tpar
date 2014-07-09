@@ -33,7 +33,6 @@ Author: Matthew Amy
 using namespace std;
 
 bool disp_log = true;
-synth_type synth_method = PMH;
 
 void print_wires(const vector<xor_func>& wires) {
   for (auto f : wires) {
@@ -419,57 +418,6 @@ void compose(int num, vector<xor_func>& A, const vector<xor_func>& B) {
 
 //------------------------- CNOT synthesis methods
 
-// Gaussian elimination based CNOT synthesis
-gatelist gauss_CNOT_synth(int n, int m, vector<xor_func> bits, const vector<string> names) {
-  int i, j, k;
-  gatelist lst;
-  list<string> tmp_list1, tmp_list2;
-
-  for (j = 0; j < n; j++) {
-    if (bits[j].test(n)) {
-      bits[j].reset(n);
-      lst.splice(lst.begin(), x_com(j, names));
-    }
-  }
-
-  // Make triangular
-  for (i = 0; i < n; i++) {
-    bool flg = false;
-    for (j = i; j < n + m; j++) {
-      if (bits[j].test(i)) {
-        // If we haven't yet seen a vector with bit i set...
-        if (!flg) {
-          // If it wasn't the first vector we tried, swap to the front
-          if (j != i) {
-            swap(bits[i], bits[j]);
-            lst.splice(lst.begin(), swap_com(i, j, names));
-          }
-          flg = true;
-        } else {
-          bits[j] ^= bits[i];
-          lst.splice(lst.begin(), xor_com(i, j, names));
-        }
-      }
-    }
-    if (!flg) {
-      cout << "ERROR: not full rank\n";
-      exit(1);
-    }
-  }
-
-  //Finish the job
-  for (i = n-1; i > 0; i--) {
-    for (j = i - 1; j >= 0; j--) {
-      if (bits[j].test(i)) {
-        bits[j] ^= bits[i];
-        lst.splice(lst.begin(), xor_com(i, j, names));
-      }
-    }
-  }
-
-  return lst;
-}
-
 // Patel/Markov/Hayes CNOT synthesis
 gatelist Lwr_CNOT_synth(int n, int m, vector<xor_func>& bits, const vector<string>& names, bool rev) {
   gatelist acc;
@@ -582,22 +530,17 @@ gatelist construct_circuit(
     ins_equal_outs &= (in[i] == out[i]);
   }
 
-  if (synth_method != AD_HOC) {
-      // Create two identity matricies
-      for (int i = 0; i < num; i++) {
-          pre.emplace_back(num);
-          post.emplace_back(num);
-          pre[i].set(i);
-          post[i].set(i);
-      }
+  // Create two identity matricies
+  for (int i = 0; i < num; i++) {
+      pre.emplace_back(num);
+      post.emplace_back(num);
+      pre[i].set(i);
+      post[i].set(i);
   }
   if (ins_equal_outs && (part.size() == 0)) return ret;
 
   // Reduce in to echelon form to decide on a basis
-  if (synth_method == AD_HOC) ret.splice(ret.end(), to_upper_echelon(num, dim, in, names));
-  else {
-      to_upper_echelon_mut(num, dim, in, pre);
-  }
+  to_upper_echelon_mut(num, dim, in, pre);
 
   if(disp_log) cerr << "Partition is" << endl;
   {
@@ -627,21 +570,10 @@ gatelist construct_circuit(
     }
 
     // prepare the bits
-    if (synth_method == AD_HOC) {
-      tmp = to_upper_echelon(it->size(), dim, bits, names);
-      tmp.splice(tmp.end(), fix_basis(num, dim, in, bits, names));
-      rev = tmp;
-      rev.reverse();
-      ret.splice(ret.end(), rev);
-    } else {
-      /* cout << "Bits size is " << bits.size() << endl; */
-      /* cout << bits; */
-      to_upper_echelon_mut(num, dim, bits, post);
-      fix_basis(num, dim, in, bits, post);
-      compose(num, pre, post);
-      if (synth_method == GAUSS) ret.splice(ret.end(), gauss_CNOT_synth(num, 0, pre, names));
-      else if (synth_method == PMH) ret.splice(ret.end(), CNOT_synth(num, pre, names));
-    }
+    to_upper_echelon_mut(num, dim, bits, post);
+    fix_basis(num, dim, in, bits, post);
+    compose(num, pre, post);
+    ret.splice(ret.end(), CNOT_synth(num, pre, names));
 
     // apply the T gates
     auto ti = it-> begin();
@@ -659,14 +591,11 @@ gatelist construct_circuit(
     }
 
     // unprepare the bits
-    if (synth_method == AD_HOC) ret.splice(ret.end(), tmp);
-    else {
-      pre = post;
-      // re-initialize post
-      for (int i = 0; i < num; i++) {
+    pre = post;
+    // re-initialize post
+    for (int i = 0; i < num; i++) {
         post[i] = xor_func(num);
         post[i].set(i);
-      }
     }
   }
 
@@ -677,18 +606,10 @@ gatelist construct_circuit(
         bits.push_back(out[i]);
     }
     extend_row_length(bits, dim);
-    if (synth_method == AD_HOC) {
-        tmp = to_upper_echelon(num, dim, bits, names);
-        tmp.splice(tmp.end(), fix_basis(num, dim, in, bits, names));
-        tmp.reverse();
-        ret.splice(ret.end(), tmp);
-    } else {
-        to_upper_echelon_mut(num, dim, bits, post);
-        fix_basis(num, dim, in, bits, post);
-        compose(num, pre, post);
-        if (synth_method == GAUSS) ret.splice(ret.end(), gauss_CNOT_synth(num, 0, pre, names));
-        else if (synth_method == PMH) ret.splice(ret.end(), CNOT_synth(num, pre, names));
-    }
+    to_upper_echelon_mut(num, dim, bits, post);
+    fix_basis(num, dim, in, bits, post);
+    compose(num, pre, post);
+    ret.splice(ret.end(), CNOT_synth(num, pre, names));
   }
 
   return ret;

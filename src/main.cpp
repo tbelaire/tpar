@@ -114,21 +114,7 @@ int main(int argc, char *argv[]) {
       }
   }
   if (vm.count("synth")) {
-      string syth_opt = vm["synth"].as<string>();
-      if (syth_opt == "ADHOC") {
-          cout << "Warning, untested syth type" << endl; // TODO
-          synth_method = AD_HOC;
-      } else if (syth_opt == "GAUSS") {
-          cout << "Warning, untested syth type" << endl; // TODO
-          synth_method = GAUSS;
-      } else if (syth_opt == "PMH") {
-          synth_method = PMH;
-      } else {
-          cout << "Error: Invalid argument to --synth" << endl; // TODO
-      }
-      if(disp_log) {
-          cout << "synth method: " << syth_opt << endl;
-      }
+      cout << "synth method is depricated" << endl;
   } else {
       if(disp_log) {
           cout << "synth method: No" << endl;
