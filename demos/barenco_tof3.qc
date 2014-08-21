@@ -1,18 +1,18 @@
-.v 1 2 3 4 5
-.i 1 2 3 4 5
-.o 1 2 3 4 5
+.v a b c d e
+.i a b c d e
+.o a b c d e
 
 BEGIN
 
-H 5
-Z 3 4 5
-H 4
-Z 1 2 4
-H 4
-Z 3 4 5
-H 5
-H 4
-Z 1 2 4
-H 4
+H e
+Z c d e
+H d
+Z a b d
+H d
+Z c d e
+H e
+H d
+Z a b d
+H d
 
 END

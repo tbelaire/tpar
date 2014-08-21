@@ -1,11 +1,11 @@
-.v 1 2 3
-.i 1 2 3
-.o 1 2 3
+.v a b c
+.i a b
+.o a b c
 
 BEGIN
 
-H 3
-Z 1 2 3
-H 3
+H c
+Z a b c
+H c
 
 END

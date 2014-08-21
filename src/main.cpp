@@ -131,6 +131,9 @@ int main(int argc, char *argv[]) {
   if (disp_log) cerr << "With full character" << endl;
   if (disp_log) cerr << "Parsing circuit...\n" << flush;
   character c{circuit};
+  cerr << "Character is:" << endl;
+  c.output(cerr);
+  cerr << endl;
   if (disp_log) cerr << "anc is " << anc << endl;
   if (anc == -1) c.add_ancillae(c.n + c.m);
   else if (anc > 0) c.add_ancillae(anc);

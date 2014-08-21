@@ -69,4 +69,5 @@ class xor_func {
 
 std::ostream& operator<<(std::ostream& out, const std::vector<xor_func>& arr);
 void extend_row_length(std::vector<xor_func>& arr, int length);
+void output_with_names(std::ostream& out, xor_func f, std::map<int, int> val_map, std::vector<std::string> names);
 #endif // XOR_FUNC_H

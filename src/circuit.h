@@ -36,9 +36,21 @@ Author: Matthew Amy
 struct Hadamard {
   int qubit;        // Which qubit this hadamard is applied to
   int prep;         // Which "value" this hadamard prepares
+  // i.e. what path variable it is.
 
   std::set<xor_func> in;      // exponent terms that must be prepared before the hadamard
   std::vector<xor_func> wires; // state of the wires when this hadamard is applied
+};
+
+struct Polynomial_Hadamard {
+    std::string name;
+    xor_func inputs;
+};
+
+struct Polynomial_Term {
+    int coefficient; // Bounded 0 - 7
+    bool negated;
+    std::vector<std::string> terms; // List of wires that are xor'd together when this phase is applied
 };
 
 // Characteristic of a circuit
@@ -54,6 +66,13 @@ struct character {
   // TODO: make this a dependency graph instead
   std::list<Hadamard>   hadamards;   // a list of the hadamards in the order we saw them
   character(const dotqc &input);
+  character(
+        int n,
+        int m,
+        std::vector<std::string> names,
+        std::vector<Polynomial_Hadamard> hadamards,
+        std::vector<Polynomial_Term> terms);
+
   void output(std::ostream& out) const;
   void print() {output(std::cout);}
   void print_outputs() const;

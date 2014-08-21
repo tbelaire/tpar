@@ -31,6 +31,20 @@ std::ostream& operator<<(std::ostream& out, const std::vector<xor_func>& arr) {
     return out;
 }
 
+void output_with_names(std::ostream& out, xor_func f, std::map<int, int> val_map, std::vector<std::string> names) {
+
+    bool following = false;
+    out << "[";
+    for (int i = 0; i < f.size(); i++) {
+      if (f.test(i)) {
+          if(following) { out << ", "; }
+          out << names.at(val_map.at(i));
+          following = true;
+      }
+    }
+    out << "]";
+}
+
 // Returns a int in range [0, 2^offset -1]
 // It will be different for each xor_func,
 // beyond that there are no guarantees

@@ -85,6 +85,9 @@ character::character(const dotqc &input) :
     int gate_index = -1;
     for (const auto& gate : input.circ ) {
         gate_index++;
+        cout << "Processing gate: " << gate.first;
+        for (const auto& in : gate.second ) { cout << " " << in; }
+        cout << endl;
         if (gate.first == "tof" && gate.second.size() == 2) {
             auto gate_inputs_it = gate.second.begin();
             int first_input = name_map[*gate_inputs_it];
@@ -151,8 +154,11 @@ character::character(const dotqc &input) :
 
             // Give this new value a name
             val_map[new_h.prep] = name_max;
-            names[name_max] = names[new_h.qubit];
-            names[name_max++].append(to_string(new_h.prep));
+            string new_name = "H";
+            new_name.append(names[new_h.qubit]);
+            new_name.append(to_string(new_h.prep));
+
+            names[name_max++] = new_name;
 
         } else {
             cout << "ERROR: not a {H, CNOT, X, Y, Z, P, T} circuit" << endl;
@@ -171,8 +177,42 @@ character::character(const dotqc &input) :
 
 }
 
+// From a polynomial
+character::character(
+        int n,
+        int m,
+        vector<string> names,
+        vector<Polynomial_Hadamard> hadamards,
+        vector<Polynomial_Term> terms) :
+    n(n),
+    m(m),
+    h(hadamards.size()),
+    names(names),
+    zero(n + m),
+    val_map(),
+    phase_expts(),
+    outputs(),
+    hadamards()
+{
+    (void) hadamards;
+    (void) terms;
+}
+
+
 void character::output(ostream& out) const {
-  bool flag;
+  /* out << "Val map: {" << endl; */
+
+  /* for (const pair<int,int> p : this->val_map) { */
+  /*     out << "  " << p.first << ": " << p.second << "," << endl; */
+  /* } */
+  /* out << "}" << endl; */
+
+  out << "Names : [" << endl;
+  for (const string name : this->names) {
+      out << "  " << name << "," << endl;
+  }
+  out << "]" << endl;
+
 
   out << "U|";
   for (int i = 0; i < (n + m); i++) {
@@ -185,15 +225,18 @@ void character::output(ostream& out) const {
 
   // Print the phase exponents
   for (auto it = phase_expts.begin(); it != phase_expts.end(); it++) {
-    if (it != phase_expts.begin()) out << "+";
-    out << (int)(it->second) << "*";
+    int coefficient = (it->second);
+    if (!coefficient) { continue; }
+    out << endl;
+    if (it != phase_expts.begin()) { out << " + "; }
+    else { out << "   "; }
+    out << coefficient << " * ";
     if (it->first.is_negated()) out << "~";
-    for (int i = 0; i < (n + h); i++) {
-      if (it->first.test(i)) out << names.at(val_map.at(i));
-    }
+    output_with_names(out, it->first, val_map, names);
   }
-  out << ")|";
-
+  out << endl << ")" << endl;
+#if 0
+  out << "|";
   // Print the output functions
   if (this->outputs.size() > 0) {
       for (int i = 0; i < (n + m); i++) {
@@ -201,6 +244,7 @@ void character::output(ostream& out) const {
           out << "(";
           if (outputs[i].is_negated()) out << "~";
           for (int j = 0; j < (n + h); j++) {
+              out << "j = " << j << endl;
               if (outputs[i].test(j)) {
                   if (flag) out << " ";
                   out << names.at(val_map.at(j));
@@ -211,11 +255,17 @@ void character::output(ostream& out) const {
       }
   } else { out << "{}"; }
   out << ">\n";
+#endif
 
   // Print the Hadamards:
+  out << "Hadamards : {" << endl;
   for (const auto& hadamard : hadamards) {
-    out << "H:" << names[hadamard.qubit] << "-->" << hadamard.prep << "\n";
+      out << "  " << names.at(val_map.at(hadamard.prep)) << ": ";
+      output_with_names(out, hadamard.wires[hadamard.qubit],
+              val_map, names);
+      out << "," << endl;
   }
+  out << "}" << endl;
 }
 
 void character::print_outputs() const {
@@ -243,6 +293,12 @@ void insert_phase (unsigned char c, xor_func f, vector<pair<exponent_val, xor_fu
 }
 
 void insert_phase (unsigned char c, xor_func f, map<xor_func, unsigned char> & phases) {
+  cout << "Inserting phase of " << (int) c << " for func " << f << endl;
+  if(f.none()){
+      // We're doing T|0>, don't do anything.
+      cout << "Actually, nope, not inserting phase for |0>" << endl;
+      return;
+  }
   phases[f] += c;
   phases[f] %= 8;
   /*  If we're pressed for space?
