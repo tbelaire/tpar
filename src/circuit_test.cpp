@@ -24,7 +24,7 @@ TEST(parsingFromDotQC, initalized) {
     EXPECT_EQ("1", c.names[0]);
     EXPECT_EQ(vector<bool>{0}, c.zero);
 
-    EXPECT_EQ(1, c.val_map.size()); // TODO understand
+    EXPECT_EQ(1, c.val_map.size());
     /*
     for (const auto& p : c.val_map) {
         cout << p.first << ": " << p.second << endl;
@@ -35,7 +35,7 @@ TEST(parsingFromDotQC, initalized) {
     // TODO that might play poorly with synthesize unbounded.
     /* EXPECT_EQ(0, c.outputs.size()); */
 
-    EXPECT_EQ(1, c.phase_expts.size()); // TODO understand
+    EXPECT_EQ(1, c.phase_expts.size());
 
     // No H gates in this example
     EXPECT_EQ(0, c.hadamards.size());
@@ -59,7 +59,7 @@ TEST(character, insertPhase) {
     EXPECT_EQ(3, xpt[1].first);
     EXPECT_EQ(1, xpt[2].first);
     insert_phase(6, f0101, xpt);
-    EXPECT_EQ(0, xpt[0].first);  // TODO is that expected?
+    EXPECT_EQ(0, xpt[0].first); // It'd also be acceptible for it to be missing
 }
 
 void insert_phase (unsigned char c, xor_func f, exponents_set& phases);
@@ -74,5 +74,5 @@ TEST(character, insertPhaseMap) {
     EXPECT_EQ(3, xpt[f1010]);
     EXPECT_EQ(1, xpt[f1111]);
     insert_phase(6, f0101, xpt);
-    EXPECT_EQ(0, xpt[f0101]);  // TODO is that expected?
+    EXPECT_EQ(0, xpt[f0101]);  // It'd also be acceptible for it to be missing
 }

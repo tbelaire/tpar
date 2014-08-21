@@ -294,7 +294,6 @@ void character::add_ancillae(int num) {
 dotqc character::synthesize() {
   partitioning floats[2], frozen[2];
   dotqc ret{};
-  // TODO investigate mask, is +1 needed?
   xor_func mask(n + h);      // Tells us what values we have prepared
   vector<xor_func> wires;        // Current state of the wires
   wires.reserve(n+m);
@@ -550,4 +549,3 @@ dotqc character::synthesize_unbounded() {
   }
   return ret;
 }
-
