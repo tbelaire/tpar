@@ -55,10 +55,32 @@ character::character(const dotqc &input) :
     gate_lookup["Y"] = 4; // TODO investigate
 
     // TODO fix for permutations by actually reading the output list
-    // TODO hm?
     for(int i = 0; i < n + m; i++) {
         outputs.push_back(xor_func(n+m));
-        /* outputs.at(i).set(i); */
+    }
+    if(disp_log) {
+        cout << "names: [" << endl;
+        for(const string &n : input.names) {
+            cout << n << "," << endl;
+        }
+        cout << "]" << endl;
+    }
+
+    for(int i = 0; i < n + m; i++) {
+        if( i < input.output_wires.size() ) {
+            auto loc = find(input.names.begin(), input.names.end(), input.output_wires[i])
+                - input.names.begin();
+            if (loc == input.names.size()) {
+                cerr << ".o name: \"" << input.output_wires[i] << "\" is not in the names array" << endl;
+                throw std::logic_error("bad .o");
+            }
+
+            if(disp_log) {
+                cout << "Found output " << input.output_wires[i]
+                    << " at location " << loc << " in the names array." << endl;
+            }
+            outputs[loc].set(i);
+        }
     }
     // Initialize names and wires
     vector<xor_func> wires;
@@ -381,7 +403,7 @@ dotqc character::synthesize() {
   }
 
   // create an initial partition
-  // cerr << "Adding new functions to the partition... " << flush;
+  if (disp_log) cerr << "Adding new functions to the partition... " << flush;
   for (int j = 0; j < 2; j++) {
     for (auto it = remaining[j].begin(); it != remaining[j].end();) {
       if (mask.contains(*it)) {
@@ -408,10 +430,23 @@ dotqc character::synthesize() {
 
     // Construct {CNOT, T} subcircuit for the frozen partitions
     {
+        if (disp_log) cout << "Constructing CNOT, T subcircuit" << endl;
         auto tmp = construct_circuit(phase_expts, frozen[0], wires, wires, n + m, n + h, names);
+        if (disp_log) {
+            cout << "Part 1" << endl;
+            for (const auto t : tmp) {
+                cout << "Gate {" << t.first << "}" << endl;
+            }
+        }
         ret.circ.splice(ret.circ.end(), tmp);
         tmp = construct_circuit(phase_expts, frozen[1], wires, it->wires, n + m, n + h, names);
         ret.circ.splice(ret.circ.end(), tmp);
+        if (disp_log) {
+            cout << "Part 2" << endl;
+            for (const auto t : tmp) {
+                cout << "Gate {" << t.first << "}" << endl;
+            }
+        }
     }
     for (int i = 0; i < n + m; i++) {
       wires[i] = it->wires[i];
@@ -454,11 +489,35 @@ dotqc character::synthesize() {
   applied += num_elts(floats[0]) + num_elts(floats[1]);
   // Construct the final {CNOT, T} subcircuit
   {
+      if (disp_log) {
+          cout << "Constructing final CNOT, T subcircuit" << endl;
+          cout << "State of wires" << endl << wires;
+          cout << "State of floats[0]:" << floats[0] << endl;
+      }
       auto tmp = construct_circuit(this->phase_expts, floats[0],
               wires, wires, n + m, n + h, this->names);
+      if (disp_log) {
+          cout << "  Part 1 : [" << endl;
+          for (const auto t : tmp) {
+              cout << "    Gate {" << t.first << "}," << endl;
+          }
+          cout << "  ]" << endl;
+      }
       ret.circ.splice(ret.circ.end(), tmp);
+      if (disp_log) {
+          cout << "State of wires" << endl << wires;
+          cout << "State of floats[1]:" << floats[0] << endl;
+          cout << "State of outputs" << endl << this->outputs;
+      }
       tmp = construct_circuit(this->phase_expts, floats[1],
               wires, this->outputs, n + m, n + h, this->names);
+      if (disp_log) {
+          cout << "  Part 2: [" << endl;
+          for (const auto t : tmp) {
+              cout << "    Gate {" << t.first << "}," << endl;
+          }
+          cout << "  ]" << endl;
+      }
       ret.circ.splice(ret.circ.end(), tmp);
   }
   if (disp_log) cerr << "  " << applied << "/" << phase_expts.size() << " phase rotations applied\n" << flush;
